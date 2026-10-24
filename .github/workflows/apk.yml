@@ -1,0 +1,68 @@
+name: Gerar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Sem chave de produção, a chave de teste fica guardada em cache
+      # para que as atualizações instalem por cima da versão anterior.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: debtid-debug-keystore
+
+      - name: Montar a página (web/src -> web/dist/index.html)
+        run: python3 web/montar.py web/dist/index.html
+
+      - name: Chave de assinatura
+        env:
+          KEYSTORE_B64: ${{ secrets.DEBTID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.DEBTID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/debtid.jks"
+            echo "DEBTID_KEYSTORE=$RUNNER_TEMP/debtid.jks" >> "$GITHUB_ENV"
+            echo "DEBTID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "Assinando com a chave de produção."
+          else
+            echo "::warning::Sem o segredo DEBTID_KEYSTORE_B64: o APK sai com a chave de teste. Veja o README."
+          fi
+
+      - name: Compilar
+        env:
+          DEBTID_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk DebtID.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DebtID-APK
+          path: DebtID.apk
+
+      - name: Publicar em Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.${{ github.run_number }}" DebtID.apk \
+            --title "DebtID 1.${{ github.run_number }}" \
+            --notes "Baixe o DebtID.apk e instale no Android." \
+            --latest || echo "::warning::Não consegui criar a release; o APK está em Artifacts."

@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Assinatura de produção: vem de variáveis de ambiente (no GitHub, dos segredos do repositório).
+// Sem elas, o APK de release sai com a chave de teste (debug).
+def chaveArquivo = System.getenv('DEBTID_KEYSTORE')
+def versao = (System.getenv('DEBTID_VERSION_CODE') ?: '1') as Integer
+
+android {
+    namespace 'app.debtid'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'app.debtid'
+        minSdk 24
+        targetSdk 35
+        versionCode versao
+        versionName "1.${versao}"
+    }
+
+    signingConfigs {
+        release {
+            if (chaveArquivo) {
+                storeFile file(chaveArquivo)
+                storePassword System.getenv('DEBTID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('DEBTID_KEY_ALIAS') ?: 'debtid'
+                keyPassword System.getenv('DEBTID_KEY_PASSWORD') ?: System.getenv('DEBTID_KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // sem minificação: a ponte JavaScript (@JavascriptInterface) precisa manter os nomes
+            minifyEnabled false
+            signingConfig chaveArquivo ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // A página do app é o mesmo index.html da versão web, gerado em web/dist
+    sourceSets {
+        main {
+            assets.srcDir "${rootDir}/web/dist"
+        }
+    }
+}
+
+dependencies {
+    // Leitor de QR do Google Play Services (não pede permissão de câmera ao app)
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+}

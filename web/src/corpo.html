@@ -1,0 +1,427 @@
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="ring" d="M50 4A46 46 0 1 1 4 50L30 50A20 20 0 1 0 50 30Z"/>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18.5 14h2M20.5 18.5v2M14 20.5h2.5M18 18h.01"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+    <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
+    <symbol id="i-lua" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></symbol>
+    <symbol id="i-enviar" viewBox="0 0 24 24"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7M16 7l-4-4-4 4M12 3v12"/></symbol>
+    <symbol id="i-imprimir" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 6v8M12 18.5v.01"/></symbol>
+    <symbol id="i-cadeado" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-chave" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2.5 2.5M14.5 8.5l2 2"/></symbol>
+    <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h5"/></symbol>
+    <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-cima" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-baixo" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+    <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+    <symbol id="i-pessoa" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <div class="decos only-soft" aria-hidden="true">
+    <svg class="deco d1" viewBox="-4 -4 116 116"><g transform="translate(5 5) rotate(-35 50 50)"><use href="#ring" class="shd"/></g><g transform="rotate(-35 50 50)"><use href="#ring" fill="#1E9E8C" class="o" stroke-width="3" stroke-linejoin="round"/></g></svg>
+    <svg class="deco d2" viewBox="-4 -4 116 116"><g transform="translate(5 5) rotate(150 50 50)"><use href="#ring" class="shd"/></g><g transform="rotate(150 50 50)"><use href="#ring" fill="#EC4C86" class="o" stroke-width="3" stroke-linejoin="round"/></g></svg>
+    <svg class="deco d3" viewBox="-4 -4 116 116"><g transform="translate(5 5) rotate(-120 50 50)"><use href="#ring" class="shd"/></g><g transform="rotate(-120 50 50)"><use href="#ring" fill="#F8CB47" class="o" stroke-width="3" stroke-linejoin="round"/></g></svg>
+    <svg class="deco d4" viewBox="-4 -4 116 116"><g transform="translate(5 5) rotate(60 50 50)"><use href="#ring" class="shd"/></g><g transform="rotate(60 50 50)"><use href="#ring" fill="#A35CF0" class="o" stroke-width="3" stroke-linejoin="round"/></g></svg>
+  </div>
+
+  <div class="shell">
+    <div class="sticker st-pct only-soft" aria-hidden="true">
+      <svg viewBox="0 0 78 78"><line x1="60" y1="15" x2="18" y2="63" stroke="#1C1B1F" stroke-width="7" stroke-linecap="round"/><circle cx="22" cy="22" r="11" fill="#FF5C1F" stroke="#1C1B1F" stroke-width="3"/><circle cx="56" cy="56" r="11" fill="#3DDC84" stroke="#1C1B1F" stroke-width="3"/></svg>
+    </div>
+    <div class="sticker st-name only-soft" aria-hidden="true">DebtID</div>
+    <svg class="sticker st-cursor only-soft" viewBox="0 0 34 34" aria-hidden="true"><path class="o" d="M4 3 31 14 18 18 14 31Z" fill="#8F9CF3" stroke="#1C1B1F" stroke-width="2.5" stroke-linejoin="round"/></svg>
+
+    <header class="top">
+      <div class="wrap top-in">
+        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</a>
+        <div class="top-r">
+          <nav class="nav" aria-label="Seções">
+            <a href="#inicio" data-nav="inicio">Novo</a>
+            <a href="#conferir" data-nav="conferir">Conferir</a>
+            <a href="#registros" data-nav="registros">Registros</a>
+            <a href="#ajustes" data-nav="ajustes">Ajustes</a>
+          </nav>
+          <button class="theme-btn" id="temaBtn" type="button" aria-label="Mudar para modo escuro" title="Mudar para modo escuro">
+            <svg class="ico ico-lua"><use href="#i-lua"/></svg><svg class="ico ico-sol"><use href="#i-sol"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ================= INÍCIO ================= -->
+      <section class="view" id="v-inicio" data-view="inicio">
+        <div class="hero wrap only-soft">
+          <div>
+            <p class="eyebrow">Registro de empréstimos · assinado pelos dois</p>
+            <h1>Quem empresta, registra.</h1>
+            <p class="lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
+            <ul class="chips">
+              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples</li>
+              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg>Assinado pelos dois</li>
+              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg>QR code</li>
+            </ul>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form">Novo registro</a>
+              <a class="link-arrow" href="#conferir">Ler um código <svg class="ico"><use href="#i-seta"/></svg></a>
+            </div>
+          </div>
+          <svg class="hero-art" viewBox="0 0 420 440" aria-hidden="true">
+            <polygon class="shd" points="64,74 372,74 372,304 218,414 64,304" transform="translate(10 10)" stroke-width="4" stroke-linejoin="round"/>
+            <polygon class="o" points="64,74 372,74 372,304 218,414 64,304" fill="#F6A3E6" stroke-width="4" stroke-linejoin="round"/>
+            <g transform="rotate(-6 218 230)">
+              <rect class="shd" x="134" y="114" width="180" height="232" rx="12"/>
+              <rect class="o" x="128" y="108" width="180" height="232" rx="12" fill="#fff" stroke-width="3"/>
+              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F">RECIBO</text>
+              <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
+              <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
+              <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
+              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">R$</text>
+              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1">264,39</text>
+              <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
+              <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
+              <path d="M236 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="148" y="312" width="140" height="16" rx="5" fill="#1C1B1F"/>
+              <text x="156" y="324" style="font-family:var(--mono)" font-size="9.5" fill="#DFF45C">-mRQucdQxpIV…YE19</text>
+            </g>
+            <g transform="translate(18 26)">
+              <rect class="shd" x="5" y="5" width="112" height="112" rx="16"/>
+              <rect class="o" width="112" height="112" rx="16" fill="#fff" stroke-width="3"/>
+              <g fill="#1C1B1F"><rect x="16" y="16" width="26" height="26" rx="4"/><rect x="70" y="16" width="26" height="26" rx="4"/><rect x="16" y="70" width="26" height="26" rx="4"/><rect x="70" y="70" width="10" height="10"/><rect x="86" y="70" width="10" height="10"/><rect x="70" y="86" width="10" height="10"/><rect x="86" y="86" width="10" height="10" fill="#EC4C86"/><rect x="52" y="16" width="8" height="8"/><rect x="52" y="34" width="8" height="8"/><rect x="16" y="52" width="8" height="8"/><rect x="34" y="52" width="8" height="8"/><rect x="52" y="52" width="8" height="8"/><rect x="52" y="70" width="8" height="8"/><rect x="52" y="88" width="8" height="8"/></g>
+              <g fill="#fff"><rect x="22" y="22" width="14" height="14" rx="2"/><rect x="76" y="22" width="14" height="14" rx="2"/><rect x="22" y="76" width="14" height="14" rx="2"/></g>
+              <g fill="#1C1B1F"><rect x="26" y="26" width="6" height="6"/><rect x="80" y="26" width="6" height="6"/><rect x="26" y="80" width="6" height="6"/></g>
+            </g>
+            <g>
+              <circle class="shd" cx="377" cy="253" r="40"/>
+              <circle class="o" cx="372" cy="248" r="40" fill="#F8CB47" stroke-width="3"/>
+              <path d="M352 248l14 14 26-28" fill="none" stroke="#1C1B1F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <g transform="translate(222 386)">
+              <rect class="shd" x="4" y="4" width="186" height="34" rx="17"/>
+              <rect class="o" width="186" height="34" rx="17" fill="#3DDC84" stroke-width="2.5"/>
+              <circle cx="18" cy="17" r="9" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
+              <path d="M14 17l3 3 5-6" fill="none" stroke="#1C1B1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F">assinado pelos dois</text>
+            </g>
+            <path class="o" d="M200 360 222 369 211 372 208 383Z" fill="#8F9CF3" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="hero-pro only-pro">
+          <div class="wrap">
+            <p class="hp-eyebrow">Calcule · Registre · Comprove</p>
+            <h1 class="hp-title">Quem empresta, registra.</h1>
+            <div class="hp-row">
+              <p class="hp-sub"><span>Assinado pelos dois</span> <em>— sem discussão</em></p>
+              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form">Novo registro</a>
+            </div>
+            <div class="hp-feats">
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b>Assinatura digital</b><small>Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b>QR code</b><small>Mostre o QR e a outra pessoa confere em segundos.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b>Sem servidor</b><small>Nada sai do aparelho. Funciona até sem internet.</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap only-pro">
+          <div class="hp-stats">
+            <div><b>2</b><span>assinaturas<br>por registro</span></div>
+            <div><b>0</b><span>servidores<br>no caminho</span></div>
+            <div><b>1</b><span>QR code<br>para conferir</span></div>
+          </div>
+        </div>
+
+        <div class="wrap">
+          <section class="block panel" id="novo-form" aria-labelledby="t-novo">
+            <div class="sec-head">
+              <span class="tile" style="background:var(--peri)"><svg class="ico"><use href="#i-calc"/></svg></span>
+              <div><p class="kicker">Passo 1 de 3</p><h2 id="t-novo">Novo registro</h2></div>
+            </div>
+            <form id="form" novalidate autocomplete="off">
+              <div class="grid">
+                <div class="field span2">
+                  <span class="label" id="l-papel">Neste empréstimo, eu sou…</span>
+                  <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-papel">
+                    <input type="radio" name="papel" id="p-credor" value="credor" checked><label for="p-credor">Quem empresta</label>
+                    <input type="radio" name="papel" id="p-devedor" value="devedor"><label for="p-devedor">Quem pega emprestado</label>
+                  </div>
+                </div>
+                <div class="field span2" data-f="outro">
+                  <label for="f-outro" id="l-outro">Nome de quem pega emprestado</label>
+                  <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" autocomplete="off"></div>
+                  <div class="err" id="e-outro"></div>
+                </div>
+                <div class="field" data-f="valor">
+                  <label for="f-valor">Valor emprestado</label>
+                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00"></div>
+                  <div class="err" id="e-valor"></div>
+                </div>
+                <div class="field" data-f="taxa">
+                  <label for="f-taxa">Taxa de juros</label>
+                  <div class="control"><input id="f-taxa" name="taxa" type="text" inputmode="decimal" placeholder="Ex.: 10 ou 2,5"><span class="affix end">%</span></div>
+                  <div class="err" id="e-taxa"></div>
+                </div>
+                <div class="field span2">
+                  <span class="label" id="l-modo">A taxa vale…</span>
+                  <div class="seg" role="radiogroup" aria-labelledby="l-modo">
+                    <input type="radio" name="modo" id="m-total" value="total"><label for="m-total">no total</label>
+                    <input type="radio" name="modo" id="m-mes" value="mes" checked><label for="m-mes">ao mês</label>
+                    <input type="radio" name="modo" id="m-ano" value="ano"><label for="m-ano">ao ano</label>
+                  </div>
+                  <p class="hint" id="hintModo"></p>
+                </div>
+                <div class="field" data-f="de">
+                  <label for="f-de">Data do empréstimo</label>
+                  <div class="control"><input id="f-de" name="de" type="date"></div>
+                  <div class="err" id="e-de"></div>
+                </div>
+                <div class="field" data-f="dp">
+                  <label for="f-dp">Data prevista de pagamento</label>
+                  <div class="control"><input id="f-dp" name="dp" type="date"></div>
+                  <div class="err" id="e-dp"></div>
+                </div>
+              </div>
+              <div class="form-foot">
+                <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg>Registrar e assinar</button>
+                <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
+              </div>
+              <p class="hint">Você assina como <b id="assinaComo">—</b>. Depois, a outra pessoa confirma no DebtID dela.</p>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- ================= CONFERIR ================= -->
+      <section class="view" id="v-conferir" data-view="conferir">
+        <div class="wrap view-pad">
+          <section class="panel" aria-labelledby="t-conf">
+            <div class="sec-head">
+              <span class="tile" style="background:var(--teal)"><svg class="ico"><use href="#i-qr"/></svg></span>
+              <div><p class="kicker">Conferir</p><h2 id="t-conf">Ler um código</h2></div>
+            </div>
+            <p class="intro">Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.</p>
+            <button class="btn btn-dark btn-block so-qr" type="button" data-acao="ler-qr"><svg class="ico"><use href="#i-camera"/></svg>Ler QR code</button>
+            <div class="ou so-qr"><span>ou cole o código</span></div>
+            <form id="vform" novalidate autocomplete="off">
+              <div class="field">
+                <label for="f-codigo">Código</label>
+                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira"></textarea></div>
+              </div>
+              <div class="form-foot">
+                <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg>Conferir código</button>
+                <button class="btn btn-ghost" type="button" id="limparConf">Limpar</button>
+              </div>
+            </form>
+            <div id="msgConf" role="alert"></div>
+          </section>
+          <section class="como" aria-labelledby="t-como">
+            <h3 id="t-como">Como a validação funciona</h3>
+            <ol class="passos">
+              <li><span><b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.</span></li>
+              <li><span><b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.</span></li>
+              <li><span><b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.</span></li>
+            </ol>
+          </section>
+        </div>
+      </section>
+
+      <!-- ================= REGISTROS ================= -->
+      <section class="view" id="v-registros" data-view="registros">
+        <div class="wrap view-pad">
+          <div class="sec-head">
+            <span class="tile" style="background:var(--yellow)"><svg class="ico"><use href="#i-list"/></svg></span>
+            <div><p class="kicker">Neste aparelho</p><h2>Seus registros</h2></div>
+          </div>
+          <div class="totais" id="totais"></div>
+          <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros">
+            <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos">Todos</label>
+            <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag">Aguardando</label>
+            <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val">Validados</label>
+            <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt">Quitados</label>
+          </div>
+          <div class="lista" id="lista"></div>
+        </div>
+      </section>
+
+      <!-- ================= AJUSTES ================= -->
+      <section class="view" id="v-ajustes" data-view="ajustes">
+        <div class="wrap view-pad">
+          <div class="sec-head">
+            <span class="tile" style="background:var(--lime)"><svg class="ico"><use href="#i-ajustes"/></svg></span>
+            <div><p class="kicker">DebtID</p><h2>Ajustes</h2></div>
+          </div>
+
+          <section class="panel" aria-labelledby="t-perfil">
+            <h3 id="t-perfil">Seu perfil</h3>
+            <div class="perfil-card">
+              <span class="avatar" id="avatar">?</span>
+              <div><b id="perfilNome">—</b><small>ID <code id="perfilId">—</code></small></div>
+            </div>
+            <form id="formNome" class="linha-form" novalidate autocomplete="off">
+              <label class="sr-only" for="f-nome-ajuste">Seu nome</label>
+              <div class="control"><input id="f-nome-ajuste" maxlength="80" placeholder="Seu nome completo"></div>
+              <button class="btn" type="submit">Salvar nome</button>
+            </form>
+            <p class="hint">O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.</p>
+          </section>
+
+          <section class="panel" aria-labelledby="t-aparencia">
+            <div class="ajuste">
+              <h3 id="t-aparencia">Aparência</h3>
+              <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-aparencia">
+                <input type="radio" name="ui" id="ui-pro" value="pro"><label for="ui-pro">Profissional</label>
+                <input type="radio" name="ui" id="ui-soft" value="soft"><label for="ui-soft">Soft</label>
+              </div>
+            </div>
+            <div class="ajuste">
+              <h3 id="t-tema">Tema</h3>
+              <div class="seg" role="radiogroup" aria-labelledby="t-tema">
+                <input type="radio" name="tema" id="tm-sis" value="sistema"><label for="tm-sis">Sistema</label>
+                <input type="radio" name="tema" id="tm-claro" value="light"><label for="tm-claro">Claro</label>
+                <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro">Escuro</label>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="t-backup">
+            <h3 id="t-backup">Backup</h3>
+            <p class="intro" style="margin-top:0">Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.</p>
+            <div class="btns">
+              <button class="btn btn-alt" type="button" id="btnBackup"><svg class="ico"><use href="#i-cadeado"/></svg>Criar backup</button>
+              <button class="btn" type="button" id="btnRestaurar"><svg class="ico"><use href="#i-desfazer"/></svg>Restaurar backup</button>
+            </div>
+            <form id="formBackup" class="block" hidden novalidate autocomplete="off">
+              <div class="grid">
+                <div class="field"><label for="f-bk1">Crie uma senha</label><div class="control"><input id="f-bk1" type="password" autocomplete="new-password"></div></div>
+                <div class="field"><label for="f-bk2">Repita a senha</label><div class="control"><input id="f-bk2" type="password" autocomplete="new-password"></div></div>
+              </div>
+              <p class="hint">Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.</p>
+              <div class="form-foot"><button class="btn btn-primary" type="submit">Gerar backup</button></div>
+            </form>
+            <div id="saidaBackup" class="block" hidden>
+              <span class="label kicker">Seu backup</span>
+              <code class="codigo" id="codigoBackup"></code>
+              <div class="btns">
+                <button class="btn btn-alt" type="button" data-acao="copiar-backup"><svg class="ico"><use href="#i-copiar"/></svg>Copiar</button>
+                <button class="btn" type="button" data-acao="enviar-backup"><svg class="ico"><use href="#i-enviar"/></svg>Compartilhar</button>
+              </div>
+              <p class="hint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
+            </div>
+            <form id="formRestaurar" class="block form-restaurar" hidden novalidate autocomplete="off">
+              <div class="field"><label for="f-rs-codigo">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-rs-senha">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-primary" type="submit">Restaurar</button></div>
+            </form>
+            <div id="msgBackup" role="alert"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="t-apagar">
+            <h3 id="t-apagar">Apagar dados</h3>
+            <p class="intro" style="margin-top:0">Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.</p>
+            <button class="btn btn-danger" type="button" id="btnApagar"><svg class="ico"><use href="#i-lixo"/></svg>Apagar perfil e registros</button>
+          </section>
+
+          <p class="sobre">DebtID 1.0 · código aberto · tudo fica no seu aparelho.</p>
+        </div>
+      </section>
+
+      <!-- ================= DETALHE ================= -->
+      <section class="view" id="v-detalhe" data-view="detalhe">
+        <div class="wrap view-pad" id="detalhe"></div>
+      </section>
+
+      <!-- ================= BOAS-VINDAS ================= -->
+      <section class="view" id="v-boas-vindas" data-view="boas-vindas">
+        <div class="wrap view-pad">
+          <div class="bv" id="bv1">
+            <p class="kicker">Bem-vindo ao DebtID</p>
+            <h1 class="bv-title">Escolha a aparência</h1>
+            <p class="intro">Dá para trocar depois, em Ajustes.</p>
+            <div class="ui-opcoes" role="radiogroup" aria-label="Aparência">
+              <label class="ui-op">
+                <input type="radio" name="ui-bv" value="pro">
+                <span class="prev prev-pro" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
+                <b>Profissional</b><small>Sóbrio, preto e branco, direto ao ponto.</small>
+              </label>
+              <label class="ui-op">
+                <input type="radio" name="ui-bv" value="soft">
+                <span class="prev prev-soft" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
+                <b>Soft</b><small>Colorido, com contornos marcados.</small>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block" type="button" id="bvContinuar">Continuar<svg class="ico"><use href="#i-seta"/></svg></button>
+          </div>
+
+          <div class="bv" id="bv2" hidden>
+            <p class="kicker">Passo 2 de 2</p>
+            <h1 class="bv-title">Crie seu perfil</h1>
+            <p class="intro">Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.</p>
+            <form id="formPerfil" novalidate autocomplete="off">
+              <div class="field" data-f="nome">
+                <label for="f-nome">Seu nome completo</label>
+                <div class="control"><input id="f-nome" maxlength="80" placeholder="Ex.: Ana Souza" autocomplete="name"></div>
+                <div class="err" id="e-nome"></div>
+              </div>
+              <div class="form-foot"><button class="btn btn-primary btn-block" type="submit" id="btnCriarPerfil"><svg class="ico"><use href="#i-chave"/></svg>Criar perfil</button></div>
+            </form>
+            <div class="form-foot">
+              <button class="btn btn-ghost" type="button" id="bvTenhoBackup">Já tenho um backup</button>
+              <button class="btn btn-ghost" type="button" id="bvVoltar">Voltar</button>
+            </div>
+            <form id="formRestaurarBV" class="block form-restaurar" hidden novalidate autocomplete="off">
+              <div class="field"><label for="f-bv-codigo">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-bv-senha">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-alt btn-block" type="submit">Restaurar backup</button></div>
+            </form>
+            <div id="msgBV" role="alert"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot wrap">
+      <svg class="ico"><use href="#i-cadeado"/></svg>
+      <p>Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.</p>
+    </footer>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Navegação">
+  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span>Novo</span></a>
+  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span>Conferir</span></a>
+  <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span>Registros</span></a>
+  <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span>Ajustes</span></a>
+</nav>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal-box">
+    <h3 id="modalTitulo"></h3>
+    <p id="modalTexto"></p>
+    <div class="btns">
+      <button class="btn btn-primary" type="button" id="modalOk"></button>
+      <button class="btn" type="button" id="modalCancelar">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="scanner" id="scanner" hidden>
+  <video id="scanVideo" playsinline muted></video>
+  <div class="scan-frame" aria-hidden="true"></div>
+  <p class="scan-txt">Aponte para o QR code do DebtID</p>
+  <button class="btn scan-fechar" type="button" id="scanFechar">Fechar</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>

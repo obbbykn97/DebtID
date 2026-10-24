@@ -1,0 +1,20 @@
+# Gradle / Android
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Chaves de assinatura nunca vão para o repositório
+*.jks
+*.keystore
+*.p12
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.DS_Store
