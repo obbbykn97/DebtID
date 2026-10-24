@@ -85,7 +85,7 @@ body:not(.pode-ler-qr) .so-qr{display:none !important}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- page frame ---------- */
-.page{position:relative;overflow:hidden;padding:52px 14px 34px;min-height:100vh}
+.page{position:relative;overflow:hidden;overflow:clip;padding:52px 14px 34px;min-height:100vh}
 .deco{position:absolute;z-index:0;pointer-events:none}
 .shd{fill:var(--line)} polygon.shd{stroke:var(--line)} .o{stroke:var(--line)}
 .d1{width:118px;top:130px;left:-44px}
@@ -200,7 +200,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .err{color:var(--red);font-size:13px;font-weight:700;margin-top:6px}
 .err:empty{display:none}
 .seg{position:relative;display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:4px;background:var(--field);border:2px solid var(--line);border-radius:14px;padding:4px}
-.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input{position:absolute;left:4px;top:4px;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}
 .seg label{display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;padding:9px 4px;min-height:40px;border-radius:10px;font-weight:700;font-size:14.5px;cursor:pointer;color:var(--muted);transition:background .12s,color .12s}
 .seg label:hover{color:var(--ink)}
 .seg input:checked+label{background:var(--ink);color:var(--card)}
@@ -255,7 +255,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .status .btn{background:#fff;color:var(--on);box-shadow:3px 3px 0 var(--on);border-color:var(--on)}
 .status .btn-primary,.status .btn-dark{background:var(--dark);color:var(--lime);--shc:var(--on)}
 .st-aguardando{background:var(--rose)} .st-recebida{background:var(--yellow)} .st-validado{background:var(--green)}
-.st-quitado{background:var(--peri-soft)} .st-antigo,.st-terceiro{background:var(--teal-soft)}
+.st-quitado{background:var(--peri-soft)} .st-antigo,.st-terceiro{background:var(--teal-soft)} .st-pessoal{background:var(--yellow)}
 .qr-card{display:grid;gap:18px;align-items:center;margin-bottom:22px}
 @media (min-width:720px){.qr-card{grid-template-columns:auto 1fr;gap:26px}}
 .qr{width:min(280px,100%);aspect-ratio:1;background:#fff;border:2px solid var(--line);border-radius:18px;padding:10px;justify-self:center;box-shadow:var(--sh)}
@@ -305,8 +305,8 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .rc-key-note .ico{width:15px;height:15px;margin-top:2px}
 
 /* ---------- records ---------- */
-.filtros{margin-bottom:16px;--n:4}
-.filtros label{font-size:13.5px;padding:8px 2px}
+.filtros{margin-bottom:16px;--n:5}
+.filtros label{font-size:12.5px;padding:8px 2px;line-height:1.15}
 .lista{display:grid;gap:12px}
 .reg{appearance:none;-webkit-appearance:none;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:12px 14px;cursor:pointer;color:var(--ink)}
 .reg:active{transform:translate(2px,2px);box-shadow:var(--sh-sm)}
@@ -318,7 +318,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .reg-side{text-align:right;display:grid;gap:5px;justify-items:end}
 .reg-side b{font-size:15.5px;white-space:nowrap}
 .chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;border:2px solid var(--line);color:var(--on);white-space:nowrap}
-.chip.aguardando{background:var(--rose)} .chip.validado{background:var(--green)} .chip.quitado{background:var(--peri-soft)} .chip.vencido{background:var(--orange);color:#fff}
+.chip.aguardando{background:var(--rose)} .chip.registrado{background:var(--yellow)} .chip.validado{background:var(--green)} .chip.quitado{background:var(--peri-soft)} .chip.vencido{background:var(--orange);color:#fff}
 .vazio{text-align:center;padding:30px 16px;border:2px dashed var(--dash);border-radius:20px;color:var(--muted)}
 .vazio .btn{margin-top:14px}
 
@@ -339,7 +339,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .bv-title{font-size:clamp(32px,9vw,56px);margin:6px 0 12px}
 .ui-opcoes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 24px}
 .ui-op{position:relative;display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:10px;border:2px solid var(--dash);border-radius:20px;background:var(--card)}
-.ui-op input{position:absolute;opacity:0;pointer-events:none}
+.ui-op input{position:absolute;left:10px;top:10px;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}
 .ui-op:has(input:checked){border-color:var(--line);box-shadow:var(--sh);outline:3px solid var(--peri);outline-offset:2px}
 .ui-op b{font-size:16px;margin-top:6px}
 .ui-op small{font-size:13px;color:var(--muted);line-height:1.35}
@@ -387,6 +387,13 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .modal-box h3{font-size:20px;margin:0 0 8px}
 .modal-box p{margin:0 0 18px;color:var(--ink-2)}
 .modal-box .btns{flex-direction:row-reverse}
+.modal-campo{margin:0 0 18px}
+.lucro{margin:16px 0}
+.lucro h3{margin:0 0 12px}
+.lucro-periodo{--n:4;margin-bottom:14px}
+.lucro-periodo label{font-size:12.5px;padding:8px 2px;line-height:1.15}
+.lucro-datas{margin-bottom:14px}
+.lucro-cards{margin-bottom:10px}
 .moeda-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;padding:8px 14px;background:var(--field);border:2px solid var(--line);border-radius:14px;color:var(--ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
 .moeda-btn:focus-visible{outline:3px solid var(--peri);outline-offset:2px}
 .moeda-btn .mo-nome{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -563,6 +570,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .chip.aguardando{border-color:var(--coral);color:var(--coral)}
 [data-ui="pro"] .chip.vencido{background:var(--coral);border-color:var(--coral);color:#fff}
 [data-ui="pro"] .chip.quitado{border-color:var(--muted);color:var(--muted)}
+[data-ui="pro"] .chip.registrado{border-color:var(--ink);color:var(--ink)}
 [data-ui="pro"] .totais{gap:0;border-bottom:1px solid var(--line)}
 [data-ui="pro"] .totais .stat+.stat{border-left:1px solid var(--rule);padding-left:14px}
 [data-ui="pro"] .vazio{border:1px dashed var(--rule);border-radius:0}
@@ -831,12 +839,20 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
                   <div class="err" id="e-dp"></div>
                 </div>
               </div>
+              <div class="field span2 conf-campo">
+                <span class="label" id="l-conf" data-i18n="form.conf">Confirmação da outra pessoa</span>
+                <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-conf">
+                  <input type="radio" name="confirmacao" id="c-pedir" value="pedir" checked><label for="c-pedir" data-i18n="form.confPedir">Pedir confirmação</label>
+                  <input type="radio" name="confirmacao" id="c-so" value="so"><label for="c-so" data-i18n="form.confSo">Só registrar</label>
+                </div>
+                <p class="hint" id="hintConf"></p>
+              </div>
               <div class="form-foot">
                 <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="form.registrar">Registrar e assinar</span></button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
                 <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
-              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">. Depois, a outra pessoa confirma no DebtID dela.</span></p>
+              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">.</span></p>
             </form>
           </section>
         </div>
@@ -884,10 +900,26 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
             <div><p class="kicker" data-i18n="reg.kicker">Neste aparelho</p><h2 data-i18n="reg.titulo">Seus registros</h2></div>
           </div>
           <div class="totais" id="totais"></div>
+          <section class="panel lucro" aria-labelledby="t-lucro">
+            <h3 id="t-lucro" data-i18n="lucro.titulo">Lucro</h3>
+            <div class="seg lucro-periodo" role="radiogroup" aria-labelledby="t-lucro">
+              <input type="radio" name="periodo" id="pe-mes" value="mes"><label for="pe-mes" data-i18n="lucro.mes">Este mês</label>
+              <input type="radio" name="periodo" id="pe-ano" value="ano"><label for="pe-ano" data-i18n="lucro.ano">Este ano</label>
+              <input type="radio" name="periodo" id="pe-tudo" value="tudo" checked><label for="pe-tudo" data-i18n="lucro.tudo">Desde o começo</label>
+              <input type="radio" name="periodo" id="pe-datas" value="datas"><label for="pe-datas" data-i18n="lucro.datas">Datas</label>
+            </div>
+            <div class="grid lucro-datas" id="lucroDatas" hidden>
+              <div class="field"><label for="pe-de" data-i18n="lucro.de">De</label><div class="control"><input id="pe-de" type="date"></div></div>
+              <div class="field"><label for="pe-ate" data-i18n="lucro.ate">Até</label><div class="control"><input id="pe-ate" type="date"></div></div>
+            </div>
+            <div class="summary lucro-cards" id="lucroCards"></div>
+            <p class="hint" data-i18n="lucro.hint">Recebido: empréstimos quitados, pela data do pagamento. A receber: empréstimos em aberto (validados ou só registro), pela data de vencimento.</p>
+          </section>
           <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros" data-i18n-aria="reg.filtrar">
             <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos" data-i18n="filtro.todos">Todos</label>
             <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag" data-i18n="filtro.aguardando">Aguardando</label>
             <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val" data-i18n="filtro.validado">Validados</label>
+            <input type="radio" name="filtro" id="fl-so" value="registrado"><label for="fl-so" data-i18n="filtro.registrado">Só registro</label>
             <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt" data-i18n="filtro.quitado">Quitados</label>
           </div>
           <div class="lista" id="lista"></div>
@@ -1080,6 +1112,10 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
   <div class="modal-box">
     <h3 id="modalTitulo"></h3>
     <p id="modalTexto"></p>
+    <div class="field modal-campo" id="modalCampo" hidden>
+      <label for="modalData" data-i18n="modal.dataPagamento">Data do pagamento</label>
+      <div class="control"><input id="modalData" type="date"></div>
+    </div>
     <div class="btns">
       <button class="btn btn-primary" type="button" id="modalOk"></button>
       <button class="btn" type="button" id="modalCancelar" data-i18n="modal.cancelar">Cancelar</button>
@@ -1143,7 +1179,7 @@ const DebtIDTextos = {
     "form.de": "Data do empréstimo", "form.dp": "Data prevista de pagamento",
     "form.registrar": "Registrar e assinar",
     "form.prazo": "Prazo: {x}", "form.prazoVazio": "Prazo: —", "form.totalPrevia": "Total: {x}", "form.totalVazio": "Total: —",
-    "form.assinaAntes": "Você assina como ", "form.assinaDepois": ". Depois, a outra pessoa confirma no DebtID dela.",
+    "form.assinaAntes": "Você assina como ", "form.assinaDepois": ".",
     "dica.simples.total": "Aplicada uma única vez sobre o valor, qualquer que seja o prazo.",
     "dica.simples.mes": "Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).",
     "dica.simples.ano": "Juros simples: proporcionais aos dias do prazo (ano de 365 dias).",
@@ -1197,7 +1233,7 @@ const DebtIDTextos = {
 
     "reg.kicker": "Neste aparelho", "reg.titulo": "Seus registros", "reg.filtrar": "Filtrar registros",
     "filtro.todos": "Todos", "filtro.aguardando": "Aguardando", "filtro.validado": "Validados", "filtro.quitado": "Quitados",
-    "reg.receber": "A receber", "reg.pagar": "A pagar", "reg.totaisNota": "validados, sem quitados",
+    "reg.receber": "A receber", "reg.pagar": "A pagar", "reg.totaisNota": "em aberto, sem quitados",
     "reg.vazioT": "Nenhum registro ainda", "reg.vazio": "Quando você registrar ou confirmar um empréstimo, ele aparece aqui.",
     "reg.filtroVazio": "Nada com esse filtro.",
     "reg.emprestou": "Você emprestou", "reg.deve": "Você deve",
@@ -1256,7 +1292,7 @@ const DebtIDTextos = {
     "st.validadoT": "Validado pelos dois", "st.validado": "{a} e {b} assinaram este registro.",
     "st.mostreVolta": "Agora mostre o QR para {nome} ler, para o registro ficar validado no celular dessa pessoa também.",
     "st.venceu": "O pagamento venceu em {data}.", "st.quitar": "Marcar como quitado",
-    "st.quitadoT": "Quitado", "st.quitado": "Marcado como quitado em {data}. Essa marcação fica só neste aparelho.", "st.desfazer": "Desfazer",
+    "st.quitadoT": "Quitado", "st.quitado": "Pago em {data}. Essa marcação fica só neste aparelho.", "st.desfazer": "Desfazer",
     "st.terceiroT": "Registro validado", "st.terceiro": "Assinado por {a} e {b}. Você não participa deste empréstimo.",
     "st.antigoT": "Código antigo, sem assinatura", "st.antigo": "Gerado por uma versão anterior do app. Mostra os dados, mas não comprova quem registrou.",
     "qr.paraConfirmar": "Código para {nome} confirmar", "qr.antigo": "Código antigo", "qr.validado": "Código do registro validado",
@@ -1293,6 +1329,43 @@ const DebtIDTextos = {
     "rc.semAssinatura": "Sem assinatura digital", "rc.aguardando": "Aguardando confirmação",
     "rc.codigo": "Código de verificação", "rc.pdf": "Recibo DebtID - {nome} - {data}",
 
+    "form.conf": "Confirmação da outra pessoa",
+    "form.confPedir": "Pedir confirmação",
+    "form.confSo": "Só registrar",
+    "dica.confPedir": "A outra pessoa confirma no DebtID dela, e o registro fica assinado pelos dois.",
+    "dica.confSo": "Fica salvo só no seu celular, assinado só por você. Dá para pedir a confirmação depois.",
+    "toast.soRegistro": "Registrado só por você.",
+    "toast.pedirConf": "Agora mostre o QR para {nome} confirmar.",
+    "st.pessoalT": "Só registro",
+    "st.pessoal": "Registrado só por você, sem a confirmação de {nome}. Serve para o seu controle; como prova, vale menos que um registro assinado pelos dois.",
+    "st.pedirConf": "Pedir confirmação",
+    "qr.pessoal": "Código do registro (só você assinou)",
+    "qr.dicaPessoal": "Para ter a assinatura de {nome} também, toque em Pedir confirmação.",
+    "rc.situacaoPessoal": "Registrado e assinado só por {a}, sem a confirmação de {b}.",
+    "rc.curtaPessoal": "Só registro",
+    "rc.notaPessoal": "Só {a} assinou este registro. Confira no DebtID, em Conferir.",
+    "rc.semConfirmacao": "Sem confirmação",
+    "rotulo.registrado": "Só registro",
+    "filtro.registrado": "Só registro",
+    "modal.quitarT": "Marcar como quitado?",
+    "modal.quitarCredor": "Quando você recebeu o pagamento? A data entra no cálculo do lucro por período.",
+    "modal.quitarDevedor": "Quando você pagou? A data entra no cálculo dos juros pagos por período.",
+    "modal.quitarOk": "Marcar como quitado",
+    "modal.dataPagamento": "Data do pagamento",
+    "lucro.titulo": "Lucro",
+    "lucro.mes": "Este mês",
+    "lucro.ano": "Este ano",
+    "lucro.tudo": "Desde o começo",
+    "lucro.datas": "Datas",
+    "lucro.de": "De",
+    "lucro.ate": "Até",
+    "lucro.recebido": "Lucro recebido",
+    "lucro.aReceber": "Lucro a receber",
+    "lucro.jurosPagos": "Juros pagos",
+    "lucro.jurosAPagar": "Juros a pagar",
+    "lucro.nQuitados": "quitados: {n}",
+    "lucro.nAbertos": "em aberto: {n}",
+    "lucro.hint": "Recebido: empréstimos quitados, pela data do pagamento. A receber: empréstimos em aberto (validados ou só registro), pela data de vencimento.",
     "share.aguardando": "{eu} registrou um empréstimo com você no DebtID: {total} até {data}.\nPara confirmar, abra o DebtID, toque em Conferir e cole este código:\n\n{codigo}",
     "share.confirmei": "Confirmei nosso empréstimo no DebtID. Abra o DebtID, toque em Conferir e cole este código para validar:\n\n{codigo}",
     "share.geral": "Empréstimo registrado no DebtID (Ref. {ref}). Código para conferir:\n\n{codigo}"
@@ -1327,7 +1400,7 @@ const DebtIDTextos = {
     "form.de": "Loan date", "form.dp": "Due date",
     "form.registrar": "Record and sign",
     "form.prazo": "Term: {x}", "form.prazoVazio": "Term: —", "form.totalPrevia": "Total: {x}", "form.totalVazio": "Total: —",
-    "form.assinaAntes": "You sign as ", "form.assinaDepois": ". Then the other person confirms in their own DebtID.",
+    "form.assinaAntes": "You sign as ", "form.assinaDepois": ".",
     "dica.simples.total": "Applied once to the amount, whatever the term.",
     "dica.simples.mes": "Simple interest: prorated over the days in the term (30-day months).",
     "dica.simples.ano": "Simple interest: prorated over the days in the term (365-day years).",
@@ -1381,7 +1454,7 @@ const DebtIDTextos = {
 
     "reg.kicker": "On this device", "reg.titulo": "Your records", "reg.filtrar": "Filter records",
     "filtro.todos": "All", "filtro.aguardando": "Pending", "filtro.validado": "Validated", "filtro.quitado": "Paid",
-    "reg.receber": "To receive", "reg.pagar": "To pay", "reg.totaisNota": "validated, excluding paid",
+    "reg.receber": "To receive", "reg.pagar": "To pay", "reg.totaisNota": "open, excluding paid",
     "reg.vazioT": "No records yet", "reg.vazio": "Loans you record or confirm show up here.",
     "reg.filtroVazio": "Nothing matches this filter.",
     "reg.emprestou": "You lent", "reg.deve": "You owe",
@@ -1440,7 +1513,7 @@ const DebtIDTextos = {
     "st.validadoT": "Validated by both sides", "st.validado": "{a} and {b} signed this record.",
     "st.mostreVolta": "Now show the QR for {nome} to scan, so the record is validated on their phone too.",
     "st.venceu": "Payment was due on {data}.", "st.quitar": "Mark as paid",
-    "st.quitadoT": "Paid", "st.quitado": "Marked as paid on {data}. This mark stays only on this device.", "st.desfazer": "Undo",
+    "st.quitadoT": "Paid", "st.quitado": "Paid on {data}. This mark stays only on this device.", "st.desfazer": "Undo",
     "st.terceiroT": "Validated record", "st.terceiro": "Signed by {a} and {b}. You are not part of this loan.",
     "st.antigoT": "Old code, unsigned", "st.antigo": "Created by an earlier version of the app. It shows the data but doesn't prove who recorded it.",
     "qr.paraConfirmar": "Code for {nome} to confirm", "qr.antigo": "Old code", "qr.validado": "Validated record code",
@@ -1477,6 +1550,43 @@ const DebtIDTextos = {
     "rc.semAssinatura": "No digital signature", "rc.aguardando": "Awaiting confirmation",
     "rc.codigo": "Verification code", "rc.pdf": "DebtID receipt - {nome} - {data}",
 
+    "form.conf": "Confirmation from the other person",
+    "form.confPedir": "Ask to confirm",
+    "form.confSo": "Just record",
+    "dica.confPedir": "The other person confirms in their own DebtID, and the record is signed by both sides.",
+    "dica.confSo": "It's saved only on your phone, signed only by you. You can ask for confirmation later.",
+    "toast.soRegistro": "Recorded by you only.",
+    "toast.pedirConf": "Now show the QR for {nome} to confirm.",
+    "st.pessoalT": "Record only",
+    "st.pessoal": "Recorded by you only, without confirmation from {nome}. Good for keeping track; as proof, it's weaker than a record signed by both sides.",
+    "st.pedirConf": "Ask to confirm",
+    "qr.pessoal": "Record code (signed by you only)",
+    "qr.dicaPessoal": "To get {nome}'s signature too, tap Ask to confirm.",
+    "rc.situacaoPessoal": "Recorded and signed by {a} only, without confirmation from {b}.",
+    "rc.curtaPessoal": "Record only",
+    "rc.notaPessoal": "Only {a} signed this record. Verify it in DebtID under Verify.",
+    "rc.semConfirmacao": "Not confirmed",
+    "rotulo.registrado": "Record only",
+    "filtro.registrado": "Record only",
+    "modal.quitarT": "Mark as paid?",
+    "modal.quitarCredor": "When did you receive the payment? The date is used for profit by period.",
+    "modal.quitarDevedor": "When did you pay? The date is used for interest paid by period.",
+    "modal.quitarOk": "Mark as paid",
+    "modal.dataPagamento": "Payment date",
+    "lucro.titulo": "Profit",
+    "lucro.mes": "This month",
+    "lucro.ano": "This year",
+    "lucro.tudo": "All time",
+    "lucro.datas": "Dates",
+    "lucro.de": "From",
+    "lucro.ate": "To",
+    "lucro.recebido": "Profit received",
+    "lucro.aReceber": "Profit to receive",
+    "lucro.jurosPagos": "Interest paid",
+    "lucro.jurosAPagar": "Interest to pay",
+    "lucro.nQuitados": "paid: {n}",
+    "lucro.nAbertos": "open: {n}",
+    "lucro.hint": "Received: paid loans, by payment date. To receive: open loans (validated or record only), by due date.",
     "share.aguardando": "{eu} recorded a loan with you in DebtID: {total} due {data}.\nTo confirm, open DebtID, tap Verify and paste this code:\n\n{codigo}",
     "share.confirmei": "I confirmed our loan in DebtID. Open DebtID, tap Verify and paste this code to validate it:\n\n{codigo}",
     "share.geral": "Loan recorded in DebtID (Ref. {ref}). Code to verify:\n\n{codigo}"
@@ -2639,6 +2749,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (e.target.name === 'ui' || e.target.name === 'ui-bv') aplicarUI(e.target.value);
     if (e.target.name === 'tema') { gravarTexto(K.tema, e.target.value === 'sistema' ? null : e.target.value); aplicarTema(); }
     if (e.target.name === 'filtro') renderRegistros();
+    if (e.target.name === 'periodo') { gravarTexto('debtid.periodo', e.target.value); renderLucro(); }
     if (e.target.name === 'idioma' || e.target.name === 'idioma-bv') aplicarIdioma(e.target.value, true);
   });
 
@@ -2648,15 +2759,24 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const x = $('#toast'); x.textContent = msg; x.classList.add('show');
     clearTimeout(timerToast); timerToast = setTimeout(() => x.classList.remove('show'), 2600);
   }
-  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false }) {
+  // data: ISO date to show in a date field; the promise then resolves with the chosen day (or false)
+  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false, data = null, dataMax = null }) {
     return new Promise(res => {
-      const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar');
+      const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar'), campoData = $('#modalData');
       $('#modalTitulo').textContent = titulo; $('#modalTexto').textContent = texto;
       bOk.textContent = ok; bOk.className = 'btn ' + (perigo ? 'btn-danger' : 'btn-primary');
+      $('#modalCampo').hidden = !data;
+      if (data) { campoData.value = data; campoData.max = dataMax || ''; }
       m.hidden = false; bOk.focus();
       const tecla = e => { if (e.key === 'Escape') fim(false); };
       const fim = v => { m.hidden = true; bOk.onclick = bNao.onclick = m.onclick = null; document.removeEventListener('keydown', tecla); res(v); };
-      bOk.onclick = () => fim(true); bNao.onclick = () => fim(false);
+      bOk.onclick = () => {
+        if (!data) return fim(true);
+        const dia = diaDeISO(campoData.value), max = dataMax ? diaDeISO(dataMax) : null;
+        if (dia == null || (max != null && dia > max)) { campoData.focus(); return; }
+        fim(dia);
+      };
+      bNao.onclick = () => fim(false);
       m.onclick = e => { if (e.target === m) fim(false); };
       document.addEventListener('keydown', tecla);
     });
@@ -2756,6 +2876,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (composto && opTotal.checked) $('#m-mes').checked = true;
     const modo = marcado('modo') || 'mes';
     $('#hintModo').textContent = t(`dica.${composto ? 'compostos' : 'simples'}.${modo}`);
+    $('#hintConf').textContent = t(marcado('confirmacao') === 'so' ? 'dica.confSo' : 'dica.confPedir');
     const credor = marcado('papel') !== 'devedor';
     $('#l-outro').textContent = t(credor ? 'form.outroDevedor' : 'form.outroCredor');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
@@ -2830,13 +2951,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     e.preventDefault();
     const { erros, dados } = lerFormulario();
     if (mostrarErros(erros)) return;
+    const soRegistro = marcado('confirmacao') === 'so';
     const btn = $('#btnRegistrar'); btn.disabled = true;
     try {
       const codigo = await D.criarProposta(perfil, dados);
       const m = await D.lerCodigo(codigo);
-      upsert(registroDe(m, dados.papel, 'aguardando'));
+      upsert(soRegistro ? { ...registroDe(m, dados.papel, 'registrado'), soRegistro: true } : registroDe(m, dados.papel, 'aguardando'));
       campo('outro').value = ''; campo('valor').value = ''; campo('taxa').value = '';
-      await abrirModelo(m, { aviso: t('toast.registrado') });
+      await abrirModelo(m, { aviso: t(soRegistro ? 'toast.soRegistro' : 'toast.registrado') });
     } catch (err) {
       const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
     } finally {
@@ -3046,16 +3168,16 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       }
       if (parteEmissora(m).id === perfil.id) {
         if (!reg) reg = upsert(registroDe(m, m.emissor, 'aguardando'));
-        ctx = 'aguardando';
+        ctx = reg.status === 'registrado' ? 'pessoal' : reg.status === 'quitado' ? 'quitado' : 'aguardando';
       } else {
         ctx = 'recebida';
       }
     } else {
       const meu = papelDe(m);
       if (meu) {
-        if (!reg || reg.status === 'aguardando') {
+        if (!reg || reg.status === 'aguardando' || reg.status === 'registrado' || (reg.soRegistro && reg.status === 'quitado' && reg.codigo !== m.codigo)) {
           const estavaAguardando = !!reg;
-          reg = upsert(registroDe(m, meu, 'validado'));
+          reg = upsert({ ...registroDe(m, meu, reg && reg.status === 'quitado' ? 'quitado' : 'validado'), soRegistro: false });
           if (estavaAguardando && !aviso) aviso = t('toast.validado');
         }
         ctx = reg.status === 'quitado' ? 'quitado' : 'validado';
@@ -3080,6 +3202,13 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       texto = t('st.aguardando', { nome: esc(outra.nome) });
       botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerConf')}</button>
                 <button class="btn" type="button" data-acao="colar">${ico('copiar')}${t('st.colarConf')}</button>`;
+    } else if (ctx === 'pessoal') {
+      cls = 'st-pessoal'; icone = 'doc';
+      titulo = t('st.pessoalT');
+      texto = t('st.pessoal', { nome: esc(outra.nome) });
+      if (d.dp < hojeDia()) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
+      botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}${t('st.quitar')}</button>
+                <button class="btn" type="button" data-acao="pedir-confirmacao">${ico('enviar')}${t('st.pedirConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
       cls = 'st-recebida'; icone = 'doc';
@@ -3099,8 +3228,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
       titulo = t('st.quitadoT');
-      const q = new Date(reg.quitadoEm || Date.now());
-      texto = t('st.quitado', { data: fmt.data(Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000)) });
+      texto = t('st.quitado', { data: fmt.data(diaQuitado(reg)) });
       botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
     } else if (ctx === 'terceiro') {
       cls = 'st-terceiro'; icone = 'escudo';
@@ -3117,9 +3245,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function qrHTML() {
     const { m, ctx } = atual;
     if (ctx === 'recebida') return '';
-    const aguardando = ctx === 'aguardando';
-    const legenda = aguardando ? t('qr.paraConfirmar', { nome: esc(parteOutra(m).nome) }) : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
-    const dica = t(aguardando ? 'qr.dicaAg' : 'qr.dica');
+    const aguardando = ctx === 'aguardando', pessoal = m.tipo === 'proposta' && !aguardando;
+    const nomeOutra = m.emissor ? esc(parteOutra(m).nome) : '';
+    const legenda = aguardando ? t('qr.paraConfirmar', { nome: nomeOutra }) : pessoal ? t('qr.pessoal') : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
+    const dica = aguardando ? t('qr.dicaAg') : pessoal ? (ctx === 'pessoal' ? t('qr.dicaPessoal', { nome: nomeOutra }) : '') : t('qr.dica');
     return `<section class="qr-card">
       <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: esc(t('qr.rotulo')) })}</div>
       <div class="qr-info">
@@ -3130,7 +3259,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
           <button class="btn" type="button" data-acao="enviar">${ico('enviar')}${t('aj.compartilhar')}</button>
           ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}${t('qr.imprimir')}</button>`}
         </div>
-        <p class="hint">${dica}</p>
+        ${dica ? `<p class="hint">${dica}</p>` : ''}
       </div>
     </section>`;
   }
@@ -3157,10 +3286,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function reciboHTML(m) {
     const c = m.calc, d = m.dados, moeda = infoDe(d);
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
+    // a record kept without the other person's confirmation (only the issuer signed)
+    const pessoal = m.tipo === 'proposta' && !!(atual && atual.m === m && atual.reg && atual.reg.soRegistro);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
       ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>${t('rc.assinou', { quando: fmt.momento(parte.ts, parte.tz) })}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>${t('rc.informado', { nome: esc(parte.nomeInformado) })}</small>` : ''}</div>`
-      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : 'rc.aguardando')}</small></div>`;
+      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : pessoal ? 'rc.semConfirmacao' : 'rc.aguardando')}</small></div>`;
     let situacao, nota, situacaoCurta;
     if (m.tipo === 'validado') {
       situacao = t('rc.situacaoVal', { a: credor, b: devedor });
@@ -3168,9 +3299,9 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       nota = t('rc.notaVal');
     } else if (m.tipo === 'proposta') {
       const a = esc(parteEmissora(m).nome), b = esc(parteOutra(m).nome);
-      situacao = t('rc.situacaoProp', { a, b });
-      situacaoCurta = t('rc.curtaProp');
-      nota = t('rc.notaProp', { b });
+      situacao = t(pessoal ? 'rc.situacaoPessoal' : 'rc.situacaoProp', { a, b });
+      situacaoCurta = t(pessoal ? 'rc.curtaPessoal' : 'rc.curtaProp');
+      nota = t(pessoal ? 'rc.notaPessoal' : 'rc.notaProp', { a, b });
     } else {
       situacao = t('rc.situacaoV1');
       situacaoCurta = t('rc.curtaV1');
@@ -3270,12 +3401,25 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
       case 'imprimir': imprimir(); break;
-      case 'quitar':
-        atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), atualizadoEm: Date.now() });
+      case 'quitar': {
+        const hoje = isoDeDia(hojeDia());
+        const dia = await perguntar({
+          titulo: t('modal.quitarT'), texto: t(reg.papel === 'devedor' ? 'modal.quitarDevedor' : 'modal.quitarCredor'),
+          ok: t('modal.quitarOk'), data: hoje, dataMax: hoje
+        });
+        if (dia === false) break;
+        atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), quitadoDia: dia, atualizadoEm: Date.now() });
         atual.ctx = 'quitado'; renderDetalhe(); toast(t('toast.quitado')); break;
-      case 'desquitar':
-        atual.reg = upsert({ id: reg.id, status: 'validado', quitadoEm: null, atualizadoEm: Date.now() });
-        atual.ctx = 'validado'; renderDetalhe(); break;
+      }
+      case 'desquitar': {
+        const volta = reg.soRegistro ? 'registrado' : 'validado';
+        atual.reg = upsert({ id: reg.id, status: volta, quitadoEm: null, quitadoDia: null, atualizadoEm: Date.now() });
+        atual.ctx = volta === 'registrado' ? 'pessoal' : 'validado'; renderDetalhe(); break;
+      }
+      case 'pedir-confirmacao':
+        atual.reg = upsert({ id: reg.id, status: 'aguardando', soRegistro: false, atualizadoEm: Date.now() });
+        atual.ctx = 'aguardando'; renderDetalhe(); window.scrollTo({ top: 0, behavior: 'instant' });
+        toast(t('toast.pedirConf', { nome: parteOutra(atual.m).nome })); break;
       case 'excluir':
         if (await perguntar({ titulo: t('modal.excluirT'), texto: t('modal.excluir'), ok: t('modal.excluirOk'), perigo: true })) {
           registros = registros.filter(r => r.id !== reg.id); salvarRegistros();
@@ -3286,24 +3430,68 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   });
 
   /* ---------------- records list ---------------- */
+  const emAberto = r => r.status === 'validado' || r.status === 'registrado';
+  const isoDeDia = dia => new Date(dia * 86400000).toISOString().slice(0, 10);
+  // payment day (older records only have the moment the button was pressed)
+  const diaQuitado = r => {
+    if (r.quitadoDia != null) return r.quitadoDia;
+    const q = new Date(r.quitadoEm || Date.now());
+    return Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000);
+  };
+  // one line per currency: amounts in different currencies are never added together
+  function somasPorMoeda(lista, valor) {
+    const grupos = new Map();
+    for (const r of lista) {
+      const m = infoDe(r), k = m.codigo + '|' + m.casas;
+      grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + valor(r) });
+    }
+    const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
+    return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
+                         : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
+  }
+
+  /* ---------------- profit by period ---------------- */
+  const PERIODOS = ['mes', 'ano', 'tudo', 'datas'];
+  function intervalo() {
+    const p = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
+    const h = new Date(), y = h.getFullYear(), mo = h.getMonth(), dia = x => Math.round(x / 86400000);
+    if (p === 'mes') return [dia(Date.UTC(y, mo, 1)), dia(Date.UTC(y, mo + 1, 0))];
+    if (p === 'ano') return [dia(Date.UTC(y, 0, 1)), dia(Date.UTC(y, 11, 31))];
+    if (p === 'datas') return [diaDeISO($('#pe-de').value) ?? -Infinity, diaDeISO($('#pe-ate').value) ?? Infinity];
+    return [-Infinity, Infinity];
+  }
+  function renderLucro() {
+    const periodo = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
+    $('#lucroDatas').hidden = periodo !== 'datas';
+    const [ini, fim] = intervalo(), dentro = d => d >= ini && d <= fim;
+    const lucro = r => r.total - r.valor;
+    const pagos = papel => registros.filter(r => r.papel === papel && r.status === 'quitado' && dentro(diaQuitado(r)));
+    const abertos = papel => registros.filter(r => r.papel === papel && emAberto(r) && dentro(r.dp));
+    const card = (cls, rotulo, lista, nota) =>
+      `<div class="stat ${cls}"><span>${t(rotulo)}</span>${somasPorMoeda(lista, lucro)}<small>${t(nota, { n: lista.length })}</small></div>`;
+    let html = card('s-2', 'lucro.recebido', pagos('credor'), 'lucro.nQuitados') + card('s-1', 'lucro.aReceber', abertos('credor'), 'lucro.nAbertos');
+    if (registros.some(r => r.papel === 'devedor' && (r.status === 'quitado' || emAberto(r)))) {
+      html += card('s-3', 'lucro.jurosPagos', pagos('devedor'), 'lucro.nQuitados') + card('s-4', 'lucro.jurosAPagar', abertos('devedor'), 'lucro.nAbertos');
+    }
+    $('#lucroCards').innerHTML = html;
+  }
+  {
+    const salvo = lerTexto('debtid.periodo');
+    if (PERIODOS.includes(salvo)) $('#pe-' + salvo).checked = true;
+    const h = new Date();
+    $('#pe-de').value = isoLocal(new Date(h.getFullYear(), h.getMonth(), 1));
+    $('#pe-ate').value = isoLocal(h);
+    ['#pe-de', '#pe-ate'].forEach(id => $(id).addEventListener('change', renderLucro));
+  }
+
   function renderRegistros() {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
-    const validos = registros.filter(r => r.status === 'validado');
-    // one line per currency: amounts in different currencies are never added together
-    const somas = papel => {
-      const grupos = new Map();
-      for (const r of validos.filter(x => x.papel === papel)) {
-        const m = infoDe(r), k = m.codigo + '|' + m.casas;
-        grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + r.total });
-      }
-      const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
-      return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
-                           : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
-    };
+    const abertos = registros.filter(emAberto);
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somas('credor')}<small>${t('reg.totaisNota')}</small></div>` +
-      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somas('devedor')}<small>${t('reg.totaisNota')}</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'credor'), r => r.total)}<small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'devedor'), r => r.total)}<small>${t('reg.totaisNota')}</small></div>`;
+    renderLucro();
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
@@ -3314,7 +3502,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!lista.length) { el.innerHTML = `<div class="vazio">${t('reg.filtroVazio')}</div>`; return; }
     el.innerHTML = lista.map(r => {
       const recebe = r.papel === 'credor';
-      const vencido = r.status === 'validado' && r.dp < dia;
+      const vencido = emAberto(r) && r.dp < dia;
       const quando = r.status === 'quitado' ? t('reg.quitado') : t(vencido ? 'reg.venceu' : 'reg.vence', { data: fmt.data(r.dp) });
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
@@ -3376,7 +3564,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       const [ti, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
-  const PESO = { aguardando: 0, validado: 1, quitado: 2 };
+  const PESO = { aguardando: 0, registrado: 0, validado: 1, quitado: 2 };
   async function restaurar(codigo, senha, msgEl, btn) {
     if (btn) btn.disabled = true;
     try {

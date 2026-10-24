@@ -62,7 +62,7 @@ body:not(.pode-ler-qr) .so-qr{display:none !important}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- page frame ---------- */
-.page{position:relative;overflow:hidden;padding:52px 14px 34px;min-height:100vh}
+.page{position:relative;overflow:hidden;overflow:clip;padding:52px 14px 34px;min-height:100vh}
 .deco{position:absolute;z-index:0;pointer-events:none}
 .shd{fill:var(--line)} polygon.shd{stroke:var(--line)} .o{stroke:var(--line)}
 .d1{width:118px;top:130px;left:-44px}
@@ -177,7 +177,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .err{color:var(--red);font-size:13px;font-weight:700;margin-top:6px}
 .err:empty{display:none}
 .seg{position:relative;display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:4px;background:var(--field);border:2px solid var(--line);border-radius:14px;padding:4px}
-.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input{position:absolute;left:4px;top:4px;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}
 .seg label{display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;padding:9px 4px;min-height:40px;border-radius:10px;font-weight:700;font-size:14.5px;cursor:pointer;color:var(--muted);transition:background .12s,color .12s}
 .seg label:hover{color:var(--ink)}
 .seg input:checked+label{background:var(--ink);color:var(--card)}
@@ -232,7 +232,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .status .btn{background:#fff;color:var(--on);box-shadow:3px 3px 0 var(--on);border-color:var(--on)}
 .status .btn-primary,.status .btn-dark{background:var(--dark);color:var(--lime);--shc:var(--on)}
 .st-aguardando{background:var(--rose)} .st-recebida{background:var(--yellow)} .st-validado{background:var(--green)}
-.st-quitado{background:var(--peri-soft)} .st-antigo,.st-terceiro{background:var(--teal-soft)}
+.st-quitado{background:var(--peri-soft)} .st-antigo,.st-terceiro{background:var(--teal-soft)} .st-pessoal{background:var(--yellow)}
 .qr-card{display:grid;gap:18px;align-items:center;margin-bottom:22px}
 @media (min-width:720px){.qr-card{grid-template-columns:auto 1fr;gap:26px}}
 .qr{width:min(280px,100%);aspect-ratio:1;background:#fff;border:2px solid var(--line);border-radius:18px;padding:10px;justify-self:center;box-shadow:var(--sh)}
@@ -282,8 +282,8 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .rc-key-note .ico{width:15px;height:15px;margin-top:2px}
 
 /* ---------- records ---------- */
-.filtros{margin-bottom:16px;--n:4}
-.filtros label{font-size:13.5px;padding:8px 2px}
+.filtros{margin-bottom:16px;--n:5}
+.filtros label{font-size:12.5px;padding:8px 2px;line-height:1.15}
 .lista{display:grid;gap:12px}
 .reg{appearance:none;-webkit-appearance:none;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:12px 14px;cursor:pointer;color:var(--ink)}
 .reg:active{transform:translate(2px,2px);box-shadow:var(--sh-sm)}
@@ -295,7 +295,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .reg-side{text-align:right;display:grid;gap:5px;justify-items:end}
 .reg-side b{font-size:15.5px;white-space:nowrap}
 .chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;border:2px solid var(--line);color:var(--on);white-space:nowrap}
-.chip.aguardando{background:var(--rose)} .chip.validado{background:var(--green)} .chip.quitado{background:var(--peri-soft)} .chip.vencido{background:var(--orange);color:#fff}
+.chip.aguardando{background:var(--rose)} .chip.registrado{background:var(--yellow)} .chip.validado{background:var(--green)} .chip.quitado{background:var(--peri-soft)} .chip.vencido{background:var(--orange);color:#fff}
 .vazio{text-align:center;padding:30px 16px;border:2px dashed var(--dash);border-radius:20px;color:var(--muted)}
 .vazio .btn{margin-top:14px}
 
@@ -316,7 +316,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .bv-title{font-size:clamp(32px,9vw,56px);margin:6px 0 12px}
 .ui-opcoes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 24px}
 .ui-op{position:relative;display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:10px;border:2px solid var(--dash);border-radius:20px;background:var(--card)}
-.ui-op input{position:absolute;opacity:0;pointer-events:none}
+.ui-op input{position:absolute;left:10px;top:10px;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}
 .ui-op:has(input:checked){border-color:var(--line);box-shadow:var(--sh);outline:3px solid var(--peri);outline-offset:2px}
 .ui-op b{font-size:16px;margin-top:6px}
 .ui-op small{font-size:13px;color:var(--muted);line-height:1.35}
@@ -364,6 +364,13 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .modal-box h3{font-size:20px;margin:0 0 8px}
 .modal-box p{margin:0 0 18px;color:var(--ink-2)}
 .modal-box .btns{flex-direction:row-reverse}
+.modal-campo{margin:0 0 18px}
+.lucro{margin:16px 0}
+.lucro h3{margin:0 0 12px}
+.lucro-periodo{--n:4;margin-bottom:14px}
+.lucro-periodo label{font-size:12.5px;padding:8px 2px;line-height:1.15}
+.lucro-datas{margin-bottom:14px}
+.lucro-cards{margin-bottom:10px}
 .moeda-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;padding:8px 14px;background:var(--field);border:2px solid var(--line);border-radius:14px;color:var(--ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
 .moeda-btn:focus-visible{outline:3px solid var(--peri);outline-offset:2px}
 .moeda-btn .mo-nome{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -540,6 +547,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .chip.aguardando{border-color:var(--coral);color:var(--coral)}
 [data-ui="pro"] .chip.vencido{background:var(--coral);border-color:var(--coral);color:#fff}
 [data-ui="pro"] .chip.quitado{border-color:var(--muted);color:var(--muted)}
+[data-ui="pro"] .chip.registrado{border-color:var(--ink);color:var(--ink)}
 [data-ui="pro"] .totais{gap:0;border-bottom:1px solid var(--line)}
 [data-ui="pro"] .totais .stat+.stat{border-left:1px solid var(--rule);padding-left:14px}
 [data-ui="pro"] .vazio{border:1px dashed var(--rule);border-radius:0}

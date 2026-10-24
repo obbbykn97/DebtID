@@ -87,6 +87,7 @@
     if (e.target.name === 'ui' || e.target.name === 'ui-bv') aplicarUI(e.target.value);
     if (e.target.name === 'tema') { gravarTexto(K.tema, e.target.value === 'sistema' ? null : e.target.value); aplicarTema(); }
     if (e.target.name === 'filtro') renderRegistros();
+    if (e.target.name === 'periodo') { gravarTexto('debtid.periodo', e.target.value); renderLucro(); }
     if (e.target.name === 'idioma' || e.target.name === 'idioma-bv') aplicarIdioma(e.target.value, true);
   });
 
@@ -96,15 +97,24 @@
     const x = $('#toast'); x.textContent = msg; x.classList.add('show');
     clearTimeout(timerToast); timerToast = setTimeout(() => x.classList.remove('show'), 2600);
   }
-  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false }) {
+  // data: ISO date to show in a date field; the promise then resolves with the chosen day (or false)
+  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false, data = null, dataMax = null }) {
     return new Promise(res => {
-      const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar');
+      const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar'), campoData = $('#modalData');
       $('#modalTitulo').textContent = titulo; $('#modalTexto').textContent = texto;
       bOk.textContent = ok; bOk.className = 'btn ' + (perigo ? 'btn-danger' : 'btn-primary');
+      $('#modalCampo').hidden = !data;
+      if (data) { campoData.value = data; campoData.max = dataMax || ''; }
       m.hidden = false; bOk.focus();
       const tecla = e => { if (e.key === 'Escape') fim(false); };
       const fim = v => { m.hidden = true; bOk.onclick = bNao.onclick = m.onclick = null; document.removeEventListener('keydown', tecla); res(v); };
-      bOk.onclick = () => fim(true); bNao.onclick = () => fim(false);
+      bOk.onclick = () => {
+        if (!data) return fim(true);
+        const dia = diaDeISO(campoData.value), max = dataMax ? diaDeISO(dataMax) : null;
+        if (dia == null || (max != null && dia > max)) { campoData.focus(); return; }
+        fim(dia);
+      };
+      bNao.onclick = () => fim(false);
       m.onclick = e => { if (e.target === m) fim(false); };
       document.addEventListener('keydown', tecla);
     });
@@ -204,6 +214,7 @@
     if (composto && opTotal.checked) $('#m-mes').checked = true;
     const modo = marcado('modo') || 'mes';
     $('#hintModo').textContent = t(`dica.${composto ? 'compostos' : 'simples'}.${modo}`);
+    $('#hintConf').textContent = t(marcado('confirmacao') === 'so' ? 'dica.confSo' : 'dica.confPedir');
     const credor = marcado('papel') !== 'devedor';
     $('#l-outro').textContent = t(credor ? 'form.outroDevedor' : 'form.outroCredor');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
@@ -278,13 +289,14 @@
     e.preventDefault();
     const { erros, dados } = lerFormulario();
     if (mostrarErros(erros)) return;
+    const soRegistro = marcado('confirmacao') === 'so';
     const btn = $('#btnRegistrar'); btn.disabled = true;
     try {
       const codigo = await D.criarProposta(perfil, dados);
       const m = await D.lerCodigo(codigo);
-      upsert(registroDe(m, dados.papel, 'aguardando'));
+      upsert(soRegistro ? { ...registroDe(m, dados.papel, 'registrado'), soRegistro: true } : registroDe(m, dados.papel, 'aguardando'));
       campo('outro').value = ''; campo('valor').value = ''; campo('taxa').value = '';
-      await abrirModelo(m, { aviso: t('toast.registrado') });
+      await abrirModelo(m, { aviso: t(soRegistro ? 'toast.soRegistro' : 'toast.registrado') });
     } catch (err) {
       const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
     } finally {
@@ -494,16 +506,16 @@
       }
       if (parteEmissora(m).id === perfil.id) {
         if (!reg) reg = upsert(registroDe(m, m.emissor, 'aguardando'));
-        ctx = 'aguardando';
+        ctx = reg.status === 'registrado' ? 'pessoal' : reg.status === 'quitado' ? 'quitado' : 'aguardando';
       } else {
         ctx = 'recebida';
       }
     } else {
       const meu = papelDe(m);
       if (meu) {
-        if (!reg || reg.status === 'aguardando') {
+        if (!reg || reg.status === 'aguardando' || reg.status === 'registrado' || (reg.soRegistro && reg.status === 'quitado' && reg.codigo !== m.codigo)) {
           const estavaAguardando = !!reg;
-          reg = upsert(registroDe(m, meu, 'validado'));
+          reg = upsert({ ...registroDe(m, meu, reg && reg.status === 'quitado' ? 'quitado' : 'validado'), soRegistro: false });
           if (estavaAguardando && !aviso) aviso = t('toast.validado');
         }
         ctx = reg.status === 'quitado' ? 'quitado' : 'validado';
@@ -528,6 +540,13 @@
       texto = t('st.aguardando', { nome: esc(outra.nome) });
       botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerConf')}</button>
                 <button class="btn" type="button" data-acao="colar">${ico('copiar')}${t('st.colarConf')}</button>`;
+    } else if (ctx === 'pessoal') {
+      cls = 'st-pessoal'; icone = 'doc';
+      titulo = t('st.pessoalT');
+      texto = t('st.pessoal', { nome: esc(outra.nome) });
+      if (d.dp < hojeDia()) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
+      botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}${t('st.quitar')}</button>
+                <button class="btn" type="button" data-acao="pedir-confirmacao">${ico('enviar')}${t('st.pedirConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
       cls = 'st-recebida'; icone = 'doc';
@@ -547,8 +566,7 @@
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
       titulo = t('st.quitadoT');
-      const q = new Date(reg.quitadoEm || Date.now());
-      texto = t('st.quitado', { data: fmt.data(Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000)) });
+      texto = t('st.quitado', { data: fmt.data(diaQuitado(reg)) });
       botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
     } else if (ctx === 'terceiro') {
       cls = 'st-terceiro'; icone = 'escudo';
@@ -565,9 +583,10 @@
   function qrHTML() {
     const { m, ctx } = atual;
     if (ctx === 'recebida') return '';
-    const aguardando = ctx === 'aguardando';
-    const legenda = aguardando ? t('qr.paraConfirmar', { nome: esc(parteOutra(m).nome) }) : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
-    const dica = t(aguardando ? 'qr.dicaAg' : 'qr.dica');
+    const aguardando = ctx === 'aguardando', pessoal = m.tipo === 'proposta' && !aguardando;
+    const nomeOutra = m.emissor ? esc(parteOutra(m).nome) : '';
+    const legenda = aguardando ? t('qr.paraConfirmar', { nome: nomeOutra }) : pessoal ? t('qr.pessoal') : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
+    const dica = aguardando ? t('qr.dicaAg') : pessoal ? (ctx === 'pessoal' ? t('qr.dicaPessoal', { nome: nomeOutra }) : '') : t('qr.dica');
     return `<section class="qr-card">
       <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: esc(t('qr.rotulo')) })}</div>
       <div class="qr-info">
@@ -578,7 +597,7 @@
           <button class="btn" type="button" data-acao="enviar">${ico('enviar')}${t('aj.compartilhar')}</button>
           ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}${t('qr.imprimir')}</button>`}
         </div>
-        <p class="hint">${dica}</p>
+        ${dica ? `<p class="hint">${dica}</p>` : ''}
       </div>
     </section>`;
   }
@@ -605,10 +624,12 @@
   function reciboHTML(m) {
     const c = m.calc, d = m.dados, moeda = infoDe(d);
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
+    // a record kept without the other person's confirmation (only the issuer signed)
+    const pessoal = m.tipo === 'proposta' && !!(atual && atual.m === m && atual.reg && atual.reg.soRegistro);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
       ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>${t('rc.assinou', { quando: fmt.momento(parte.ts, parte.tz) })}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>${t('rc.informado', { nome: esc(parte.nomeInformado) })}</small>` : ''}</div>`
-      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : 'rc.aguardando')}</small></div>`;
+      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : pessoal ? 'rc.semConfirmacao' : 'rc.aguardando')}</small></div>`;
     let situacao, nota, situacaoCurta;
     if (m.tipo === 'validado') {
       situacao = t('rc.situacaoVal', { a: credor, b: devedor });
@@ -616,9 +637,9 @@
       nota = t('rc.notaVal');
     } else if (m.tipo === 'proposta') {
       const a = esc(parteEmissora(m).nome), b = esc(parteOutra(m).nome);
-      situacao = t('rc.situacaoProp', { a, b });
-      situacaoCurta = t('rc.curtaProp');
-      nota = t('rc.notaProp', { b });
+      situacao = t(pessoal ? 'rc.situacaoPessoal' : 'rc.situacaoProp', { a, b });
+      situacaoCurta = t(pessoal ? 'rc.curtaPessoal' : 'rc.curtaProp');
+      nota = t(pessoal ? 'rc.notaPessoal' : 'rc.notaProp', { a, b });
     } else {
       situacao = t('rc.situacaoV1');
       situacaoCurta = t('rc.curtaV1');
@@ -718,12 +739,25 @@
       case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
       case 'imprimir': imprimir(); break;
-      case 'quitar':
-        atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), atualizadoEm: Date.now() });
+      case 'quitar': {
+        const hoje = isoDeDia(hojeDia());
+        const dia = await perguntar({
+          titulo: t('modal.quitarT'), texto: t(reg.papel === 'devedor' ? 'modal.quitarDevedor' : 'modal.quitarCredor'),
+          ok: t('modal.quitarOk'), data: hoje, dataMax: hoje
+        });
+        if (dia === false) break;
+        atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), quitadoDia: dia, atualizadoEm: Date.now() });
         atual.ctx = 'quitado'; renderDetalhe(); toast(t('toast.quitado')); break;
-      case 'desquitar':
-        atual.reg = upsert({ id: reg.id, status: 'validado', quitadoEm: null, atualizadoEm: Date.now() });
-        atual.ctx = 'validado'; renderDetalhe(); break;
+      }
+      case 'desquitar': {
+        const volta = reg.soRegistro ? 'registrado' : 'validado';
+        atual.reg = upsert({ id: reg.id, status: volta, quitadoEm: null, quitadoDia: null, atualizadoEm: Date.now() });
+        atual.ctx = volta === 'registrado' ? 'pessoal' : 'validado'; renderDetalhe(); break;
+      }
+      case 'pedir-confirmacao':
+        atual.reg = upsert({ id: reg.id, status: 'aguardando', soRegistro: false, atualizadoEm: Date.now() });
+        atual.ctx = 'aguardando'; renderDetalhe(); window.scrollTo({ top: 0, behavior: 'instant' });
+        toast(t('toast.pedirConf', { nome: parteOutra(atual.m).nome })); break;
       case 'excluir':
         if (await perguntar({ titulo: t('modal.excluirT'), texto: t('modal.excluir'), ok: t('modal.excluirOk'), perigo: true })) {
           registros = registros.filter(r => r.id !== reg.id); salvarRegistros();
@@ -734,24 +768,68 @@
   });
 
   /* ---------------- records list ---------------- */
+  const emAberto = r => r.status === 'validado' || r.status === 'registrado';
+  const isoDeDia = dia => new Date(dia * 86400000).toISOString().slice(0, 10);
+  // payment day (older records only have the moment the button was pressed)
+  const diaQuitado = r => {
+    if (r.quitadoDia != null) return r.quitadoDia;
+    const q = new Date(r.quitadoEm || Date.now());
+    return Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000);
+  };
+  // one line per currency: amounts in different currencies are never added together
+  function somasPorMoeda(lista, valor) {
+    const grupos = new Map();
+    for (const r of lista) {
+      const m = infoDe(r), k = m.codigo + '|' + m.casas;
+      grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + valor(r) });
+    }
+    const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
+    return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
+                         : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
+  }
+
+  /* ---------------- profit by period ---------------- */
+  const PERIODOS = ['mes', 'ano', 'tudo', 'datas'];
+  function intervalo() {
+    const p = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
+    const h = new Date(), y = h.getFullYear(), mo = h.getMonth(), dia = x => Math.round(x / 86400000);
+    if (p === 'mes') return [dia(Date.UTC(y, mo, 1)), dia(Date.UTC(y, mo + 1, 0))];
+    if (p === 'ano') return [dia(Date.UTC(y, 0, 1)), dia(Date.UTC(y, 11, 31))];
+    if (p === 'datas') return [diaDeISO($('#pe-de').value) ?? -Infinity, diaDeISO($('#pe-ate').value) ?? Infinity];
+    return [-Infinity, Infinity];
+  }
+  function renderLucro() {
+    const periodo = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
+    $('#lucroDatas').hidden = periodo !== 'datas';
+    const [ini, fim] = intervalo(), dentro = d => d >= ini && d <= fim;
+    const lucro = r => r.total - r.valor;
+    const pagos = papel => registros.filter(r => r.papel === papel && r.status === 'quitado' && dentro(diaQuitado(r)));
+    const abertos = papel => registros.filter(r => r.papel === papel && emAberto(r) && dentro(r.dp));
+    const card = (cls, rotulo, lista, nota) =>
+      `<div class="stat ${cls}"><span>${t(rotulo)}</span>${somasPorMoeda(lista, lucro)}<small>${t(nota, { n: lista.length })}</small></div>`;
+    let html = card('s-2', 'lucro.recebido', pagos('credor'), 'lucro.nQuitados') + card('s-1', 'lucro.aReceber', abertos('credor'), 'lucro.nAbertos');
+    if (registros.some(r => r.papel === 'devedor' && (r.status === 'quitado' || emAberto(r)))) {
+      html += card('s-3', 'lucro.jurosPagos', pagos('devedor'), 'lucro.nQuitados') + card('s-4', 'lucro.jurosAPagar', abertos('devedor'), 'lucro.nAbertos');
+    }
+    $('#lucroCards').innerHTML = html;
+  }
+  {
+    const salvo = lerTexto('debtid.periodo');
+    if (PERIODOS.includes(salvo)) $('#pe-' + salvo).checked = true;
+    const h = new Date();
+    $('#pe-de').value = isoLocal(new Date(h.getFullYear(), h.getMonth(), 1));
+    $('#pe-ate').value = isoLocal(h);
+    ['#pe-de', '#pe-ate'].forEach(id => $(id).addEventListener('change', renderLucro));
+  }
+
   function renderRegistros() {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
-    const validos = registros.filter(r => r.status === 'validado');
-    // one line per currency: amounts in different currencies are never added together
-    const somas = papel => {
-      const grupos = new Map();
-      for (const r of validos.filter(x => x.papel === papel)) {
-        const m = infoDe(r), k = m.codigo + '|' + m.casas;
-        grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + r.total });
-      }
-      const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
-      return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
-                           : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
-    };
+    const abertos = registros.filter(emAberto);
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somas('credor')}<small>${t('reg.totaisNota')}</small></div>` +
-      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somas('devedor')}<small>${t('reg.totaisNota')}</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'credor'), r => r.total)}<small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'devedor'), r => r.total)}<small>${t('reg.totaisNota')}</small></div>`;
+    renderLucro();
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
@@ -762,7 +840,7 @@
     if (!lista.length) { el.innerHTML = `<div class="vazio">${t('reg.filtroVazio')}</div>`; return; }
     el.innerHTML = lista.map(r => {
       const recebe = r.papel === 'credor';
-      const vencido = r.status === 'validado' && r.dp < dia;
+      const vencido = emAberto(r) && r.dp < dia;
       const quando = r.status === 'quitado' ? t('reg.quitado') : t(vencido ? 'reg.venceu' : 'reg.vence', { data: fmt.data(r.dp) });
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
@@ -824,7 +902,7 @@
       const [ti, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
-  const PESO = { aguardando: 0, validado: 1, quitado: 2 };
+  const PESO = { aguardando: 0, registrado: 0, validado: 1, quitado: 2 };
   async function restaurar(codigo, senha, msgEl, btn) {
     if (btn) btn.disabled = true;
     try {

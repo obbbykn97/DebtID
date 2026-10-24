@@ -205,12 +205,20 @@
                   <div class="err" id="e-dp"></div>
                 </div>
               </div>
+              <div class="field span2 conf-campo">
+                <span class="label" id="l-conf" data-i18n="form.conf">Confirmação da outra pessoa</span>
+                <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-conf">
+                  <input type="radio" name="confirmacao" id="c-pedir" value="pedir" checked><label for="c-pedir" data-i18n="form.confPedir">Pedir confirmação</label>
+                  <input type="radio" name="confirmacao" id="c-so" value="so"><label for="c-so" data-i18n="form.confSo">Só registrar</label>
+                </div>
+                <p class="hint" id="hintConf"></p>
+              </div>
               <div class="form-foot">
                 <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="form.registrar">Registrar e assinar</span></button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
                 <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
-              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">. Depois, a outra pessoa confirma no DebtID dela.</span></p>
+              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">.</span></p>
             </form>
           </section>
         </div>
@@ -258,10 +266,26 @@
             <div><p class="kicker" data-i18n="reg.kicker">Neste aparelho</p><h2 data-i18n="reg.titulo">Seus registros</h2></div>
           </div>
           <div class="totais" id="totais"></div>
+          <section class="panel lucro" aria-labelledby="t-lucro">
+            <h3 id="t-lucro" data-i18n="lucro.titulo">Lucro</h3>
+            <div class="seg lucro-periodo" role="radiogroup" aria-labelledby="t-lucro">
+              <input type="radio" name="periodo" id="pe-mes" value="mes"><label for="pe-mes" data-i18n="lucro.mes">Este mês</label>
+              <input type="radio" name="periodo" id="pe-ano" value="ano"><label for="pe-ano" data-i18n="lucro.ano">Este ano</label>
+              <input type="radio" name="periodo" id="pe-tudo" value="tudo" checked><label for="pe-tudo" data-i18n="lucro.tudo">Desde o começo</label>
+              <input type="radio" name="periodo" id="pe-datas" value="datas"><label for="pe-datas" data-i18n="lucro.datas">Datas</label>
+            </div>
+            <div class="grid lucro-datas" id="lucroDatas" hidden>
+              <div class="field"><label for="pe-de" data-i18n="lucro.de">De</label><div class="control"><input id="pe-de" type="date"></div></div>
+              <div class="field"><label for="pe-ate" data-i18n="lucro.ate">Até</label><div class="control"><input id="pe-ate" type="date"></div></div>
+            </div>
+            <div class="summary lucro-cards" id="lucroCards"></div>
+            <p class="hint" data-i18n="lucro.hint">Recebido: empréstimos quitados, pela data do pagamento. A receber: empréstimos em aberto (validados ou só registro), pela data de vencimento.</p>
+          </section>
           <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros" data-i18n-aria="reg.filtrar">
             <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos" data-i18n="filtro.todos">Todos</label>
             <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag" data-i18n="filtro.aguardando">Aguardando</label>
             <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val" data-i18n="filtro.validado">Validados</label>
+            <input type="radio" name="filtro" id="fl-so" value="registrado"><label for="fl-so" data-i18n="filtro.registrado">Só registro</label>
             <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt" data-i18n="filtro.quitado">Quitados</label>
           </div>
           <div class="lista" id="lista"></div>
@@ -454,6 +478,10 @@
   <div class="modal-box">
     <h3 id="modalTitulo"></h3>
     <p id="modalTexto"></p>
+    <div class="field modal-campo" id="modalCampo" hidden>
+      <label for="modalData" data-i18n="modal.dataPagamento">Data do pagamento</label>
+      <div class="control"><input id="modalData" type="date"></div>
+    </div>
     <div class="btns">
       <button class="btn btn-primary" type="button" id="modalOk"></button>
       <button class="btn" type="button" id="modalCancelar" data-i18n="modal.cancelar">Cancelar</button>
