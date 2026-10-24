@@ -29,8 +29,15 @@ jobs:
           KEYSTORE_B64: ${{ secrets.DEBTID_KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.DEBTID_KEYSTORE_PASSWORD }}
         run: |
+          # tolerate stray line breaks or spaces around the pasted values
+          KEYSTORE_PASSWORD="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
           if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
-            echo "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/debtid.jks"
+            if ! printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n\t' | base64 -d > "$RUNNER_TEMP/debtid.jks" 2>/dev/null; then
+              echo "::error::DEBTID_KEYSTORE_B64 is not valid base64. Paste the whole block again, with nothing else."; exit 1
+            fi
+            if ! keytool -list -keystore "$RUNNER_TEMP/debtid.jks" -storepass "$KEYSTORE_PASSWORD" > /dev/null 2>&1; then
+              echo "::error::The keystore does not open with DEBTID_KEYSTORE_PASSWORD. Check both secrets."; exit 1
+            fi
             echo "DEBTID_KEYSTORE=$RUNNER_TEMP/debtid.jks" >> "$GITHUB_ENV"
             echo "DEBTID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
             echo "SIGNED_RELEASE=true" >> "$GITHUB_ENV"
