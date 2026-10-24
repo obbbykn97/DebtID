@@ -2,6 +2,8 @@
 
 <h1 align="center">DebtID</h1>
 
+<p align="center"><b>English</b> · <a href="README.pt-BR.md">Português</a></p>
+
 <p align="center">A loan calculator and IOU that both sides sign — with a QR code anyone can verify in seconds.<br>
 Everything runs on the device: no server, no account, no network access.</p>
 
@@ -20,11 +22,10 @@ Either side can start: the lender or the borrower.
 - **Simple or compound interest** — applied once over the whole loan, per month (30-day months) or per year, with a live total preview. Totals always round up to the next cent.
 - **Receipt** with amounts spelled out, both digital signatures and the QR code, ready to print or save as PDF.
 - **Records** with status (pending, validated, paid, overdue) and running totals of what you are owed and what you owe.
+- **Two languages**, English and Brazilian Portuguese. The app asks on first launch and you can switch any time in *Settings*. Amounts are always in Brazilian reais (R$).
 - **Two looks**, *Professional* and *Soft*, each with light and dark themes.
 - **Password-protected backup** of your profile and records, so you can move to a new phone and keep the same ID.
 - **Android app**: QR scanning through Google Play services (no camera permission), and codes can be received straight from another app's *Share* menu.
-
-The app itself is in Brazilian Portuguese, the language of its first users.
 
 ## Security, without the hype
 
@@ -37,7 +38,7 @@ The app itself is in Brazilian Portuguese, the language of its first users.
 ## Project layout
 
 ```
-web/src/        page source (HTML, CSS and JS, no dependencies)
+web/src/        page source (HTML, CSS and JS, no dependencies; texts in i18n.js)
 web/build.py    bundles everything into one file
 web/dist/       the built index.html — opens directly in a browser
 app/            Android app (a WebView that loads web/dist/index.html)

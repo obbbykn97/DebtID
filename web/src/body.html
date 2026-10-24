@@ -48,11 +48,11 @@
       <div class="wrap top-in">
         <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</a>
         <div class="top-r">
-          <nav class="nav" aria-label="Seções">
-            <a href="#inicio" data-nav="inicio">Novo</a>
-            <a href="#conferir" data-nav="conferir">Conferir</a>
-            <a href="#registros" data-nav="registros">Registros</a>
-            <a href="#ajustes" data-nav="ajustes">Ajustes</a>
+          <nav class="nav" aria-label="Seções" data-i18n-aria="nav.secoes">
+            <a href="#inicio" data-nav="inicio" data-i18n="nav.novo">Novo</a>
+            <a href="#conferir" data-nav="conferir" data-i18n="nav.conferir">Conferir</a>
+            <a href="#registros" data-nav="registros" data-i18n="nav.registros">Registros</a>
+            <a href="#ajustes" data-nav="ajustes" data-i18n="nav.ajustes">Ajustes</a>
           </nav>
           <button class="theme-btn" id="temaBtn" type="button" aria-label="Mudar para modo escuro" title="Mudar para modo escuro">
             <svg class="ico ico-lua"><use href="#i-lua"/></svg><svg class="ico ico-sol"><use href="#i-sol"/></svg>
@@ -66,17 +66,17 @@
       <section class="view" id="v-inicio" data-view="inicio">
         <div class="hero wrap only-soft">
           <div>
-            <p class="eyebrow">Registro de empréstimos · assinado pelos dois</p>
-            <h1>Quem empresta, registra.</h1>
-            <p class="lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
+            <p class="eyebrow" data-i18n="hero.eyebrow">Registro de empréstimos · assinado pelos dois</p>
+            <h1 data-i18n="hero.titulo">Quem empresta, registra.</h1>
+            <p class="lead" data-i18n="hero.lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
             <ul class="chips">
-              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples e compostos</li>
-              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg>Assinado pelos dois</li>
-              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg>QR code</li>
+              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg><span data-i18n="hero.chip1">Juros simples e compostos</span></li>
+              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="hero.chip2">Assinado pelos dois</span></li>
+              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="hero.chip3">QR code</span></li>
             </ul>
             <div class="hero-cta">
-              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form">Novo registro</a>
-              <a class="link-arrow" href="#conferir">Ler um código <svg class="ico"><use href="#i-seta"/></svg></a>
+              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
+              <a class="link-arrow" href="#conferir"><span data-i18n="hero.ler">Ler um código</span> <svg class="ico"><use href="#i-seta"/></svg></a>
             </div>
           </div>
           <svg class="hero-art" viewBox="0 0 420 440" aria-hidden="true">
@@ -85,12 +85,12 @@
             <g transform="rotate(-6 218 230)">
               <rect class="shd" x="134" y="114" width="180" height="232" rx="12"/>
               <rect class="o" x="128" y="108" width="180" height="232" rx="12" fill="#fff" stroke-width="3"/>
-              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F">RECIBO</text>
+              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F" data-i18n="art.recibo">RECIBO</text>
               <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
               <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
               <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
               <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">R$</text>
-              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1">264,39</text>
+              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">264,39</text>
               <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
@@ -115,7 +115,7 @@
               <rect class="o" width="186" height="34" rx="17" fill="#3DDC84" stroke-width="2.5"/>
               <circle cx="18" cy="17" r="9" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M14 17l3 3 5-6" fill="none" stroke="#1C1B1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F">assinado pelos dois</text>
+              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F" data-i18n="art.selo">assinado pelos dois</text>
             </g>
             <path class="o" d="M200 360 222 369 211 372 208 383Z" fill="#8F9CF3" stroke-width="2.5" stroke-linejoin="round"/>
           </svg>
@@ -123,24 +123,24 @@
 
         <div class="hero-pro only-pro">
           <div class="wrap">
-            <p class="hp-eyebrow">Calcule · Registre · Comprove</p>
-            <h1 class="hp-title">Quem empresta, registra.</h1>
+            <p class="hp-eyebrow" data-i18n="hp.eyebrow">Calcule · Registre · Comprove</p>
+            <h1 class="hp-title" data-i18n="hero.titulo">Quem empresta, registra.</h1>
             <div class="hp-row">
-              <p class="hp-sub"><span>Assinado pelos dois</span> <em>— sem discussão</em></p>
-              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form">Novo registro</a>
+              <p class="hp-sub" data-i18n-html="hp.sub"><span>Assinado pelos dois</span> <em>— sem discussão</em></p>
+              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
             </div>
             <div class="hp-feats">
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b>Assinatura digital</b><small>Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b>QR code</b><small>Mostre o QR e a outra pessoa confere em segundos.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b>Sem servidor</b><small>Nada sai do aparelho. Funciona até sem internet.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b data-i18n="hp.f1t">Assinatura digital</b><small data-i18n="hp.f1">Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b data-i18n="hp.f2t">QR code</b><small data-i18n="hp.f2">Mostre o QR e a outra pessoa confere em segundos.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b data-i18n="hp.f3t">Sem servidor</b><small data-i18n="hp.f3">Nada sai do aparelho. Funciona até sem internet.</small></div>
             </div>
           </div>
         </div>
         <div class="wrap only-pro">
           <div class="hp-stats">
-            <div><b>2</b><span>assinaturas<br>por registro</span></div>
-            <div><b>0</b><span>servidores<br>no caminho</span></div>
-            <div><b>1</b><span>QR code<br>para conferir</span></div>
+            <div><b>2</b><span data-i18n-html="hp.s1">assinaturas<br>por registro</span></div>
+            <div><b>0</b><span data-i18n-html="hp.s2">servidores<br>no caminho</span></div>
+            <div><b>1</b><span data-i18n-html="hp.s3">QR code<br>para conferir</span></div>
           </div>
         </div>
 
@@ -148,65 +148,65 @@
           <section class="block panel" id="novo-form" aria-labelledby="t-novo">
             <div class="sec-head">
               <span class="tile" style="background:var(--peri)"><svg class="ico"><use href="#i-calc"/></svg></span>
-              <div><p class="kicker">Passo 1 de 3</p><h2 id="t-novo">Novo registro</h2></div>
+              <div><p class="kicker" data-i18n="form.passo">Passo 1 de 3</p><h2 id="t-novo" data-i18n="comum.novoRegistro">Novo registro</h2></div>
             </div>
             <form id="form" novalidate autocomplete="off">
               <div class="grid">
                 <div class="field span2">
-                  <span class="label" id="l-papel">Neste empréstimo, eu sou…</span>
+                  <span class="label" id="l-papel" data-i18n="form.papel">Neste empréstimo, eu sou…</span>
                   <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-papel">
-                    <input type="radio" name="papel" id="p-credor" value="credor" checked><label for="p-credor">Quem empresta</label>
-                    <input type="radio" name="papel" id="p-devedor" value="devedor"><label for="p-devedor">Quem pega emprestado</label>
+                    <input type="radio" name="papel" id="p-credor" value="credor" checked><label for="p-credor" data-i18n="form.credor">Quem empresta</label>
+                    <input type="radio" name="papel" id="p-devedor" value="devedor"><label for="p-devedor" data-i18n="form.devedor">Quem pega emprestado</label>
                   </div>
                 </div>
                 <div class="field span2" data-f="outro">
                   <label for="f-outro" id="l-outro">Nome de quem pega emprestado</label>
-                  <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" autocomplete="off"></div>
+                  <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" data-i18n-ph="form.outroPh" autocomplete="off"></div>
                   <div class="err" id="e-outro"></div>
                 </div>
                 <div class="field" data-f="valor">
-                  <label for="f-valor">Valor emprestado</label>
-                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00"></div>
+                  <label for="f-valor" data-i18n="form.valor">Valor emprestado</label>
+                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00" data-i18n-ph="form.valorPh"></div>
                   <div class="err" id="e-valor"></div>
                 </div>
                 <div class="field" data-f="taxa">
-                  <label for="f-taxa">Taxa de juros</label>
-                  <div class="control"><input id="f-taxa" name="taxa" type="text" inputmode="decimal" placeholder="Ex.: 10 ou 2,5"><span class="affix end">%</span></div>
+                  <label for="f-taxa" data-i18n="form.taxa">Taxa de juros</label>
+                  <div class="control"><input id="f-taxa" name="taxa" type="text" inputmode="decimal" placeholder="Ex.: 10 ou 2,5" data-i18n-ph="form.taxaPh"><span class="affix end">%</span></div>
                   <div class="err" id="e-taxa"></div>
                 </div>
                 <div class="field span2">
-                  <span class="label" id="l-tipo">Tipo de juros</span>
+                  <span class="label" id="l-tipo" data-i18n="form.tipo">Tipo de juros</span>
                   <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-tipo">
-                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples">Simples</label>
-                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos">Compostos</label>
+                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples" data-i18n="form.simples">Simples</label>
+                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos" data-i18n="form.compostos">Compostos</label>
                   </div>
                 </div>
                 <div class="field span2">
-                  <span class="label" id="l-modo">A taxa vale…</span>
+                  <span class="label" id="l-modo" data-i18n="form.modo">A taxa vale…</span>
                   <div class="seg" role="radiogroup" aria-labelledby="l-modo">
-                    <input type="radio" name="modo" id="m-total" value="total"><label for="m-total">no total</label>
-                    <input type="radio" name="modo" id="m-mes" value="mes" checked><label for="m-mes">ao mês</label>
-                    <input type="radio" name="modo" id="m-ano" value="ano"><label for="m-ano">ao ano</label>
+                    <input type="radio" name="modo" id="m-total" value="total"><label for="m-total" data-i18n="form.modoTotal">no total</label>
+                    <input type="radio" name="modo" id="m-mes" value="mes" checked><label for="m-mes" data-i18n="form.modoMes">ao mês</label>
+                    <input type="radio" name="modo" id="m-ano" value="ano"><label for="m-ano" data-i18n="form.modoAno">ao ano</label>
                   </div>
                   <p class="hint" id="hintModo"></p>
                 </div>
                 <div class="field" data-f="de">
-                  <label for="f-de">Data do empréstimo</label>
+                  <label for="f-de" data-i18n="form.de">Data do empréstimo</label>
                   <div class="control"><input id="f-de" name="de" type="date"></div>
                   <div class="err" id="e-de"></div>
                 </div>
                 <div class="field" data-f="dp">
-                  <label for="f-dp">Data prevista de pagamento</label>
+                  <label for="f-dp" data-i18n="form.dp">Data prevista de pagamento</label>
                   <div class="control"><input id="f-dp" name="dp" type="date"></div>
                   <div class="err" id="e-dp"></div>
                 </div>
               </div>
               <div class="form-foot">
-                <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg>Registrar e assinar</button>
+                <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="form.registrar">Registrar e assinar</span></button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
                 <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
-              <p class="hint">Você assina como <b id="assinaComo">—</b>. Depois, a outra pessoa confirma no DebtID dela.</p>
+              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">. Depois, a outra pessoa confirma no DebtID dela.</span></p>
             </form>
           </section>
         </div>
@@ -218,29 +218,29 @@
           <section class="panel" aria-labelledby="t-conf">
             <div class="sec-head">
               <span class="tile" style="background:var(--teal)"><svg class="ico"><use href="#i-qr"/></svg></span>
-              <div><p class="kicker">Conferir</p><h2 id="t-conf">Ler um código</h2></div>
+              <div><p class="kicker" data-i18n="conf.kicker">Conferir</p><h2 id="t-conf" data-i18n="conf.titulo">Ler um código</h2></div>
             </div>
-            <p class="intro">Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.</p>
-            <button class="btn btn-dark btn-block so-qr" type="button" data-acao="ler-qr"><svg class="ico"><use href="#i-camera"/></svg>Ler QR code</button>
-            <div class="ou so-qr"><span>ou cole o código</span></div>
+            <p class="intro" data-i18n="conf.intro">Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.</p>
+            <button class="btn btn-dark btn-block so-qr" type="button" data-acao="ler-qr"><svg class="ico"><use href="#i-camera"/></svg><span data-i18n="conf.lerQR">Ler QR code</span></button>
+            <div class="ou so-qr"><span data-i18n="conf.ou">ou cole o código</span></div>
             <form id="vform" novalidate autocomplete="off">
               <div class="field">
-                <label for="f-codigo">Código</label>
-                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira"></textarea></div>
+                <label for="f-codigo" data-i18n="conf.codigo">Código</label>
+                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira" data-i18n-ph="conf.ph"></textarea></div>
               </div>
               <div class="form-foot">
-                <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg>Conferir código</button>
-                <button class="btn btn-ghost" type="button" id="limparConf">Limpar</button>
+                <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="conf.conferir">Conferir código</span></button>
+                <button class="btn btn-ghost" type="button" id="limparConf" data-i18n="conf.limpar">Limpar</button>
               </div>
             </form>
             <div id="msgConf" role="alert"></div>
           </section>
           <section class="como" aria-labelledby="t-como">
-            <h3 id="t-como">Como a validação funciona</h3>
+            <h3 id="t-como" data-i18n="como.titulo">Como a validação funciona</h3>
             <ol class="passos">
-              <li><span><b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.</span></li>
-              <li><span><b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.</span></li>
-              <li><span><b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.</span></li>
+              <li><span data-i18n-html="como.1"><b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.</span></li>
+              <li><span data-i18n-html="como.2"><b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.</span></li>
+              <li><span data-i18n-html="como.3"><b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.</span></li>
             </ol>
           </section>
         </div>
@@ -251,14 +251,14 @@
         <div class="wrap view-pad">
           <div class="sec-head">
             <span class="tile" style="background:var(--yellow)"><svg class="ico"><use href="#i-list"/></svg></span>
-            <div><p class="kicker">Neste aparelho</p><h2>Seus registros</h2></div>
+            <div><p class="kicker" data-i18n="reg.kicker">Neste aparelho</p><h2 data-i18n="reg.titulo">Seus registros</h2></div>
           </div>
           <div class="totais" id="totais"></div>
-          <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros">
-            <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos">Todos</label>
-            <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag">Aguardando</label>
-            <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val">Validados</label>
-            <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt">Quitados</label>
+          <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros" data-i18n-aria="reg.filtrar">
+            <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos" data-i18n="filtro.todos">Todos</label>
+            <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag" data-i18n="filtro.aguardando">Aguardando</label>
+            <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val" data-i18n="filtro.validado">Validados</label>
+            <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt" data-i18n="filtro.quitado">Quitados</label>
           </div>
           <div class="lista" id="lista"></div>
         </div>
@@ -269,80 +269,87 @@
         <div class="wrap view-pad">
           <div class="sec-head">
             <span class="tile" style="background:var(--lime)"><svg class="ico"><use href="#i-ajustes"/></svg></span>
-            <div><p class="kicker">DebtID</p><h2>Ajustes</h2></div>
+            <div><p class="kicker">DebtID</p><h2 data-i18n="aj.titulo">Ajustes</h2></div>
           </div>
 
           <section class="panel" aria-labelledby="t-perfil">
-            <h3 id="t-perfil">Seu perfil</h3>
+            <h3 id="t-perfil" data-i18n="aj.perfil">Seu perfil</h3>
             <div class="perfil-card">
               <span class="avatar" id="avatar">?</span>
               <div><b id="perfilNome">—</b><small>ID <code id="perfilId">—</code></small></div>
             </div>
             <form id="formNome" class="linha-form" novalidate autocomplete="off">
-              <label class="sr-only" for="f-nome-ajuste">Seu nome</label>
-              <div class="control"><input id="f-nome-ajuste" maxlength="80" placeholder="Seu nome completo"></div>
-              <button class="btn" type="submit">Salvar nome</button>
+              <label class="sr-only" for="f-nome-ajuste" data-i18n="aj.nomeSr">Seu nome</label>
+              <div class="control"><input id="f-nome-ajuste" maxlength="80" placeholder="Seu nome completo" data-i18n-ph="aj.nomePh"></div>
+              <button class="btn" type="submit" data-i18n="aj.salvarNome">Salvar nome</button>
             </form>
-            <p class="hint">O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.</p>
+            <p class="hint" data-i18n="aj.perfilHint">O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.</p>
           </section>
 
           <section class="panel" aria-labelledby="t-aparencia">
             <div class="ajuste">
-              <h3 id="t-aparencia">Aparência</h3>
+              <h3 id="t-idioma" data-i18n="aj.idioma">Idioma</h3>
+              <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-idioma">
+                <input type="radio" name="idioma" id="id-pt" value="pt"><label for="id-pt" lang="pt-BR">Português</label>
+                <input type="radio" name="idioma" id="id-en" value="en"><label for="id-en" lang="en">English</label>
+              </div>
+            </div>
+            <div class="ajuste">
+              <h3 id="t-aparencia" data-i18n="aj.aparencia">Aparência</h3>
               <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-aparencia">
-                <input type="radio" name="ui" id="ui-pro" value="pro"><label for="ui-pro">Profissional</label>
+                <input type="radio" name="ui" id="ui-pro" value="pro"><label for="ui-pro" data-i18n="aj.pro">Profissional</label>
                 <input type="radio" name="ui" id="ui-soft" value="soft"><label for="ui-soft">Soft</label>
               </div>
             </div>
             <div class="ajuste">
-              <h3 id="t-tema">Tema</h3>
+              <h3 id="t-tema" data-i18n="aj.tema">Tema</h3>
               <div class="seg" role="radiogroup" aria-labelledby="t-tema">
-                <input type="radio" name="tema" id="tm-sis" value="sistema"><label for="tm-sis">Sistema</label>
-                <input type="radio" name="tema" id="tm-claro" value="light"><label for="tm-claro">Claro</label>
-                <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro">Escuro</label>
+                <input type="radio" name="tema" id="tm-sis" value="sistema"><label for="tm-sis" data-i18n="aj.sistema">Sistema</label>
+                <input type="radio" name="tema" id="tm-claro" value="light"><label for="tm-claro" data-i18n="aj.claro">Claro</label>
+                <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro" data-i18n="aj.escuro">Escuro</label>
               </div>
             </div>
           </section>
 
           <section class="panel" aria-labelledby="t-backup">
             <h3 id="t-backup">Backup</h3>
-            <p class="intro" style="margin-top:0">Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.</p>
+            <p class="intro" style="margin-top:0" data-i18n="aj.backupIntro">Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.</p>
             <div class="btns">
-              <button class="btn btn-alt" type="button" id="btnBackup"><svg class="ico"><use href="#i-cadeado"/></svg>Criar backup</button>
-              <button class="btn" type="button" id="btnRestaurar"><svg class="ico"><use href="#i-desfazer"/></svg>Restaurar backup</button>
+              <button class="btn btn-alt" type="button" id="btnBackup"><svg class="ico"><use href="#i-cadeado"/></svg><span data-i18n="aj.criarBackup">Criar backup</span></button>
+              <button class="btn" type="button" id="btnRestaurar"><svg class="ico"><use href="#i-desfazer"/></svg><span data-i18n="aj.restaurarBackup">Restaurar backup</span></button>
             </div>
             <form id="formBackup" class="block" hidden novalidate autocomplete="off">
               <div class="grid">
-                <div class="field"><label for="f-bk1">Crie uma senha</label><div class="control"><input id="f-bk1" type="password" autocomplete="new-password"></div></div>
-                <div class="field"><label for="f-bk2">Repita a senha</label><div class="control"><input id="f-bk2" type="password" autocomplete="new-password"></div></div>
+                <div class="field"><label for="f-bk1" data-i18n="aj.senha1">Crie uma senha</label><div class="control"><input id="f-bk1" type="password" autocomplete="new-password"></div></div>
+                <div class="field"><label for="f-bk2" data-i18n="aj.senha2">Repita a senha</label><div class="control"><input id="f-bk2" type="password" autocomplete="new-password"></div></div>
               </div>
-              <p class="hint">Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.</p>
-              <div class="form-foot"><button class="btn btn-primary" type="submit">Gerar backup</button></div>
+              <p class="hint" data-i18n="aj.senhaHint">Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.</p>
+              <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="aj.gerar">Gerar backup</button></div>
             </form>
             <div id="saidaBackup" class="block" hidden>
-              <span class="label kicker">Seu backup</span>
+              <span class="label kicker" data-i18n="aj.seuBackup">Seu backup</span>
               <code class="codigo" id="codigoBackup"></code>
               <div class="btns">
-                <button class="btn btn-alt" type="button" data-acao="copiar-backup"><svg class="ico"><use href="#i-copiar"/></svg>Copiar</button>
-                <button class="btn" type="button" data-acao="enviar-backup"><svg class="ico"><use href="#i-enviar"/></svg>Compartilhar</button>
+                <button class="btn btn-alt" type="button" data-acao="copiar-backup"><svg class="ico"><use href="#i-copiar"/></svg><span data-i18n="aj.copiar">Copiar</span></button>
+                <button class="btn" type="button" data-acao="enviar-backup"><svg class="ico"><use href="#i-enviar"/></svg><span data-i18n="aj.compartilhar">Compartilhar</span></button>
               </div>
-              <p class="hint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
+              <p class="hint" data-i18n="aj.backupHint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
             </div>
             <form id="formRestaurar" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-rs-codigo">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
-              <div class="field" style="margin-top:14px"><label for="f-rs-senha">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
-              <div class="form-foot"><button class="btn btn-primary" type="submit">Restaurar</button></div>
+              <div class="field"><label for="f-rs-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-rs-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="aj.restaurar">Restaurar</button></div>
             </form>
             <div id="msgBackup" role="alert"></div>
           </section>
 
           <section class="panel" aria-labelledby="t-apagar">
-            <h3 id="t-apagar">Apagar dados</h3>
-            <p class="intro" style="margin-top:0">Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.</p>
-            <button class="btn btn-danger" type="button" id="btnApagar"><svg class="ico"><use href="#i-lixo"/></svg>Apagar perfil e registros</button>
+            <h3 id="t-apagar" data-i18n="aj.apagar">Apagar dados</h3>
+            <p class="intro" style="margin-top:0" data-i18n="aj.apagarIntro">Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.</p>
+            <button class="btn btn-danger" type="button" id="btnApagar"><svg class="ico"><use href="#i-lixo"/></svg><span data-i18n="aj.apagarBtn">Apagar perfil e registros</span></button>
           </section>
 
-          <p class="sobre">DebtID 1.0 · código aberto · tudo fica no seu aparelho.</p>
+          <p class="sobre" data-i18n="aj.sobre">DebtID 1.0 · código aberto · tudo fica no seu aparelho.</p>
         </div>
       </section>
 
@@ -354,45 +361,65 @@
       <!-- ================= ONBOARDING ================= -->
       <section class="view" id="v-boas-vindas" data-view="boas-vindas">
         <div class="wrap view-pad">
-          <div class="bv" id="bv1">
-            <p class="kicker">Bem-vindo ao DebtID</p>
-            <h1 class="bv-title">Escolha a aparência</h1>
-            <p class="intro">Dá para trocar depois, em Ajustes.</p>
-            <div class="ui-opcoes" role="radiogroup" aria-label="Aparência">
+          <div class="bv" id="bv0">
+            <p class="kicker">Bem-vindo · Welcome</p>
+            <h1 class="bv-title">Idioma <span class="bv-sep">·</span> Language</h1>
+            <p class="intro">Escolha o idioma do app. <span class="bv-sep">·</span> Choose the app language.</p>
+            <div class="ui-opcoes" role="radiogroup" aria-label="Idioma · Language">
+              <label class="ui-op" lang="pt-BR">
+                <input type="radio" name="idioma-bv" value="pt">
+                <span class="lang-tag" aria-hidden="true">PT</span>
+                <b>Português</b><small>Brasil</small>
+              </label>
+              <label class="ui-op" lang="en">
+                <input type="radio" name="idioma-bv" value="en">
+                <span class="lang-tag" aria-hidden="true">EN</span>
+                <b>English</b><small>International</small>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block" type="button" id="bvIdioma"><span data-i18n="bv.continuar">Continuar</span><svg class="ico"><use href="#i-seta"/></svg></button>
+          </div>
+
+          <div class="bv" id="bv1" hidden>
+            <p class="kicker" data-i18n="bv.passo2">Passo 2 de 3</p>
+            <h1 class="bv-title" data-i18n="bv.aparencia">Escolha a aparência</h1>
+            <p class="intro" data-i18n="bv.aparenciaIntro">Dá para trocar depois, em Ajustes.</p>
+            <div class="ui-opcoes" role="radiogroup" aria-label="Aparência" data-i18n-aria="aj.aparencia">
               <label class="ui-op">
                 <input type="radio" name="ui-bv" value="pro">
                 <span class="prev prev-pro" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
-                <b>Profissional</b><small>Sóbrio, preto e branco, direto ao ponto.</small>
+                <b data-i18n="aj.pro">Profissional</b><small data-i18n="bv.proDesc">Sóbrio, preto e branco, direto ao ponto.</small>
               </label>
               <label class="ui-op">
                 <input type="radio" name="ui-bv" value="soft">
                 <span class="prev prev-soft" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
-                <b>Soft</b><small>Colorido, com contornos marcados.</small>
+                <b>Soft</b><small data-i18n="bv.softDesc">Colorido, com contornos marcados.</small>
               </label>
             </div>
-            <button class="btn btn-primary btn-block" type="button" id="bvContinuar">Continuar<svg class="ico"><use href="#i-seta"/></svg></button>
+            <button class="btn btn-primary btn-block" type="button" id="bvContinuar"><span data-i18n="bv.continuar">Continuar</span><svg class="ico"><use href="#i-seta"/></svg></button>
+            <div class="form-foot"><button class="btn btn-ghost" type="button" id="bvVoltarIdioma" data-i18n="bv.voltar">Voltar</button></div>
           </div>
 
           <div class="bv" id="bv2" hidden>
-            <p class="kicker">Passo 2 de 2</p>
-            <h1 class="bv-title">Crie seu perfil</h1>
-            <p class="intro">Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.</p>
+            <p class="kicker" data-i18n="bv.passo3">Passo 3 de 3</p>
+            <h1 class="bv-title" data-i18n="bv.perfil">Crie seu perfil</h1>
+            <p class="intro" data-i18n="bv.perfilIntro">Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.</p>
             <form id="formPerfil" novalidate autocomplete="off">
               <div class="field" data-f="nome">
-                <label for="f-nome">Seu nome completo</label>
-                <div class="control"><input id="f-nome" maxlength="80" placeholder="Ex.: Ana Souza" autocomplete="name"></div>
+                <label for="f-nome" data-i18n="bv.nome">Seu nome completo</label>
+                <div class="control"><input id="f-nome" maxlength="80" placeholder="Ex.: Ana Souza" data-i18n-ph="bv.nomePh" autocomplete="name"></div>
                 <div class="err" id="e-nome"></div>
               </div>
-              <div class="form-foot"><button class="btn btn-primary btn-block" type="submit" id="btnCriarPerfil"><svg class="ico"><use href="#i-chave"/></svg>Criar perfil</button></div>
+              <div class="form-foot"><button class="btn btn-primary btn-block" type="submit" id="btnCriarPerfil"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="bv.criar">Criar perfil</span></button></div>
             </form>
             <div class="form-foot">
-              <button class="btn btn-ghost" type="button" id="bvTenhoBackup">Já tenho um backup</button>
-              <button class="btn btn-ghost" type="button" id="bvVoltar">Voltar</button>
+              <button class="btn btn-ghost" type="button" id="bvTenhoBackup" data-i18n="bv.temBackup">Já tenho um backup</button>
+              <button class="btn btn-ghost" type="button" id="bvVoltar" data-i18n="bv.voltar">Voltar</button>
             </div>
             <form id="formRestaurarBV" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-bv-codigo">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
-              <div class="field" style="margin-top:14px"><label for="f-bv-senha">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
-              <div class="form-foot"><button class="btn btn-alt btn-block" type="submit">Restaurar backup</button></div>
+              <div class="field"><label for="f-bv-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-bv-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-alt btn-block" type="submit" data-i18n="aj.restaurarBackup">Restaurar backup</button></div>
             </form>
             <div id="msgBV" role="alert"></div>
           </div>
@@ -402,16 +429,16 @@
 
     <footer class="foot wrap">
       <svg class="ico"><use href="#i-cadeado"/></svg>
-      <p>Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.</p>
+      <p data-i18n="rodape">Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.</p>
     </footer>
   </div>
 </div>
 
-<nav class="tabbar" aria-label="Navegação">
-  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span>Novo</span></a>
-  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span>Conferir</span></a>
-  <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span>Registros</span></a>
-  <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span>Ajustes</span></a>
+<nav class="tabbar" aria-label="Navegação" data-i18n-aria="nav.navegacao">
+  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span data-i18n="nav.novo">Novo</span></a>
+  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="nav.conferir">Conferir</span></a>
+  <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span data-i18n="nav.registros">Registros</span></a>
+  <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span data-i18n="nav.ajustes">Ajustes</span></a>
 </nav>
 
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
@@ -420,7 +447,7 @@
     <p id="modalTexto"></p>
     <div class="btns">
       <button class="btn btn-primary" type="button" id="modalOk"></button>
-      <button class="btn" type="button" id="modalCancelar">Cancelar</button>
+      <button class="btn" type="button" id="modalCancelar" data-i18n="modal.cancelar">Cancelar</button>
     </div>
   </div>
 </div>
@@ -428,8 +455,8 @@
 <div class="scanner" id="scanner" hidden>
   <video id="scanVideo" playsinline muted></video>
   <div class="scan-frame" aria-hidden="true"></div>
-  <p class="scan-txt">Aponte para o QR code do DebtID</p>
-  <button class="btn scan-fechar" type="button" id="scanFechar">Fechar</button>
+  <p class="scan-txt" data-i18n="scan.txt">Aponte para o QR code do DebtID</p>
+  <button class="btn scan-fechar" type="button" id="scanFechar" data-i18n="scan.fechar">Fechar</button>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>

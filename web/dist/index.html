@@ -8,12 +8,16 @@
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%230E0E0E'/%3E%3Cg transform='translate(54 54) scale(1.1) translate(-54 -54)'%3E%3Cpath d='M41 37H50A17 17 0 0 1 50 71H41Z' fill='none' stroke='%23fff' stroke-width='8'/%3E%3Ccircle cx='52.5' cy='54' r='4.6' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
-(function () { // apply look and theme before the first paint (no flash)
-  var d = document.documentElement, u, t;
-  try { u = localStorage.getItem('debtid.ui'); t = localStorage.getItem('debtid.tema'); } catch (e) {}
+(function () { // apply look, theme and language before the first paint (no flash)
+  var d = document.documentElement, u, t, l;
+  try { u = localStorage.getItem('debtid.ui'); t = localStorage.getItem('debtid.tema'); l = localStorage.getItem('debtid.idioma'); } catch (e) {}
   d.setAttribute('data-ui', u === 'soft' || u === 'pro' ? u : 'pro');
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   d.setAttribute('data-theme', t);
+  if (l !== 'pt' && l !== 'en') l = /^pt/i.test(navigator.language || '') ? 'pt' : 'en';
+  d.setAttribute('data-lang', l);
+  d.lang = l === 'en' ? 'en' : 'pt-BR';
+  if (l === 'en') d.className += ' i18n-espera'; // page text is written in Portuguese: hide it until it is translated
 })();
 </script>
 <style>
@@ -360,6 +364,9 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .prev-soft .p6{right:4%;top:4%;width:18%;height:14%;background:#8F9CF3;border-radius:7px;transform:rotate(10deg);box-shadow:2px 2px 0 #1C1B1F}
 .prev-soft .p7{left:2%;bottom:16%;width:16%;height:13%;background:#EC4C86;border-radius:50%}
 .bv-volta{margin-top:10px}
+.i18n-espera body{visibility:hidden}
+.bv-sep{color:var(--muted);font-weight:400}
+.lang-tag{display:grid;place-items:center;aspect-ratio:16/10;border-radius:12px;background:var(--line);color:var(--card);font-family:var(--display);font-weight:900;font-size:clamp(30px,9vw,48px);letter-spacing:.02em}
 
 /* ---------- alerts, modal, scanner, toast ---------- */
 .alert{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--sh);margin-top:20px;background:var(--red-soft);color:var(--on)}
@@ -550,6 +557,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .toast{background:var(--band);color:var(--band-ink);border:1px solid var(--rule);box-shadow:none;border-radius:999px;font-weight:600}
 [data-ui="pro"] .foot{border:0;border-top:1px solid var(--rule);border-radius:0;padding-top:18px;padding-bottom:28px;margin-top:40px}
 [data-ui="pro"] .ui-op{border-radius:0;border:1px solid var(--rule)}
+[data-ui="pro"] .lang-tag{border-radius:0}
 [data-ui="pro"] .ui-op:has(input:checked){border-color:var(--line);box-shadow:none;outline:2px solid var(--accent)}
 [data-ui="pro"] .bv-title{font-family:var(--display);font-weight:800}
 [data-ui="pro"] .view-pad{padding-top:26px}
@@ -644,11 +652,11 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
       <div class="wrap top-in">
         <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</a>
         <div class="top-r">
-          <nav class="nav" aria-label="Seções">
-            <a href="#inicio" data-nav="inicio">Novo</a>
-            <a href="#conferir" data-nav="conferir">Conferir</a>
-            <a href="#registros" data-nav="registros">Registros</a>
-            <a href="#ajustes" data-nav="ajustes">Ajustes</a>
+          <nav class="nav" aria-label="Seções" data-i18n-aria="nav.secoes">
+            <a href="#inicio" data-nav="inicio" data-i18n="nav.novo">Novo</a>
+            <a href="#conferir" data-nav="conferir" data-i18n="nav.conferir">Conferir</a>
+            <a href="#registros" data-nav="registros" data-i18n="nav.registros">Registros</a>
+            <a href="#ajustes" data-nav="ajustes" data-i18n="nav.ajustes">Ajustes</a>
           </nav>
           <button class="theme-btn" id="temaBtn" type="button" aria-label="Mudar para modo escuro" title="Mudar para modo escuro">
             <svg class="ico ico-lua"><use href="#i-lua"/></svg><svg class="ico ico-sol"><use href="#i-sol"/></svg>
@@ -662,17 +670,17 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
       <section class="view" id="v-inicio" data-view="inicio">
         <div class="hero wrap only-soft">
           <div>
-            <p class="eyebrow">Registro de empréstimos · assinado pelos dois</p>
-            <h1>Quem empresta, registra.</h1>
-            <p class="lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
+            <p class="eyebrow" data-i18n="hero.eyebrow">Registro de empréstimos · assinado pelos dois</p>
+            <h1 data-i18n="hero.titulo">Quem empresta, registra.</h1>
+            <p class="lead" data-i18n="hero.lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
             <ul class="chips">
-              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples e compostos</li>
-              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg>Assinado pelos dois</li>
-              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg>QR code</li>
+              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg><span data-i18n="hero.chip1">Juros simples e compostos</span></li>
+              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="hero.chip2">Assinado pelos dois</span></li>
+              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="hero.chip3">QR code</span></li>
             </ul>
             <div class="hero-cta">
-              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form">Novo registro</a>
-              <a class="link-arrow" href="#conferir">Ler um código <svg class="ico"><use href="#i-seta"/></svg></a>
+              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
+              <a class="link-arrow" href="#conferir"><span data-i18n="hero.ler">Ler um código</span> <svg class="ico"><use href="#i-seta"/></svg></a>
             </div>
           </div>
           <svg class="hero-art" viewBox="0 0 420 440" aria-hidden="true">
@@ -681,12 +689,12 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
             <g transform="rotate(-6 218 230)">
               <rect class="shd" x="134" y="114" width="180" height="232" rx="12"/>
               <rect class="o" x="128" y="108" width="180" height="232" rx="12" fill="#fff" stroke-width="3"/>
-              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F">RECIBO</text>
+              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F" data-i18n="art.recibo">RECIBO</text>
               <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
               <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
               <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
               <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">R$</text>
-              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1">264,39</text>
+              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">264,39</text>
               <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
@@ -711,7 +719,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
               <rect class="o" width="186" height="34" rx="17" fill="#3DDC84" stroke-width="2.5"/>
               <circle cx="18" cy="17" r="9" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M14 17l3 3 5-6" fill="none" stroke="#1C1B1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F">assinado pelos dois</text>
+              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F" data-i18n="art.selo">assinado pelos dois</text>
             </g>
             <path class="o" d="M200 360 222 369 211 372 208 383Z" fill="#8F9CF3" stroke-width="2.5" stroke-linejoin="round"/>
           </svg>
@@ -719,24 +727,24 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 
         <div class="hero-pro only-pro">
           <div class="wrap">
-            <p class="hp-eyebrow">Calcule · Registre · Comprove</p>
-            <h1 class="hp-title">Quem empresta, registra.</h1>
+            <p class="hp-eyebrow" data-i18n="hp.eyebrow">Calcule · Registre · Comprove</p>
+            <h1 class="hp-title" data-i18n="hero.titulo">Quem empresta, registra.</h1>
             <div class="hp-row">
-              <p class="hp-sub"><span>Assinado pelos dois</span> <em>— sem discussão</em></p>
-              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form">Novo registro</a>
+              <p class="hp-sub" data-i18n-html="hp.sub"><span>Assinado pelos dois</span> <em>— sem discussão</em></p>
+              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
             </div>
             <div class="hp-feats">
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b>Assinatura digital</b><small>Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b>QR code</b><small>Mostre o QR e a outra pessoa confere em segundos.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b>Sem servidor</b><small>Nada sai do aparelho. Funciona até sem internet.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b data-i18n="hp.f1t">Assinatura digital</b><small data-i18n="hp.f1">Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b data-i18n="hp.f2t">QR code</b><small data-i18n="hp.f2">Mostre o QR e a outra pessoa confere em segundos.</small></div>
+              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b data-i18n="hp.f3t">Sem servidor</b><small data-i18n="hp.f3">Nada sai do aparelho. Funciona até sem internet.</small></div>
             </div>
           </div>
         </div>
         <div class="wrap only-pro">
           <div class="hp-stats">
-            <div><b>2</b><span>assinaturas<br>por registro</span></div>
-            <div><b>0</b><span>servidores<br>no caminho</span></div>
-            <div><b>1</b><span>QR code<br>para conferir</span></div>
+            <div><b>2</b><span data-i18n-html="hp.s1">assinaturas<br>por registro</span></div>
+            <div><b>0</b><span data-i18n-html="hp.s2">servidores<br>no caminho</span></div>
+            <div><b>1</b><span data-i18n-html="hp.s3">QR code<br>para conferir</span></div>
           </div>
         </div>
 
@@ -744,65 +752,65 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
           <section class="block panel" id="novo-form" aria-labelledby="t-novo">
             <div class="sec-head">
               <span class="tile" style="background:var(--peri)"><svg class="ico"><use href="#i-calc"/></svg></span>
-              <div><p class="kicker">Passo 1 de 3</p><h2 id="t-novo">Novo registro</h2></div>
+              <div><p class="kicker" data-i18n="form.passo">Passo 1 de 3</p><h2 id="t-novo" data-i18n="comum.novoRegistro">Novo registro</h2></div>
             </div>
             <form id="form" novalidate autocomplete="off">
               <div class="grid">
                 <div class="field span2">
-                  <span class="label" id="l-papel">Neste empréstimo, eu sou…</span>
+                  <span class="label" id="l-papel" data-i18n="form.papel">Neste empréstimo, eu sou…</span>
                   <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-papel">
-                    <input type="radio" name="papel" id="p-credor" value="credor" checked><label for="p-credor">Quem empresta</label>
-                    <input type="radio" name="papel" id="p-devedor" value="devedor"><label for="p-devedor">Quem pega emprestado</label>
+                    <input type="radio" name="papel" id="p-credor" value="credor" checked><label for="p-credor" data-i18n="form.credor">Quem empresta</label>
+                    <input type="radio" name="papel" id="p-devedor" value="devedor"><label for="p-devedor" data-i18n="form.devedor">Quem pega emprestado</label>
                   </div>
                 </div>
                 <div class="field span2" data-f="outro">
                   <label for="f-outro" id="l-outro">Nome de quem pega emprestado</label>
-                  <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" autocomplete="off"></div>
+                  <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" data-i18n-ph="form.outroPh" autocomplete="off"></div>
                   <div class="err" id="e-outro"></div>
                 </div>
                 <div class="field" data-f="valor">
-                  <label for="f-valor">Valor emprestado</label>
-                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00"></div>
+                  <label for="f-valor" data-i18n="form.valor">Valor emprestado</label>
+                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00" data-i18n-ph="form.valorPh"></div>
                   <div class="err" id="e-valor"></div>
                 </div>
                 <div class="field" data-f="taxa">
-                  <label for="f-taxa">Taxa de juros</label>
-                  <div class="control"><input id="f-taxa" name="taxa" type="text" inputmode="decimal" placeholder="Ex.: 10 ou 2,5"><span class="affix end">%</span></div>
+                  <label for="f-taxa" data-i18n="form.taxa">Taxa de juros</label>
+                  <div class="control"><input id="f-taxa" name="taxa" type="text" inputmode="decimal" placeholder="Ex.: 10 ou 2,5" data-i18n-ph="form.taxaPh"><span class="affix end">%</span></div>
                   <div class="err" id="e-taxa"></div>
                 </div>
                 <div class="field span2">
-                  <span class="label" id="l-tipo">Tipo de juros</span>
+                  <span class="label" id="l-tipo" data-i18n="form.tipo">Tipo de juros</span>
                   <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-tipo">
-                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples">Simples</label>
-                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos">Compostos</label>
+                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples" data-i18n="form.simples">Simples</label>
+                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos" data-i18n="form.compostos">Compostos</label>
                   </div>
                 </div>
                 <div class="field span2">
-                  <span class="label" id="l-modo">A taxa vale…</span>
+                  <span class="label" id="l-modo" data-i18n="form.modo">A taxa vale…</span>
                   <div class="seg" role="radiogroup" aria-labelledby="l-modo">
-                    <input type="radio" name="modo" id="m-total" value="total"><label for="m-total">no total</label>
-                    <input type="radio" name="modo" id="m-mes" value="mes" checked><label for="m-mes">ao mês</label>
-                    <input type="radio" name="modo" id="m-ano" value="ano"><label for="m-ano">ao ano</label>
+                    <input type="radio" name="modo" id="m-total" value="total"><label for="m-total" data-i18n="form.modoTotal">no total</label>
+                    <input type="radio" name="modo" id="m-mes" value="mes" checked><label for="m-mes" data-i18n="form.modoMes">ao mês</label>
+                    <input type="radio" name="modo" id="m-ano" value="ano"><label for="m-ano" data-i18n="form.modoAno">ao ano</label>
                   </div>
                   <p class="hint" id="hintModo"></p>
                 </div>
                 <div class="field" data-f="de">
-                  <label for="f-de">Data do empréstimo</label>
+                  <label for="f-de" data-i18n="form.de">Data do empréstimo</label>
                   <div class="control"><input id="f-de" name="de" type="date"></div>
                   <div class="err" id="e-de"></div>
                 </div>
                 <div class="field" data-f="dp">
-                  <label for="f-dp">Data prevista de pagamento</label>
+                  <label for="f-dp" data-i18n="form.dp">Data prevista de pagamento</label>
                   <div class="control"><input id="f-dp" name="dp" type="date"></div>
                   <div class="err" id="e-dp"></div>
                 </div>
               </div>
               <div class="form-foot">
-                <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg>Registrar e assinar</button>
+                <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="form.registrar">Registrar e assinar</span></button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
                 <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
-              <p class="hint">Você assina como <b id="assinaComo">—</b>. Depois, a outra pessoa confirma no DebtID dela.</p>
+              <p class="hint"><span data-i18n="form.assinaAntes">Você assina como </span><b id="assinaComo">—</b><span data-i18n="form.assinaDepois">. Depois, a outra pessoa confirma no DebtID dela.</span></p>
             </form>
           </section>
         </div>
@@ -814,29 +822,29 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
           <section class="panel" aria-labelledby="t-conf">
             <div class="sec-head">
               <span class="tile" style="background:var(--teal)"><svg class="ico"><use href="#i-qr"/></svg></span>
-              <div><p class="kicker">Conferir</p><h2 id="t-conf">Ler um código</h2></div>
+              <div><p class="kicker" data-i18n="conf.kicker">Conferir</p><h2 id="t-conf" data-i18n="conf.titulo">Ler um código</h2></div>
             </div>
-            <p class="intro">Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.</p>
-            <button class="btn btn-dark btn-block so-qr" type="button" data-acao="ler-qr"><svg class="ico"><use href="#i-camera"/></svg>Ler QR code</button>
-            <div class="ou so-qr"><span>ou cole o código</span></div>
+            <p class="intro" data-i18n="conf.intro">Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.</p>
+            <button class="btn btn-dark btn-block so-qr" type="button" data-acao="ler-qr"><svg class="ico"><use href="#i-camera"/></svg><span data-i18n="conf.lerQR">Ler QR code</span></button>
+            <div class="ou so-qr"><span data-i18n="conf.ou">ou cole o código</span></div>
             <form id="vform" novalidate autocomplete="off">
               <div class="field">
-                <label for="f-codigo">Código</label>
-                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira"></textarea></div>
+                <label for="f-codigo" data-i18n="conf.codigo">Código</label>
+                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira" data-i18n-ph="conf.ph"></textarea></div>
               </div>
               <div class="form-foot">
-                <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg>Conferir código</button>
-                <button class="btn btn-ghost" type="button" id="limparConf">Limpar</button>
+                <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="conf.conferir">Conferir código</span></button>
+                <button class="btn btn-ghost" type="button" id="limparConf" data-i18n="conf.limpar">Limpar</button>
               </div>
             </form>
             <div id="msgConf" role="alert"></div>
           </section>
           <section class="como" aria-labelledby="t-como">
-            <h3 id="t-como">Como a validação funciona</h3>
+            <h3 id="t-como" data-i18n="como.titulo">Como a validação funciona</h3>
             <ol class="passos">
-              <li><span><b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.</span></li>
-              <li><span><b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.</span></li>
-              <li><span><b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.</span></li>
+              <li><span data-i18n-html="como.1"><b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.</span></li>
+              <li><span data-i18n-html="como.2"><b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.</span></li>
+              <li><span data-i18n-html="como.3"><b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.</span></li>
             </ol>
           </section>
         </div>
@@ -847,14 +855,14 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
         <div class="wrap view-pad">
           <div class="sec-head">
             <span class="tile" style="background:var(--yellow)"><svg class="ico"><use href="#i-list"/></svg></span>
-            <div><p class="kicker">Neste aparelho</p><h2>Seus registros</h2></div>
+            <div><p class="kicker" data-i18n="reg.kicker">Neste aparelho</p><h2 data-i18n="reg.titulo">Seus registros</h2></div>
           </div>
           <div class="totais" id="totais"></div>
-          <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros">
-            <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos">Todos</label>
-            <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag">Aguardando</label>
-            <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val">Validados</label>
-            <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt">Quitados</label>
+          <div class="seg filtros" role="radiogroup" aria-label="Filtrar registros" data-i18n-aria="reg.filtrar">
+            <input type="radio" name="filtro" id="fl-todos" value="todos" checked><label for="fl-todos" data-i18n="filtro.todos">Todos</label>
+            <input type="radio" name="filtro" id="fl-ag" value="aguardando"><label for="fl-ag" data-i18n="filtro.aguardando">Aguardando</label>
+            <input type="radio" name="filtro" id="fl-val" value="validado"><label for="fl-val" data-i18n="filtro.validado">Validados</label>
+            <input type="radio" name="filtro" id="fl-qt" value="quitado"><label for="fl-qt" data-i18n="filtro.quitado">Quitados</label>
           </div>
           <div class="lista" id="lista"></div>
         </div>
@@ -865,80 +873,87 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
         <div class="wrap view-pad">
           <div class="sec-head">
             <span class="tile" style="background:var(--lime)"><svg class="ico"><use href="#i-ajustes"/></svg></span>
-            <div><p class="kicker">DebtID</p><h2>Ajustes</h2></div>
+            <div><p class="kicker">DebtID</p><h2 data-i18n="aj.titulo">Ajustes</h2></div>
           </div>
 
           <section class="panel" aria-labelledby="t-perfil">
-            <h3 id="t-perfil">Seu perfil</h3>
+            <h3 id="t-perfil" data-i18n="aj.perfil">Seu perfil</h3>
             <div class="perfil-card">
               <span class="avatar" id="avatar">?</span>
               <div><b id="perfilNome">—</b><small>ID <code id="perfilId">—</code></small></div>
             </div>
             <form id="formNome" class="linha-form" novalidate autocomplete="off">
-              <label class="sr-only" for="f-nome-ajuste">Seu nome</label>
-              <div class="control"><input id="f-nome-ajuste" maxlength="80" placeholder="Seu nome completo"></div>
-              <button class="btn" type="submit">Salvar nome</button>
+              <label class="sr-only" for="f-nome-ajuste" data-i18n="aj.nomeSr">Seu nome</label>
+              <div class="control"><input id="f-nome-ajuste" maxlength="80" placeholder="Seu nome completo" data-i18n-ph="aj.nomePh"></div>
+              <button class="btn" type="submit" data-i18n="aj.salvarNome">Salvar nome</button>
             </form>
-            <p class="hint">O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.</p>
+            <p class="hint" data-i18n="aj.perfilHint">O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.</p>
           </section>
 
           <section class="panel" aria-labelledby="t-aparencia">
             <div class="ajuste">
-              <h3 id="t-aparencia">Aparência</h3>
+              <h3 id="t-idioma" data-i18n="aj.idioma">Idioma</h3>
+              <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-idioma">
+                <input type="radio" name="idioma" id="id-pt" value="pt"><label for="id-pt" lang="pt-BR">Português</label>
+                <input type="radio" name="idioma" id="id-en" value="en"><label for="id-en" lang="en">English</label>
+              </div>
+            </div>
+            <div class="ajuste">
+              <h3 id="t-aparencia" data-i18n="aj.aparencia">Aparência</h3>
               <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-aparencia">
-                <input type="radio" name="ui" id="ui-pro" value="pro"><label for="ui-pro">Profissional</label>
+                <input type="radio" name="ui" id="ui-pro" value="pro"><label for="ui-pro" data-i18n="aj.pro">Profissional</label>
                 <input type="radio" name="ui" id="ui-soft" value="soft"><label for="ui-soft">Soft</label>
               </div>
             </div>
             <div class="ajuste">
-              <h3 id="t-tema">Tema</h3>
+              <h3 id="t-tema" data-i18n="aj.tema">Tema</h3>
               <div class="seg" role="radiogroup" aria-labelledby="t-tema">
-                <input type="radio" name="tema" id="tm-sis" value="sistema"><label for="tm-sis">Sistema</label>
-                <input type="radio" name="tema" id="tm-claro" value="light"><label for="tm-claro">Claro</label>
-                <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro">Escuro</label>
+                <input type="radio" name="tema" id="tm-sis" value="sistema"><label for="tm-sis" data-i18n="aj.sistema">Sistema</label>
+                <input type="radio" name="tema" id="tm-claro" value="light"><label for="tm-claro" data-i18n="aj.claro">Claro</label>
+                <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro" data-i18n="aj.escuro">Escuro</label>
               </div>
             </div>
           </section>
 
           <section class="panel" aria-labelledby="t-backup">
             <h3 id="t-backup">Backup</h3>
-            <p class="intro" style="margin-top:0">Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.</p>
+            <p class="intro" style="margin-top:0" data-i18n="aj.backupIntro">Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.</p>
             <div class="btns">
-              <button class="btn btn-alt" type="button" id="btnBackup"><svg class="ico"><use href="#i-cadeado"/></svg>Criar backup</button>
-              <button class="btn" type="button" id="btnRestaurar"><svg class="ico"><use href="#i-desfazer"/></svg>Restaurar backup</button>
+              <button class="btn btn-alt" type="button" id="btnBackup"><svg class="ico"><use href="#i-cadeado"/></svg><span data-i18n="aj.criarBackup">Criar backup</span></button>
+              <button class="btn" type="button" id="btnRestaurar"><svg class="ico"><use href="#i-desfazer"/></svg><span data-i18n="aj.restaurarBackup">Restaurar backup</span></button>
             </div>
             <form id="formBackup" class="block" hidden novalidate autocomplete="off">
               <div class="grid">
-                <div class="field"><label for="f-bk1">Crie uma senha</label><div class="control"><input id="f-bk1" type="password" autocomplete="new-password"></div></div>
-                <div class="field"><label for="f-bk2">Repita a senha</label><div class="control"><input id="f-bk2" type="password" autocomplete="new-password"></div></div>
+                <div class="field"><label for="f-bk1" data-i18n="aj.senha1">Crie uma senha</label><div class="control"><input id="f-bk1" type="password" autocomplete="new-password"></div></div>
+                <div class="field"><label for="f-bk2" data-i18n="aj.senha2">Repita a senha</label><div class="control"><input id="f-bk2" type="password" autocomplete="new-password"></div></div>
               </div>
-              <p class="hint">Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.</p>
-              <div class="form-foot"><button class="btn btn-primary" type="submit">Gerar backup</button></div>
+              <p class="hint" data-i18n="aj.senhaHint">Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.</p>
+              <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="aj.gerar">Gerar backup</button></div>
             </form>
             <div id="saidaBackup" class="block" hidden>
-              <span class="label kicker">Seu backup</span>
+              <span class="label kicker" data-i18n="aj.seuBackup">Seu backup</span>
               <code class="codigo" id="codigoBackup"></code>
               <div class="btns">
-                <button class="btn btn-alt" type="button" data-acao="copiar-backup"><svg class="ico"><use href="#i-copiar"/></svg>Copiar</button>
-                <button class="btn" type="button" data-acao="enviar-backup"><svg class="ico"><use href="#i-enviar"/></svg>Compartilhar</button>
+                <button class="btn btn-alt" type="button" data-acao="copiar-backup"><svg class="ico"><use href="#i-copiar"/></svg><span data-i18n="aj.copiar">Copiar</span></button>
+                <button class="btn" type="button" data-acao="enviar-backup"><svg class="ico"><use href="#i-enviar"/></svg><span data-i18n="aj.compartilhar">Compartilhar</span></button>
               </div>
-              <p class="hint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
+              <p class="hint" data-i18n="aj.backupHint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
             </div>
             <form id="formRestaurar" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-rs-codigo">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
-              <div class="field" style="margin-top:14px"><label for="f-rs-senha">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
-              <div class="form-foot"><button class="btn btn-primary" type="submit">Restaurar</button></div>
+              <div class="field"><label for="f-rs-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-rs-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="aj.restaurar">Restaurar</button></div>
             </form>
             <div id="msgBackup" role="alert"></div>
           </section>
 
           <section class="panel" aria-labelledby="t-apagar">
-            <h3 id="t-apagar">Apagar dados</h3>
-            <p class="intro" style="margin-top:0">Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.</p>
-            <button class="btn btn-danger" type="button" id="btnApagar"><svg class="ico"><use href="#i-lixo"/></svg>Apagar perfil e registros</button>
+            <h3 id="t-apagar" data-i18n="aj.apagar">Apagar dados</h3>
+            <p class="intro" style="margin-top:0" data-i18n="aj.apagarIntro">Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.</p>
+            <button class="btn btn-danger" type="button" id="btnApagar"><svg class="ico"><use href="#i-lixo"/></svg><span data-i18n="aj.apagarBtn">Apagar perfil e registros</span></button>
           </section>
 
-          <p class="sobre">DebtID 1.0 · código aberto · tudo fica no seu aparelho.</p>
+          <p class="sobre" data-i18n="aj.sobre">DebtID 1.0 · código aberto · tudo fica no seu aparelho.</p>
         </div>
       </section>
 
@@ -950,45 +965,65 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
       <!-- ================= ONBOARDING ================= -->
       <section class="view" id="v-boas-vindas" data-view="boas-vindas">
         <div class="wrap view-pad">
-          <div class="bv" id="bv1">
-            <p class="kicker">Bem-vindo ao DebtID</p>
-            <h1 class="bv-title">Escolha a aparência</h1>
-            <p class="intro">Dá para trocar depois, em Ajustes.</p>
-            <div class="ui-opcoes" role="radiogroup" aria-label="Aparência">
+          <div class="bv" id="bv0">
+            <p class="kicker">Bem-vindo · Welcome</p>
+            <h1 class="bv-title">Idioma <span class="bv-sep">·</span> Language</h1>
+            <p class="intro">Escolha o idioma do app. <span class="bv-sep">·</span> Choose the app language.</p>
+            <div class="ui-opcoes" role="radiogroup" aria-label="Idioma · Language">
+              <label class="ui-op" lang="pt-BR">
+                <input type="radio" name="idioma-bv" value="pt">
+                <span class="lang-tag" aria-hidden="true">PT</span>
+                <b>Português</b><small>Brasil</small>
+              </label>
+              <label class="ui-op" lang="en">
+                <input type="radio" name="idioma-bv" value="en">
+                <span class="lang-tag" aria-hidden="true">EN</span>
+                <b>English</b><small>International</small>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block" type="button" id="bvIdioma"><span data-i18n="bv.continuar">Continuar</span><svg class="ico"><use href="#i-seta"/></svg></button>
+          </div>
+
+          <div class="bv" id="bv1" hidden>
+            <p class="kicker" data-i18n="bv.passo2">Passo 2 de 3</p>
+            <h1 class="bv-title" data-i18n="bv.aparencia">Escolha a aparência</h1>
+            <p class="intro" data-i18n="bv.aparenciaIntro">Dá para trocar depois, em Ajustes.</p>
+            <div class="ui-opcoes" role="radiogroup" aria-label="Aparência" data-i18n-aria="aj.aparencia">
               <label class="ui-op">
                 <input type="radio" name="ui-bv" value="pro">
                 <span class="prev prev-pro" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
-                <b>Profissional</b><small>Sóbrio, preto e branco, direto ao ponto.</small>
+                <b data-i18n="aj.pro">Profissional</b><small data-i18n="bv.proDesc">Sóbrio, preto e branco, direto ao ponto.</small>
               </label>
               <label class="ui-op">
                 <input type="radio" name="ui-bv" value="soft">
                 <span class="prev prev-soft" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i></span>
-                <b>Soft</b><small>Colorido, com contornos marcados.</small>
+                <b>Soft</b><small data-i18n="bv.softDesc">Colorido, com contornos marcados.</small>
               </label>
             </div>
-            <button class="btn btn-primary btn-block" type="button" id="bvContinuar">Continuar<svg class="ico"><use href="#i-seta"/></svg></button>
+            <button class="btn btn-primary btn-block" type="button" id="bvContinuar"><span data-i18n="bv.continuar">Continuar</span><svg class="ico"><use href="#i-seta"/></svg></button>
+            <div class="form-foot"><button class="btn btn-ghost" type="button" id="bvVoltarIdioma" data-i18n="bv.voltar">Voltar</button></div>
           </div>
 
           <div class="bv" id="bv2" hidden>
-            <p class="kicker">Passo 2 de 2</p>
-            <h1 class="bv-title">Crie seu perfil</h1>
-            <p class="intro">Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.</p>
+            <p class="kicker" data-i18n="bv.passo3">Passo 3 de 3</p>
+            <h1 class="bv-title" data-i18n="bv.perfil">Crie seu perfil</h1>
+            <p class="intro" data-i18n="bv.perfilIntro">Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.</p>
             <form id="formPerfil" novalidate autocomplete="off">
               <div class="field" data-f="nome">
-                <label for="f-nome">Seu nome completo</label>
-                <div class="control"><input id="f-nome" maxlength="80" placeholder="Ex.: Ana Souza" autocomplete="name"></div>
+                <label for="f-nome" data-i18n="bv.nome">Seu nome completo</label>
+                <div class="control"><input id="f-nome" maxlength="80" placeholder="Ex.: Ana Souza" data-i18n-ph="bv.nomePh" autocomplete="name"></div>
                 <div class="err" id="e-nome"></div>
               </div>
-              <div class="form-foot"><button class="btn btn-primary btn-block" type="submit" id="btnCriarPerfil"><svg class="ico"><use href="#i-chave"/></svg>Criar perfil</button></div>
+              <div class="form-foot"><button class="btn btn-primary btn-block" type="submit" id="btnCriarPerfil"><svg class="ico"><use href="#i-chave"/></svg><span data-i18n="bv.criar">Criar perfil</span></button></div>
             </form>
             <div class="form-foot">
-              <button class="btn btn-ghost" type="button" id="bvTenhoBackup">Já tenho um backup</button>
-              <button class="btn btn-ghost" type="button" id="bvVoltar">Voltar</button>
+              <button class="btn btn-ghost" type="button" id="bvTenhoBackup" data-i18n="bv.temBackup">Já tenho um backup</button>
+              <button class="btn btn-ghost" type="button" id="bvVoltar" data-i18n="bv.voltar">Voltar</button>
             </div>
             <form id="formRestaurarBV" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-bv-codigo">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
-              <div class="field" style="margin-top:14px"><label for="f-bv-senha">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
-              <div class="form-foot"><button class="btn btn-alt btn-block" type="submit">Restaurar backup</button></div>
+              <div class="field"><label for="f-bv-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field" style="margin-top:14px"><label for="f-bv-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
+              <div class="form-foot"><button class="btn btn-alt btn-block" type="submit" data-i18n="aj.restaurarBackup">Restaurar backup</button></div>
             </form>
             <div id="msgBV" role="alert"></div>
           </div>
@@ -998,16 +1033,16 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 
     <footer class="foot wrap">
       <svg class="ico"><use href="#i-cadeado"/></svg>
-      <p>Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.</p>
+      <p data-i18n="rodape">Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.</p>
     </footer>
   </div>
 </div>
 
-<nav class="tabbar" aria-label="Navegação">
-  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span>Novo</span></a>
-  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span>Conferir</span></a>
-  <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span>Registros</span></a>
-  <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span>Ajustes</span></a>
+<nav class="tabbar" aria-label="Navegação" data-i18n-aria="nav.navegacao">
+  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span data-i18n="nav.novo">Novo</span></a>
+  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="nav.conferir">Conferir</span></a>
+  <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span data-i18n="nav.registros">Registros</span></a>
+  <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span data-i18n="nav.ajustes">Ajustes</span></a>
 </nav>
 
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
@@ -1016,7 +1051,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
     <p id="modalTexto"></p>
     <div class="btns">
       <button class="btn btn-primary" type="button" id="modalOk"></button>
-      <button class="btn" type="button" id="modalCancelar">Cancelar</button>
+      <button class="btn" type="button" id="modalCancelar" data-i18n="modal.cancelar">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1024,12 +1059,406 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 <div class="scanner" id="scanner" hidden>
   <video id="scanVideo" playsinline muted></video>
   <div class="scan-frame" aria-hidden="true"></div>
-  <p class="scan-txt">Aponte para o QR code do DebtID</p>
-  <button class="btn scan-fechar" type="button" id="scanFechar">Fechar</button>
+  <p class="scan-txt" data-i18n="scan.txt">Aponte para o QR code do DebtID</p>
+  <button class="btn scan-fechar" type="button" id="scanFechar" data-i18n="scan.fechar">Fechar</button>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script>
+/* =====================================================================
+   DebtID — UI strings (Brazilian Portuguese and English).
+   Values may contain {placeholders}; HTML is allowed only where the
+   caller inserts the string as HTML (and escapes the values it passes).
+   ===================================================================== */
+const DebtIDTextos = {
+  pt: {
+    "meta.descricao": "DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
+    "nav.secoes": "Seções", "nav.navegacao": "Navegação",
+    "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
+
+    "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
+    "hero.titulo": "Quem empresta, registra.",
+    "hero.lead": "Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.",
+    "hero.chip1": "Juros simples e compostos", "hero.chip2": "Assinado pelos dois", "hero.chip3": "QR code",
+    "comum.novoRegistro": "Novo registro", "hero.ler": "Ler um código",
+    "art.recibo": "RECIBO", "art.selo": "assinado pelos dois", "art.valor": "264,39",
+    "hp.eyebrow": "Calcule · Registre · Comprove",
+    "hp.sub": "<span>Assinado pelos dois</span> <em>— sem discussão</em>",
+    "hp.f1t": "Assinatura digital", "hp.f1": "Credor e devedor assinam com chaves que ficam só no celular de cada um.",
+    "hp.f2t": "QR code", "hp.f2": "Mostre o QR e a outra pessoa confere em segundos.",
+    "hp.f3t": "Sem servidor", "hp.f3": "Nada sai do aparelho. Funciona até sem internet.",
+    "hp.s1": "assinaturas<br>por registro", "hp.s2": "servidores<br>no caminho", "hp.s3": "QR code<br>para conferir",
+
+    "form.passo": "Passo 1 de 3",
+    "form.papel": "Neste empréstimo, eu sou…", "form.credor": "Quem empresta", "form.devedor": "Quem pega emprestado",
+    "form.outroDevedor": "Nome de quem pega emprestado", "form.outroCredor": "Nome de quem empresta", "form.outroPh": "Ex.: Bruno Lima",
+    "form.valor": "Valor emprestado", "form.valorPh": "0,00",
+    "form.taxa": "Taxa de juros", "form.taxaPh": "Ex.: 10 ou 2,5",
+    "form.tipo": "Tipo de juros", "form.simples": "Simples", "form.compostos": "Compostos",
+    "form.modo": "A taxa vale…", "form.modoTotal": "no total", "form.modoMes": "ao mês", "form.modoAno": "ao ano",
+    "form.de": "Data do empréstimo", "form.dp": "Data prevista de pagamento",
+    "form.registrar": "Registrar e assinar",
+    "form.prazo": "Prazo: {x}", "form.prazoVazio": "Prazo: —", "form.totalPrevia": "Total: {x}", "form.totalVazio": "Total: —",
+    "form.assinaAntes": "Você assina como ", "form.assinaDepois": ". Depois, a outra pessoa confirma no DebtID dela.",
+    "dica.simples.total": "Aplicada uma única vez sobre o valor, qualquer que seja o prazo.",
+    "dica.simples.mes": "Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).",
+    "dica.simples.ano": "Juros simples: proporcionais aos dias do prazo (ano de 365 dias).",
+    "dica.compostos.mes": "Juros sobre juros: a cada mês, a taxa incide sobre o valor já corrigido (mês comercial de 30 dias).",
+    "dica.compostos.ano": "Juros sobre juros: a cada ano, a taxa incide sobre o valor já corrigido (ano de 365 dias).",
+
+    "erro.outroDevedor": "Informe quem pega emprestado.", "erro.outroCredor": "Informe quem empresta.",
+    "erro.max80": "Use no máximo 80 caracteres.",
+    "erro.valorVazio": "Informe o valor emprestado.", "erro.valorInvalido": "Valor inválido. Ex.: 1.250,00",
+    "erro.valorZero": "O valor precisa ser maior que zero.", "erro.valorMax": "Valor máximo: R$ 1 bilhão.",
+    "erro.taxaVazia": "Informe a taxa (pode ser 0).", "erro.taxaInvalida": "Taxa inválida. Ex.: 2,5", "erro.taxaMax": "Taxa máxima: 1000%.",
+    "erro.de": "Escolha a data do empréstimo.", "erro.dp": "Escolha a data de pagamento.",
+    "erro.dpAntes": "O pagamento não pode ser antes do empréstimo.", "erro.prazoMax": "Prazo máximo: 100 anos.",
+    "erro.nome": "Digite seu nome completo.",
+
+    "toast.registrado": "Registrado e assinado por você.", "toast.semSalvar": "Não consegui salvar neste aparelho.",
+    "toast.criePerfil": "Crie seu perfil primeiro.",
+    "toast.camera": "Não deu para abrir a câmera. Libere o acesso ou cole o código.",
+    "toast.qrApp": "Não deu para abrir o leitor de QR. Cole o código.",
+    "toast.copiadoCola": "Copiado. Cole na conversa para enviar.", "toast.semCompartilhar": "Não deu para compartilhar.",
+    "toast.validado": "Pronto! Registro validado pelos dois.", "toast.assinado": "Assinado! Agora mostre o QR de volta.",
+    "toast.nadaAssinado": "Nada foi assinado.", "toast.codigoCopiado": "Código copiado.",
+    "toast.semCopiar": "Não deu para copiar. Selecione o código.", "toast.semCopiarCurto": "Não deu para copiar.",
+    "toast.quitado": "Marcado como quitado.", "toast.excluido": "Registro excluído.", "toast.backupCopiado": "Backup copiado.",
+    "toast.digiteNome": "Digite seu nome.", "toast.nomeAtualizado": "Nome atualizado.", "toast.backupRestaurado": "Backup restaurado.",
+    "toast.perfilCriado": "Perfil criado!", "toast.perfilNaoSalvo": "Atenção: não consegui salvar o perfil neste aparelho.",
+
+    "erros.VAZIA": "Nenhum código|Cole um código ou leia um QR code.",
+    "erros.FORMATO": "Código não reconhecido|Não encontrei um código do DebtID nesse texto. Ele termina com um traço e 4 caracteres de conferência.",
+    "erros.CHECKSUM": "Código digitado errado|O código está incompleto ou com algum caractere trocado. Confira maiúsculas e minúsculas, ou leia o QR.",
+    "erros.CORROMPIDA": "Código corrompido|O código passou na conferência, mas os dados internos não puderam ser lidos.",
+    "erros.VERSAO": "Versão desconhecida|Este código foi gerado por uma versão do DebtID que este app não conhece.",
+    "erros.INCONSISTENTE": "Dados inconsistentes|O total gravado não bate com o recálculo. O código pode ter sido adulterado.",
+    "erros.ASSINATURA": "Assinatura inválida|O código foi alterado depois de assinado. Não confie neste registro.",
+    "erros.PROPRIA": "Mesmo perfil dos dois lados|O registro precisa ser confirmado por outra pessoa, com outro perfil.",
+    "erros.NAO_E_PROPOSTA": "Nada para confirmar|Este código já está validado.",
+    "erros.SEM_CRIPTO": "Navegador sem suporte|Este navegador não tem as funções de criptografia necessárias. Use o app ou um navegador atualizado.",
+    "erros.SENHA": "Senha incorreta|A senha não abre este backup.",
+    "erros.BACKUP_FORMATO": "Backup inválido|Esse texto não é um backup do DebtID ou está incompleto.",
+    "erros.GENERICO": "Algo deu errado|Tente de novo.",
+
+    "conf.kicker": "Conferir", "conf.titulo": "Ler um código",
+    "conf.intro": "Leia o QR code ou cole o código que a outra pessoa mandou. O DebtID confere as assinaturas e mostra o registro.",
+    "conf.lerQR": "Ler QR code", "conf.ou": "ou cole o código", "conf.codigo": "Código",
+    "conf.ph": "Cole aqui o código ou a mensagem inteira", "conf.conferir": "Conferir código", "conf.limpar": "Limpar",
+    "como.titulo": "Como a validação funciona",
+    "como.1": "<b>Quem registra</b> preenche o empréstimo e o DebtID gera um código assinado, com QR code.",
+    "como.2": "<b>A outra pessoa</b> lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.",
+    "como.3": "<b>Quem registrou</b> lê o QR de confirmação. Pronto: o registro fica validado pelos dois.",
+
+    "reg.kicker": "Neste aparelho", "reg.titulo": "Seus registros", "reg.filtrar": "Filtrar registros",
+    "filtro.todos": "Todos", "filtro.aguardando": "Aguardando", "filtro.validado": "Validados", "filtro.quitado": "Quitados",
+    "reg.receber": "A receber", "reg.pagar": "A pagar", "reg.totaisNota": "validados, sem quitados",
+    "reg.vazioT": "Nenhum registro ainda", "reg.vazio": "Quando você registrar ou confirmar um empréstimo, ele aparece aqui.",
+    "reg.filtroVazio": "Nada com esse filtro.",
+    "reg.emprestou": "Você emprestou", "reg.deve": "Você deve",
+    "reg.quitado": "quitado", "reg.venceu": "venceu {data}", "reg.vence": "vence {data}",
+    "rotulo.aguardando": "Aguardando", "rotulo.validado": "Validado", "rotulo.quitado": "Quitado", "rotulo.vencido": "Vencido",
+
+    "aj.titulo": "Ajustes", "aj.perfil": "Seu perfil", "aj.nomeSr": "Seu nome", "aj.nomePh": "Seu nome completo",
+    "aj.salvarNome": "Salvar nome",
+    "aj.perfilHint": "O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.",
+    "aj.aparencia": "Aparência", "aj.pro": "Profissional", "aj.tema": "Tema",
+    "aj.sistema": "Sistema", "aj.claro": "Claro", "aj.escuro": "Escuro", "aj.idioma": "Idioma",
+    "aj.backupIntro": "Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.",
+    "aj.criarBackup": "Criar backup", "aj.restaurarBackup": "Restaurar backup",
+    "aj.senha1": "Crie uma senha", "aj.senha2": "Repita a senha",
+    "aj.senhaHint": "Sem essa senha ninguém abre o backup, nem você. Anote em um lugar seguro.",
+    "aj.gerar": "Gerar backup", "aj.seuBackup": "Seu backup", "aj.copiar": "Copiar", "aj.compartilhar": "Compartilhar",
+    "aj.backupHint": "Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.",
+    "aj.codBackup": "Código do backup", "aj.senhaBackup": "Senha do backup", "aj.restaurar": "Restaurar",
+    "aj.apagar": "Apagar dados",
+    "aj.apagarIntro": "Remove seu perfil, sua chave de assinatura e todos os registros deste aparelho. Sem backup, não dá para desfazer.",
+    "aj.apagarBtn": "Apagar perfil e registros",
+    "aj.sobre": "DebtID 1.0 · código aberto · tudo fica no seu aparelho.",
+    "bk.senhaCurtaT": "Senha curta", "bk.senhaCurta": "Use pelo menos 6 caracteres.",
+    "bk.difT": "Senhas diferentes", "bk.dif": "As duas senhas precisam ser iguais.",
+
+    "modal.cancelar": "Cancelar", "modal.confirmar": "Confirmar",
+    "modal.trocarT": "Trocar de perfil?", "modal.trocar": "Isso troca o perfil atual (ID {a}) pelo do backup (ID {b}). Os registros dos dois continuam guardados.", "modal.trocarOk": "Trocar",
+    "modal.apagarT": "Apagar tudo?", "modal.apagar": "Seu perfil, sua chave de assinatura e todos os registros saem deste aparelho. Sem backup, não dá para recuperar.", "modal.apagarOk": "Apagar tudo",
+    "modal.excluirT": "Excluir registro?", "modal.excluir": "Ele some deste aparelho. Quem tiver o código continua podendo conferir.", "modal.excluirOk": "Excluir",
+    "modal.assinarT": "Confirmar e assinar?",
+    "modal.assinarDevedor": "Sua assinatura confirma que você pegou {valor} emprestado de {nome}, com total de {total} até {data}. Depois de assinado, não dá para desfazer.",
+    "modal.assinarCredor": "Sua assinatura confirma que você emprestou {valor} para {nome}, com total de {total} até {data}. Depois de assinado, não dá para desfazer.",
+    "modal.assinarOk": "Assinar",
+
+    "bv.passo2": "Passo 2 de 3", "bv.aparencia": "Escolha a aparência", "bv.aparenciaIntro": "Dá para trocar depois, em Ajustes.",
+    "bv.proDesc": "Sóbrio, preto e branco, direto ao ponto.", "bv.softDesc": "Colorido, com contornos marcados.",
+    "bv.continuar": "Continuar", "bv.voltar": "Voltar",
+    "bv.passo3": "Passo 3 de 3", "bv.perfil": "Crie seu perfil",
+    "bv.perfilIntro": "Seu nome aparece nos registros que você assinar. O DebtID cria uma chave de assinatura que fica guardada só neste aparelho.",
+    "bv.nome": "Seu nome completo", "bv.nomePh": "Ex.: Ana Souza", "bv.criar": "Criar perfil", "bv.temBackup": "Já tenho um backup",
+
+    "rodape": "Tudo fica no seu aparelho. As assinaturas provam quem registrou, quem confirmou e que nada foi alterado depois. Não substituem uma assinatura com certificado oficial.",
+    "scan.txt": "Aponte para o QR code do DebtID", "scan.fechar": "Fechar",
+
+    "st.aguardandoT": "Aguardando {nome} confirmar",
+    "st.aguardando": "Mostre o QR code para {nome} ler no DebtID, ou envie o código por mensagem. Depois, leia aqui o QR de confirmação que vai aparecer no celular dessa pessoa.",
+    "st.lerConf": "Ler confirmação", "st.colarConf": "Colar confirmação",
+    "st.recebidaT": "{nome} registrou um empréstimo com você",
+    "st.recebidaDevedor": "Segundo {nome}, você pegou {valor} emprestado em {de} e vai pagar {total} até {dp}.",
+    "st.recebidaCredor": "Segundo {nome}, você emprestou {valor} em {de} e vai receber {total} até {dp}.",
+    "st.confira": "Confira os dados antes de assinar.",
+    "st.confirmar": "Confirmar e assinar", "st.naoReconheco": "Não reconheço",
+    "st.validadoT": "Validado pelos dois", "st.validado": "{a} e {b} assinaram este registro.",
+    "st.mostreVolta": "Agora mostre o QR para {nome} ler, para o registro ficar validado no celular dessa pessoa também.",
+    "st.venceu": "O pagamento venceu em {data}.", "st.quitar": "Marcar como quitado",
+    "st.quitadoT": "Quitado", "st.quitado": "Marcado como quitado em {data}. Essa marcação fica só neste aparelho.", "st.desfazer": "Desfazer",
+    "st.terceiroT": "Registro validado", "st.terceiro": "Assinado por {a} e {b}. Você não participa deste empréstimo.",
+    "st.antigoT": "Código antigo, sem assinatura", "st.antigo": "Gerado por uma versão anterior do app. Mostra os dados, mas não comprova quem registrou.",
+    "qr.paraConfirmar": "Código para {nome} confirmar", "qr.antigo": "Código antigo", "qr.validado": "Código do registro validado",
+    "qr.dicaAg": "Mostre o QR na tela ou envie o código por mensagem.",
+    "qr.dica": "Qualquer pessoa com o DebtID confere as assinaturas por este código.",
+    "qr.copiar": "Copiar código", "qr.imprimir": "Imprimir / PDF", "qr.rotulo": "QR code do registro",
+    "res.total": "Total a pagar", "res.totalNota": "arredondado para cima", "res.lucro": "Lucro do credor", "res.lucroNota": "{pct}% do valor",
+    "res.prazo": "Prazo", "res.juros": "Juros calculados", "res.jurosNota": "antes do arredondamento",
+    "det.excluir": "Excluir registro deste aparelho",
+
+    "rc.kicker": "Recibo e termo de compromisso", "rc.titulo": "Recibo de empréstimo",
+    "rc.p1": "Eu, <b>{devedor}</b>, declaro que recebi de <b>{credor}</b>, em {data}, a quantia de <b>{valor}</b> ({extenso}), a título de empréstimo.",
+    "rc.p2": "{juros} Comprometo-me a pagar a {credor} o total de <b>{total}</b> ({extenso}) até <b>{data}</b>, no prazo de <b>{dias}</b> contados da data do empréstimo.",
+    "juros.sem": "O empréstimo é feito <b>sem juros</b>.",
+    "juros.baseMes": "mês comercial de 30 dias", "juros.baseAno": "ano de 365 dias",
+    "juros.compostos": "Sobre esse valor incidem juros compostos de <b>{taxa}</b>, capitalizados ao longo dos {dias} de prazo ({base}), o que soma <b>{juros}</b> de juros.",
+    "juros.simplesTotal": "Sobre esse valor incidem juros simples de <b>{taxa}</b>, aplicados uma única vez sobre o valor emprestado, o que soma <b>{juros}</b> de juros.",
+    "juros.simples": "Sobre esse valor incidem juros simples de <b>{taxa}</b>, proporcionais aos {dias} de prazo ({base}), o que soma <b>{juros}</b> de juros.",
+    "rc.situacaoVal": "Registro assinado digitalmente por {a} e por {b} no DebtID.",
+    "rc.situacaoProp": "Registrado e assinado por {a}; aguardando a assinatura de {b}.",
+    "rc.situacaoV1": "Registro antigo, sem assinatura digital.",
+    "rc.tipoCompostos": "Juros compostos (juros sobre juros)", "rc.tipoSimples": "Juros simples",
+    "rc.arred": "{tipo}, com o total arredondado para cima no centavo.",
+    "rc.curtaVal": "Validado pelos dois", "rc.curtaProp": "Aguardando confirmação", "rc.curtaV1": "Sem assinatura",
+    "rc.notaVal": "Assinado com chaves que ficam só no aparelho de cada pessoa. Confira no DebtID, em Conferir.",
+    "rc.notaProp": "Ainda falta a assinatura de {b}. Confira no DebtID, em Conferir.",
+    "rc.notaV1": "Código antigo, sem assinatura digital.",
+    "rc.credor": "Credor", "rc.devedor": "Devedor", "rc.valor": "Valor emprestado", "rc.taxa": "Taxa de juros",
+    "rc.semJuros": "sem juros", "rc.compostos": ", compostos", "rc.simples": ", simples",
+    "rc.de": "Data do empréstimo", "rc.dp": "Data de pagamento", "rc.prazo": "Prazo", "rc.juros": "Juros calculados",
+    "rc.lucro": "Lucro do credor", "rc.situacao": "Situação", "rc.registrado": "Registrado em", "rc.confirmado": "Confirmado em",
+    "rc.total": "Total a pagar",
+    "rc.assinou": "Assinou em {quando}", "rc.informado": "Informado como “{nome}”",
+    "rc.semAssinatura": "Sem assinatura digital", "rc.aguardando": "Aguardando confirmação",
+    "rc.codigo": "Código de verificação", "rc.pdf": "Recibo DebtID - {nome} - {data}",
+
+    "share.aguardando": "{eu} registrou um empréstimo com você no DebtID: {total} até {data}.\nPara confirmar, abra o DebtID, toque em Conferir e cole este código:\n\n{codigo}",
+    "share.confirmei": "Confirmei nosso empréstimo no DebtID. Abra o DebtID, toque em Conferir e cole este código para validar:\n\n{codigo}",
+    "share.geral": "Empréstimo registrado no DebtID (Ref. {ref}). Código para conferir:\n\n{codigo}"
+  },
+
+  en: {
+    "meta.descricao": "DebtID: a loan calculator and IOU signed by both sides, with a QR code. Everything stays on your device.",
+    "nav.secoes": "Sections", "nav.navegacao": "Navigation",
+    "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
+    "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
+
+    "hero.eyebrow": "Loan records · signed by both sides",
+    "hero.titulo": "Lend it. Log it.",
+    "hero.lead": "Work out the interest, record the loan and ask the other person to confirm. Each side signs with a key that never leaves their own phone, so nobody can later say they never agreed.",
+    "hero.chip1": "Simple & compound interest", "hero.chip2": "Signed by both sides", "hero.chip3": "QR code",
+    "comum.novoRegistro": "New record", "hero.ler": "Read a code",
+    "art.recibo": "RECEIPT", "art.selo": "signed by both sides", "art.valor": "264.39",
+    "hp.eyebrow": "Calculate · Record · Prove",
+    "hp.sub": "<span>Signed by both sides</span> <em>— no arguments</em>",
+    "hp.f1t": "Digital signature", "hp.f1": "Lender and borrower sign with keys that stay on their own phones.",
+    "hp.f2t": "QR code", "hp.f2": "Show the QR and the other person verifies it in seconds.",
+    "hp.f3t": "No server", "hp.f3": "Nothing leaves the device. Works even offline.",
+    "hp.s1": "signatures<br>per record", "hp.s2": "servers<br>in between", "hp.s3": "QR code<br>to verify",
+
+    "form.passo": "Step 1 of 3",
+    "form.papel": "In this loan, I am…", "form.credor": "The lender", "form.devedor": "The borrower",
+    "form.outroDevedor": "Borrower's name", "form.outroCredor": "Lender's name", "form.outroPh": "e.g. Bruno Lima",
+    "form.valor": "Amount lent", "form.valorPh": "0.00",
+    "form.taxa": "Interest rate", "form.taxaPh": "e.g. 10 or 2.5",
+    "form.tipo": "Interest type", "form.simples": "Simple", "form.compostos": "Compound",
+    "form.modo": "The rate applies…", "form.modoTotal": "in total", "form.modoMes": "per month", "form.modoAno": "per year",
+    "form.de": "Loan date", "form.dp": "Due date",
+    "form.registrar": "Record and sign",
+    "form.prazo": "Term: {x}", "form.prazoVazio": "Term: —", "form.totalPrevia": "Total: {x}", "form.totalVazio": "Total: —",
+    "form.assinaAntes": "You sign as ", "form.assinaDepois": ". Then the other person confirms in their own DebtID.",
+    "dica.simples.total": "Applied once to the amount, whatever the term.",
+    "dica.simples.mes": "Simple interest: prorated over the days in the term (30-day months).",
+    "dica.simples.ano": "Simple interest: prorated over the days in the term (365-day years).",
+    "dica.compostos.mes": "Interest on interest: each month the rate applies to the already-grown amount (30-day months).",
+    "dica.compostos.ano": "Interest on interest: each year the rate applies to the already-grown amount (365-day years).",
+
+    "erro.outroDevedor": "Enter the borrower's name.", "erro.outroCredor": "Enter the lender's name.",
+    "erro.max80": "Use at most 80 characters.",
+    "erro.valorVazio": "Enter the amount lent.", "erro.valorInvalido": "Invalid amount. e.g. 1,250.00",
+    "erro.valorZero": "The amount must be greater than zero.", "erro.valorMax": "Maximum amount: R$ 1 billion.",
+    "erro.taxaVazia": "Enter the rate (it can be 0).", "erro.taxaInvalida": "Invalid rate. e.g. 2.5", "erro.taxaMax": "Maximum rate: 1000%.",
+    "erro.de": "Pick the loan date.", "erro.dp": "Pick the due date.",
+    "erro.dpAntes": "The due date can't be before the loan date.", "erro.prazoMax": "Maximum term: 100 years.",
+    "erro.nome": "Enter your full name.",
+
+    "toast.registrado": "Recorded and signed by you.", "toast.semSalvar": "Couldn't save on this device.",
+    "toast.criePerfil": "Create your profile first.",
+    "toast.camera": "Couldn't open the camera. Allow access or paste the code.",
+    "toast.qrApp": "Couldn't open the QR scanner. Paste the code instead.",
+    "toast.copiadoCola": "Copied. Paste it into the chat to send.", "toast.semCompartilhar": "Couldn't share.",
+    "toast.validado": "Done! Record validated by both sides.", "toast.assinado": "Signed! Now show the QR back.",
+    "toast.nadaAssinado": "Nothing was signed.", "toast.codigoCopiado": "Code copied.",
+    "toast.semCopiar": "Couldn't copy. Select the code instead.", "toast.semCopiarCurto": "Couldn't copy.",
+    "toast.quitado": "Marked as paid.", "toast.excluido": "Record deleted.", "toast.backupCopiado": "Backup copied.",
+    "toast.digiteNome": "Enter your name.", "toast.nomeAtualizado": "Name updated.", "toast.backupRestaurado": "Backup restored.",
+    "toast.perfilCriado": "Profile created!", "toast.perfilNaoSalvo": "Warning: couldn't save the profile on this device.",
+
+    "erros.VAZIA": "No code|Paste a code or scan a QR code.",
+    "erros.FORMATO": "Code not recognized|No DebtID code found in this text. It ends with a dash and 4 check characters.",
+    "erros.CHECKSUM": "Code typed wrong|The code is incomplete or has a wrong character. Check upper and lower case, or scan the QR.",
+    "erros.CORROMPIDA": "Corrupted code|The code passed the check, but its contents couldn't be read.",
+    "erros.VERSAO": "Unknown version|This code was made by a DebtID version this app doesn't know.",
+    "erros.INCONSISTENTE": "Inconsistent data|The stored total doesn't match the recalculation. The code may have been tampered with.",
+    "erros.ASSINATURA": "Invalid signature|The code was changed after it was signed. Don't trust this record.",
+    "erros.PROPRIA": "Same profile on both sides|The record must be confirmed by another person, with a different profile.",
+    "erros.NAO_E_PROPOSTA": "Nothing to confirm|This code is already validated.",
+    "erros.SEM_CRIPTO": "Browser not supported|This browser lacks the required cryptography features. Use the app or an up-to-date browser.",
+    "erros.SENHA": "Wrong password|This password doesn't open this backup.",
+    "erros.BACKUP_FORMATO": "Invalid backup|This text isn't a DebtID backup, or it's incomplete.",
+    "erros.GENERICO": "Something went wrong|Try again.",
+
+    "conf.kicker": "Verify", "conf.titulo": "Read a code",
+    "conf.intro": "Scan the QR code or paste the code the other person sent. DebtID checks the signatures and shows the record.",
+    "conf.lerQR": "Scan QR code", "conf.ou": "or paste the code", "conf.codigo": "Code",
+    "conf.ph": "Paste the code or the whole message here", "conf.conferir": "Verify code", "conf.limpar": "Clear",
+    "como.titulo": "How validation works",
+    "como.1": "<b>Whoever records the loan</b> fills in the details and DebtID creates a signed code, with a QR code.",
+    "como.2": "<b>The other person</b> scans the QR in their own DebtID, checks the numbers and confirms with their own signature.",
+    "como.3": "<b>The first person</b> scans the confirmation QR. Done: the record is validated by both sides.",
+
+    "reg.kicker": "On this device", "reg.titulo": "Your records", "reg.filtrar": "Filter records",
+    "filtro.todos": "All", "filtro.aguardando": "Pending", "filtro.validado": "Validated", "filtro.quitado": "Paid",
+    "reg.receber": "To receive", "reg.pagar": "To pay", "reg.totaisNota": "validated, excluding paid",
+    "reg.vazioT": "No records yet", "reg.vazio": "Loans you record or confirm show up here.",
+    "reg.filtroVazio": "Nothing matches this filter.",
+    "reg.emprestou": "You lent", "reg.deve": "You owe",
+    "reg.quitado": "paid", "reg.venceu": "was due {data}", "reg.vence": "due {data}",
+    "rotulo.aguardando": "Pending", "rotulo.validado": "Validated", "rotulo.quitado": "Paid", "rotulo.vencido": "Overdue",
+
+    "aj.titulo": "Settings", "aj.perfil": "Your profile", "aj.nomeSr": "Your name", "aj.nomePh": "Your full name",
+    "aj.salvarNome": "Save name",
+    "aj.perfilHint": "The ID identifies your signing key. People who sign with you can check it on receipts. A new name applies to future records.",
+    "aj.aparencia": "Look", "aj.pro": "Professional", "aj.tema": "Theme",
+    "aj.sistema": "System", "aj.claro": "Light", "aj.escuro": "Dark", "aj.idioma": "Language",
+    "aj.backupIntro": "Your profile and records live only on this device. If you switch phones or delete the app, the backup is what keeps your ID and history.",
+    "aj.criarBackup": "Create backup", "aj.restaurarBackup": "Restore backup",
+    "aj.senha1": "Choose a password", "aj.senha2": "Repeat the password",
+    "aj.senhaHint": "Without this password nobody can open the backup, not even you. Write it down somewhere safe.",
+    "aj.gerar": "Generate backup", "aj.seuBackup": "Your backup", "aj.copiar": "Copy", "aj.compartilhar": "Share",
+    "aj.backupHint": "Keep this text where only you can reach it, like an email to yourself or a password manager.",
+    "aj.codBackup": "Backup code", "aj.senhaBackup": "Backup password", "aj.restaurar": "Restore",
+    "aj.apagar": "Delete data",
+    "aj.apagarIntro": "Removes your profile, signing key and all records from this device. Without a backup, this can't be undone.",
+    "aj.apagarBtn": "Delete profile and records",
+    "aj.sobre": "DebtID 1.0 · open source · everything stays on your device.",
+    "bk.senhaCurtaT": "Password too short", "bk.senhaCurta": "Use at least 6 characters.",
+    "bk.difT": "Passwords don't match", "bk.dif": "Both passwords must be the same.",
+
+    "modal.cancelar": "Cancel", "modal.confirmar": "Confirm",
+    "modal.trocarT": "Switch profile?", "modal.trocar": "This replaces the current profile (ID {a}) with the one in the backup (ID {b}). Records from both are kept.", "modal.trocarOk": "Switch",
+    "modal.apagarT": "Delete everything?", "modal.apagar": "Your profile, signing key and all records will be removed from this device. Without a backup they can't be recovered.", "modal.apagarOk": "Delete everything",
+    "modal.excluirT": "Delete record?", "modal.excluir": "It's removed from this device. Anyone with the code can still verify it.", "modal.excluirOk": "Delete",
+    "modal.assinarT": "Confirm and sign?",
+    "modal.assinarDevedor": "Your signature confirms that you borrowed {valor} from {nome}, to repay {total} by {data}. Once signed, this can't be undone.",
+    "modal.assinarCredor": "Your signature confirms that you lent {valor} to {nome}, to be repaid {total} by {data}. Once signed, this can't be undone.",
+    "modal.assinarOk": "Sign",
+
+    "bv.passo2": "Step 2 of 3", "bv.aparencia": "Choose a look", "bv.aparenciaIntro": "You can change it later in Settings.",
+    "bv.proDesc": "Sober, black and white, straight to the point.", "bv.softDesc": "Colorful, with bold outlines.",
+    "bv.continuar": "Continue", "bv.voltar": "Back",
+    "bv.passo3": "Step 3 of 3", "bv.perfil": "Create your profile",
+    "bv.perfilIntro": "Your name appears on the records you sign. DebtID creates a signing key that is stored only on this device.",
+    "bv.nome": "Your full name", "bv.nomePh": "e.g. Ana Souza", "bv.criar": "Create profile", "bv.temBackup": "I have a backup",
+
+    "rodape": "Everything stays on your device. The signatures prove who recorded the loan, who confirmed it and that nothing changed afterwards. They don't replace a certified, legally recognized e-signature.",
+    "scan.txt": "Point at the DebtID QR code", "scan.fechar": "Close",
+
+    "st.aguardandoT": "Waiting for {nome} to confirm",
+    "st.aguardando": "Show the QR code for {nome} to scan in DebtID, or send the code in a message. Then scan here the confirmation QR that will appear on their phone.",
+    "st.lerConf": "Scan confirmation", "st.colarConf": "Paste confirmation",
+    "st.recebidaT": "{nome} recorded a loan with you",
+    "st.recebidaDevedor": "According to {nome}, you borrowed {valor} on {de} and will repay {total} by {dp}.",
+    "st.recebidaCredor": "According to {nome}, you lent {valor} on {de} and will receive {total} by {dp}.",
+    "st.confira": "Check the details before signing.",
+    "st.confirmar": "Confirm and sign", "st.naoReconheco": "I don't recognize this",
+    "st.validadoT": "Validated by both sides", "st.validado": "{a} and {b} signed this record.",
+    "st.mostreVolta": "Now show the QR for {nome} to scan, so the record is validated on their phone too.",
+    "st.venceu": "Payment was due on {data}.", "st.quitar": "Mark as paid",
+    "st.quitadoT": "Paid", "st.quitado": "Marked as paid on {data}. This mark stays only on this device.", "st.desfazer": "Undo",
+    "st.terceiroT": "Validated record", "st.terceiro": "Signed by {a} and {b}. You are not part of this loan.",
+    "st.antigoT": "Old code, unsigned", "st.antigo": "Created by an earlier version of the app. It shows the data but doesn't prove who recorded it.",
+    "qr.paraConfirmar": "Code for {nome} to confirm", "qr.antigo": "Old code", "qr.validado": "Validated record code",
+    "qr.dicaAg": "Show the QR on screen or send the code in a message.",
+    "qr.dica": "Anyone with DebtID can verify the signatures from this code.",
+    "qr.copiar": "Copy code", "qr.imprimir": "Print / PDF", "qr.rotulo": "Record QR code",
+    "res.total": "Total to repay", "res.totalNota": "rounded up", "res.lucro": "Lender's profit", "res.lucroNota": "{pct}% of the amount",
+    "res.prazo": "Term", "res.juros": "Calculated interest", "res.jurosNota": "before rounding",
+    "det.excluir": "Delete record from this device",
+
+    "rc.kicker": "Receipt and promise to pay", "rc.titulo": "Loan receipt",
+    "rc.p1": "I, <b>{devedor}</b>, declare that on {data} I received from <b>{credor}</b> the amount of <b>{valor}</b> ({extenso}) as a loan.",
+    "rc.p2": "{juros} I promise to repay {credor} a total of <b>{total}</b> ({extenso}) by <b>{data}</b>, a term of <b>{dias}</b> from the loan date.",
+    "juros.sem": "The loan carries <b>no interest</b>.",
+    "juros.baseMes": "30-day months", "juros.baseAno": "365-day years",
+    "juros.compostos": "Compound interest of <b>{taxa}</b> applies to this amount, compounded over the {dias} of the term ({base}), adding up to <b>{juros}</b> in interest.",
+    "juros.simplesTotal": "Simple interest of <b>{taxa}</b> applies once to the amount lent, adding up to <b>{juros}</b> in interest.",
+    "juros.simples": "Simple interest of <b>{taxa}</b> applies to this amount, prorated over the {dias} of the term ({base}), adding up to <b>{juros}</b> in interest.",
+    "rc.situacaoVal": "Digitally signed in DebtID by {a} and {b}.",
+    "rc.situacaoProp": "Recorded and signed by {a}; waiting for {b}'s signature.",
+    "rc.situacaoV1": "Old record, without a digital signature.",
+    "rc.tipoCompostos": "Compound interest (interest on interest)", "rc.tipoSimples": "Simple interest",
+    "rc.arred": "{tipo}, with the total rounded up to the next cent.",
+    "rc.curtaVal": "Validated by both sides", "rc.curtaProp": "Awaiting confirmation", "rc.curtaV1": "Unsigned",
+    "rc.notaVal": "Signed with keys that stay on each person's device. Verify it in DebtID under Verify.",
+    "rc.notaProp": "{b} hasn't signed yet. Verify it in DebtID under Verify.",
+    "rc.notaV1": "Old code, without a digital signature.",
+    "rc.credor": "Lender", "rc.devedor": "Borrower", "rc.valor": "Amount lent", "rc.taxa": "Interest rate",
+    "rc.semJuros": "no interest", "rc.compostos": ", compound", "rc.simples": ", simple",
+    "rc.de": "Loan date", "rc.dp": "Due date", "rc.prazo": "Term", "rc.juros": "Calculated interest",
+    "rc.lucro": "Lender's profit", "rc.situacao": "Status", "rc.registrado": "Recorded on", "rc.confirmado": "Confirmed on",
+    "rc.total": "Total to repay",
+    "rc.assinou": "Signed on {quando}", "rc.informado": "Entered as “{nome}”",
+    "rc.semAssinatura": "No digital signature", "rc.aguardando": "Awaiting confirmation",
+    "rc.codigo": "Verification code", "rc.pdf": "DebtID receipt - {nome} - {data}",
+
+    "share.aguardando": "{eu} recorded a loan with you in DebtID: {total} due {data}.\nTo confirm, open DebtID, tap Verify and paste this code:\n\n{codigo}",
+    "share.confirmei": "I confirmed our loan in DebtID. Open DebtID, tap Verify and paste this code to validate it:\n\n{codigo}",
+    "share.geral": "Loan recorded in DebtID (Ref. {ref}). Code to verify:\n\n{codigo}"
+  }
+};
+
+/* Applies the language to the static page text (data-i18n attributes) and exposes t(). */
+const DebtIDIdioma = (() => {
+  let atual = 'pt';
+  const t = (k, v) => {
+    let s = (DebtIDTextos[atual] && DebtIDTextos[atual][k]) ?? DebtIDTextos.pt[k] ?? k;
+    if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (n in v ? v[n] : m));
+    return s;
+  };
+  function aplicar(l) {
+    atual = l === 'en' ? 'en' : 'pt';
+    const raiz = document.documentElement;
+    raiz.lang = atual === 'en' ? 'en' : 'pt-BR';
+    raiz.dataset.lang = atual;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', t('meta.descricao'));
+    raiz.classList.remove('i18n-espera');
+    return atual;
+  }
+  return { t, aplicar, atual: () => atual };
+})();
+DebtIDIdioma.aplicar(document.documentElement.dataset.lang);
+</script>
 <script>
 /*<core>*/
 /* =====================================================================
@@ -1668,31 +2097,67 @@ const DebtID = (() => {
     return { gerar, svg };
   })();
 
-  /* =================== formatting (pt-BR) =================== */
-  const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const nf4 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-  const nfT = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
-  const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  /* =================== formatting (pt-BR or English) =================== */
+  const LOC = {
+    pt: {
+      tag: 'pt-BR',
+      meses: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+      modo: { total: 'no total', mes: 'ao mês', ano: 'ao ano' }, dia: 'dia', dias: 'dias', as: 'às',
+      milhar: '.', decimal: ','
+    },
+    en: {
+      tag: 'en-US',
+      meses: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      modo: { total: 'in total', mes: 'per month', ano: 'per year' }, dia: 'day', dias: 'days', as: 'at',
+      milhar: ',', decimal: '.'
+    }
+  };
+  let idioma = 'pt', L = LOC.pt, nf2, nf4, nfT;
+  /** Sets the language used by fmt, extenso and lerNumero ('pt' or 'en'). Stored codes are not affected. */
+  function definirIdioma(l) {
+    idioma = l === 'en' ? 'en' : 'pt';
+    L = LOC[idioma];
+    nf2 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    nf4 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+    return idioma;
+  }
+  definirIdioma('pt');
   const p2 = n => String(n).padStart(2, '0');
   const dataUTC = dia => new Date(dia * 86400000);
+  const curto = m => L.meses[m].slice(0, 3);
   const fmt = {
-    brl: c => 'R$ ' + nf2.format(c / 100),
-    brl4: c => 'R$ ' + nf4.format(c / 100),
+    idioma: () => idioma,
+    num2: n => nf2.format(n),
+    num: n => nfT.format(n),
+    brl: c => 'R$ ' + nf2.format(c / 100),
+    brl4: c => 'R$ ' + nf4.format(c / 100),
     taxa: t => nfT.format(t / 10000) + '%',
-    modo: m => ({ total: 'no total', mes: 'ao mês', ano: 'ao ano' })[m],
-    dias: n => n + (n === 1 ? ' dia' : ' dias'),
-    data: dia => { const x = dataUTC(dia); return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`; },
-    dataCurta: dia => { const x = dataUTC(dia); return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`; },
-    dataExtenso: dia => { const x = dataUTC(dia), dd = x.getUTCDate(); return `${dd === 1 ? '1º' : dd} de ${MESES[x.getUTCMonth()]} de ${x.getUTCFullYear()}`; },
+    modo: m => L.modo[m],
+    dias: n => n + ' ' + (n === 1 ? L.dia : L.dias),
+    data: dia => {
+      const x = dataUTC(dia);
+      return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}, ${x.getUTCFullYear()}`
+                             : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`;
+    },
+    dataCurta: dia => {
+      const x = dataUTC(dia);
+      return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}` : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`;
+    },
+    dataExtenso: dia => {
+      const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
+      return idioma === 'en' ? `${m} ${dd}, ${x.getUTCFullYear()}` : `${dd === 1 ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
+    },
     momento: (ts, tz) => {
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
-      return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()} às ` +
-             `${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ` +
+      const dia = Math.floor((ts + tz * 900) / 86400);
+      return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ` +
              `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
     }
   };
 
-  /* =================== amounts in words (pt-BR) =================== */
+  /* =================== amounts in words =================== */
+  // Brazilian Portuguese
   const UN = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
   const DZ = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const CT = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
@@ -1726,27 +2191,52 @@ const DebtID = (() => {
     }
     return out;
   }
+  // English (the currency stays the Brazilian real: "reais" and "centavos")
+  const EN_UN = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const EN_DZ = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  const EN_ESC = ['', 'thousand', 'million', 'billion', 'trillion'];
+  function ate999En(n) {
+    const c = Math.floor(n / 100), r = n % 100, partes = [];
+    if (c) partes.push(EN_UN[c] + ' hundred');
+    if (r) partes.push(r < 20 ? EN_UN[r] : EN_DZ[Math.floor(r / 10)] + (r % 10 ? '-' + EN_UN[r % 10] : ''));
+    return partes.join(' ');
+  }
+  function inteiroExtensoEn(n) {
+    if (n === 0) return 'zero';
+    const partes = [];
+    for (let k = 0; n > 0; k++, n = Math.floor(n / 1000)) {
+      const v = n % 1000;
+      if (v) partes.unshift(ate999En(v) + (k ? ' ' + EN_ESC[k] : ''));
+    }
+    return partes.join(' ');
+  }
   function extenso(centavos) {
     const r = Math.floor(centavos / 100), c = centavos % 100, partes = [];
+    if (idioma === 'en') {
+      if (r) partes.push(inteiroExtensoEn(r) + (r === 1 ? ' real' : ' reais'));
+      if (c) partes.push(inteiroExtensoEn(c) + (c === 1 ? ' centavo' : ' centavos'));
+      return partes.length ? partes.join(' and ') : 'zero reais';
+    }
     if (r) partes.push(inteiroExtenso(r) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? 'real' : 'reais'));
     if (c) partes.push(inteiroExtenso(c) + (c === 1 ? ' centavo' : ' centavos'));
     return partes.length ? partes.join(' e ') : 'zero real';
   }
 
-  /* =================== typed numbers (lenient pt-BR parsing) =================== */
+  /* =================== typed numbers (lenient parsing) ===================
+     Accepts both "1.250,50" and "1,250.50". When only one kind of separator appears, the
+     current language decides: the decimal mark is "," in Portuguese and "." in English. */
   function lerNumero(bruto, milhar) {
-    let s = String(bruto).replace(/[R$\s% ]/g, '');
+    let s = String(bruto).replace(/[R$\s% ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;
     const vg = s.lastIndexOf(','), pt = s.lastIndexOf('.');
     if (vg > -1 && pt > -1) {
       const decimal = vg > pt ? ',' : '.';
       s = s.split(decimal === ',' ? '.' : ',').join('').replace(decimal, '.');
-    } else if (vg > -1) {
-      const partes = s.split(',');
-      s = partes.length > 2 ? partes.join('') : s.replace(',', '.');
-    } else if (pt > -1) {
-      const partes = s.split('.');
-      if (partes.length > 2 || (milhar && partes[1].length === 3)) s = partes.join('');
+    } else if (vg > -1 || pt > -1) {
+      const sep = vg > -1 ? ',' : '.', partes = s.split(sep);
+      if (sep === L.decimal) s = partes.length > 2 ? partes.join('') : partes.join('.');
+      else if (partes.length > 2 || (milhar && partes[1].length === 3)) s = partes.join('');
+      else s = partes.join('.');
     }
     if ((s.match(/\./g) || []).length > 1) return NaN;
     const n = Number(s);
@@ -1754,7 +2244,7 @@ const DebtID = (() => {
   }
 
   return {
-    calcular, ceilCentavos, fmt, extenso, lerNumero, LIMITES, MODOS, ChaveErro,
+    calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     criarPerfil, idDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     exportarBackup, importarBackup, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum }
@@ -1764,11 +2254,13 @@ const DebtID = (() => {
 </script>
 <script>
 /* =====================================================================
-   DebtID — user interface (the app text itself is in Portuguese)
+   DebtID — user interface (texts live in i18n.js, in Portuguese and English)
    ===================================================================== */
 (() => {
   'use strict';
   const D = DebtID, { fmt, extenso } = D;
+  const { t } = DebtIDIdioma;
+  D.definirIdioma(DebtIDIdioma.atual());
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const raiz = document.documentElement;
@@ -1780,7 +2272,7 @@ const DebtID = (() => {
   const app = () => window.DebtIDApp || null; // Android app bridge (only exists inside the APK)
 
   /* ---------------- local storage ---------------- */
-  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema' };
+  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma' };
   const lerJSON = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
   const gravarJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const lerTexto = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -1791,7 +2283,7 @@ const DebtID = (() => {
   let registros = lerJSON(K.regs, []);
   if (!Array.isArray(registros)) registros = [];
   const salvarRegistros = () => {
-    if (!gravarJSON(K.regs, registros)) toast('Não consegui salvar neste aparelho.');
+    if (!gravarJSON(K.regs, registros)) toast(t('toast.semSalvar'));
   };
   function upsert(r) {
     const i = registros.findIndex(x => x.id === r.id);
@@ -1808,7 +2300,7 @@ const DebtID = (() => {
 
   /* ---------------- look and theme ---------------- */
   const prefEscuro = matchMedia('(prefers-color-scheme: dark)');
-  const temaPref = () => { const t = lerTexto(K.tema); return t === 'dark' || t === 'light' ? t : 'sistema'; };
+  const temaPref = () => { const v = lerTexto(K.tema); return v === 'dark' || v === 'light' ? v : 'sistema'; };
   function corDasBarras() {
     const cs = getComputedStyle(raiz);
     const pro = raiz.dataset.ui === 'pro', escuro = raiz.dataset.theme === 'dark';
@@ -1820,9 +2312,9 @@ const DebtID = (() => {
   }
   function aplicarTema() {
     const pref = temaPref();
-    const t = pref === 'sistema' ? (prefEscuro.matches ? 'dark' : 'light') : pref;
-    raiz.dataset.theme = t;
-    const rot = t === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+    const tema = pref === 'sistema' ? (prefEscuro.matches ? 'dark' : 'light') : pref;
+    raiz.dataset.theme = tema;
+    const rot = t(tema === 'dark' ? 'tema.paraClaro' : 'tema.paraEscuro');
     const b = $('#temaBtn'); b.setAttribute('aria-label', rot); b.title = rot;
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === pref; });
     corDasBarras();
@@ -1844,15 +2336,16 @@ const DebtID = (() => {
     if (e.target.name === 'ui' || e.target.name === 'ui-bv') aplicarUI(e.target.value);
     if (e.target.name === 'tema') { gravarTexto(K.tema, e.target.value === 'sistema' ? null : e.target.value); aplicarTema(); }
     if (e.target.name === 'filtro') renderRegistros();
+    if (e.target.name === 'idioma' || e.target.name === 'idioma-bv') aplicarIdioma(e.target.value, true);
   });
 
   /* ---------------- toasts and dialogs ---------------- */
   let timerToast;
-  function toast(t) {
-    const x = $('#toast'); x.textContent = t; x.classList.add('show');
+  function toast(msg) {
+    const x = $('#toast'); x.textContent = msg; x.classList.add('show');
     clearTimeout(timerToast); timerToast = setTimeout(() => x.classList.remove('show'), 2600);
   }
-  function perguntar({ titulo, texto, ok = 'Confirmar', perigo = false }) {
+  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false }) {
     return new Promise(res => {
       const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar');
       $('#modalTitulo').textContent = titulo; $('#modalTexto').textContent = texto;
@@ -1865,21 +2358,12 @@ const DebtID = (() => {
       document.addEventListener('keydown', tecla);
     });
   }
-  const ERROS = {
-    VAZIA: ['Nenhum código', 'Cole um código ou leia um QR code.'],
-    FORMATO: ['Código não reconhecido', 'Não encontrei um código do DebtID nesse texto. Ele termina com um traço e 4 caracteres de conferência.'],
-    CHECKSUM: ['Código digitado errado', 'O código está incompleto ou com algum caractere trocado. Confira maiúsculas e minúsculas, ou leia o QR.'],
-    CORROMPIDA: ['Código corrompido', 'O código passou na conferência, mas os dados internos não puderam ser lidos.'],
-    VERSAO: ['Versão desconhecida', 'Este código foi gerado por uma versão do DebtID que este app não conhece.'],
-    INCONSISTENTE: ['Dados inconsistentes', 'O total gravado não bate com o recálculo. O código pode ter sido adulterado.'],
-    ASSINATURA: ['Assinatura inválida', 'O código foi alterado depois de assinado. Não confie neste registro.'],
-    PROPRIA: ['Mesmo perfil dos dois lados', 'O registro precisa ser confirmado por outra pessoa, com outro perfil.'],
-    NAO_E_PROPOSTA: ['Nada para confirmar', 'Este código já está validado.'],
-    SEM_CRIPTO: ['Navegador sem suporte', 'Este navegador não tem as funções de criptografia necessárias. Use o app ou um navegador atualizado.'],
-    SENHA: ['Senha incorreta', 'A senha não abre este backup.'],
-    BACKUP_FORMATO: ['Backup inválido', 'Esse texto não é um backup do DebtID ou está incompleto.']
+  const msgDe = err => {
+    const cod = err && err.codigo;
+    if (cod && ('erros.' + cod) in DebtIDTextos.pt) return t('erros.' + cod).split('|');
+    const [titulo, texto] = t('erros.GENERICO').split('|');
+    return [titulo, (err && err.message) || texto];
   };
-  const msgDe = err => ERROS[err && err.codigo] || ['Algo deu errado', (err && err.message) || 'Tente de novo.'];
   const alertaHTML = (titulo, texto, ok = false) =>
     `<div class="alert${ok ? ' ok' : ''}"><i>${ico(ok ? 'check' : 'alerta')}</i><div><b>${esc(titulo)}</b><p>${esc(texto)}</p></div></div>`;
 
@@ -1932,17 +2416,6 @@ const DebtID = (() => {
   const hoje = new Date();
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
-  const DICAS = {
-    simples: {
-      total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
-      mes: 'Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).',
-      ano: 'Juros simples: proporcionais aos dias do prazo (ano de 365 dias).'
-    },
-    compostos: {
-      mes: 'Juros sobre juros: a cada mês, a taxa incide sobre o valor já corrigido (mês comercial de 30 dias).',
-      ano: 'Juros sobre juros: a cada ano, a taxa incide sobre o valor já corrigido (ano de 365 dias).'
-    }
-  };
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
   function atualizaDicas() {
     const composto = marcado('tipo') === 'compostos';
@@ -1950,22 +2423,22 @@ const DebtID = (() => {
     opTotal.disabled = composto; // compound interest needs a period (month or year)
     if (composto && opTotal.checked) $('#m-mes').checked = true;
     const modo = marcado('modo') || 'mes';
-    $('#hintModo').textContent = DICAS[composto ? 'compostos' : 'simples'][modo];
+    $('#hintModo').textContent = t(`dica.${composto ? 'compostos' : 'simples'}.${modo}`);
     const credor = marcado('papel') !== 'devedor';
-    $('#l-outro').textContent = credor ? 'Nome de quem pega emprestado' : 'Nome de quem empresta';
+    $('#l-outro').textContent = t(credor ? 'form.outroDevedor' : 'form.outroCredor');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
     const caixa = $('#prazoAoVivo'), ok = de != null && dp != null && dp >= de;
     caixa.classList.toggle('off', !ok);
-    caixa.lastElementChild.textContent = ok ? 'Prazo: ' + fmt.dias(dp - de) : 'Prazo: —';
+    caixa.lastElementChild.textContent = ok ? t('form.prazo', { x: fmt.dias(dp - de) }) : t('form.prazoVazio');
     // live total preview while typing
-    const v = D.lerNumero(campo('valor').value, true), t = D.lerNumero(campo('taxa').value, false);
-    const valor = Math.round(v * 100), taxa = Math.round(t * 10000);
+    const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
+    const valor = Math.round(v * 100), taxa = Math.round(tx * 10000);
     const previa = $('#totalAoVivo');
     const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
     previa.classList.toggle('off', !temPrevia);
     previa.lastElementChild.textContent = temPrevia
-      ? 'Total: ' + fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total)
-      : 'Total: —';
+      ? t('form.totalPrevia', { x: fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total) })
+      : t('form.totalVazio');
   }
   form.addEventListener('change', atualizaDicas);
   form.addEventListener('input', e => {
@@ -1974,37 +2447,35 @@ const DebtID = (() => {
     if (f && f.classList.contains('invalid')) { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; }
   });
   atualizaDicas();
-  const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const nfT = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 });
   campo('valor').addEventListener('blur', () => {
     const n = D.lerNumero(campo('valor').value, true);
-    if (n > 0) campo('valor').value = nf2.format(Math.round(n * 100) / 100);
+    if (n > 0) campo('valor').value = fmt.num2(Math.round(n * 100) / 100);
   });
   campo('taxa').addEventListener('blur', () => {
     const n = D.lerNumero(campo('taxa').value, false);
-    if (n >= 0) campo('taxa').value = nfT.format(Math.round(n * 10000) / 10000);
+    if (n >= 0) campo('taxa').value = fmt.num(Math.round(n * 10000) / 10000);
   });
   const limparNome = s => String(s).normalize('NFC').replace(/\s+/g, ' ').trim();
 
   function lerFormulario() {
     const erros = {};
     const outro = limparNome(campo('outro').value);
-    if (!outro) erros.outro = marcado('papel') === 'devedor' ? 'Informe quem empresta.' : 'Informe quem pega emprestado.';
-    else if (outro.length > 80) erros.outro = 'Use no máximo 80 caracteres.';
+    if (!outro) erros.outro = t(marcado('papel') === 'devedor' ? 'erro.outroCredor' : 'erro.outroDevedor');
+    else if (outro.length > 80) erros.outro = t('erro.max80');
     const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 100);
-    if (!campo('valor').value.trim()) erros.valor = 'Informe o valor emprestado.';
-    else if (!Number.isFinite(v)) erros.valor = 'Valor inválido. Ex.: 1.250,00';
-    else if (valor < 1) erros.valor = 'O valor precisa ser maior que zero.';
-    else if (valor > D.LIMITES.valor) erros.valor = 'Valor máximo: R$ 1 bilhão.';
-    const t = D.lerNumero(campo('taxa').value, false), taxa = Math.round(t * 10000);
-    if (!campo('taxa').value.trim()) erros.taxa = 'Informe a taxa (pode ser 0).';
-    else if (!Number.isFinite(t)) erros.taxa = 'Taxa inválida. Ex.: 2,5';
-    else if (taxa > D.LIMITES.taxa) erros.taxa = 'Taxa máxima: 1000%.';
+    if (!campo('valor').value.trim()) erros.valor = t('erro.valorVazio');
+    else if (!Number.isFinite(v)) erros.valor = t('erro.valorInvalido');
+    else if (valor < 1) erros.valor = t('erro.valorZero');
+    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax');
+    const tx = D.lerNumero(campo('taxa').value, false), taxa = Math.round(tx * 10000);
+    if (!campo('taxa').value.trim()) erros.taxa = t('erro.taxaVazia');
+    else if (!Number.isFinite(tx)) erros.taxa = t('erro.taxaInvalida');
+    else if (taxa > D.LIMITES.taxa) erros.taxa = t('erro.taxaMax');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
-    if (de == null) erros.de = 'Escolha a data do empréstimo.';
-    if (dp == null) erros.dp = 'Escolha a data de pagamento.';
-    else if (de != null && dp < de) erros.dp = 'O pagamento não pode ser antes do empréstimo.';
-    else if (de != null && dp - de > D.LIMITES.dias) erros.dp = 'Prazo máximo: 100 anos.';
+    if (de == null) erros.de = t('erro.de');
+    if (dp == null) erros.dp = t('erro.dp');
+    else if (de != null && dp < de) erros.dp = t('erro.dpAntes');
+    else if (de != null && dp - de > D.LIMITES.dias) erros.dp = t('erro.prazoMax');
     return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
@@ -2027,9 +2498,9 @@ const DebtID = (() => {
       const m = await D.lerCodigo(codigo);
       upsert(registroDe(m, dados.papel, 'aguardando'));
       campo('outro').value = ''; campo('valor').value = ''; campo('taxa').value = '';
-      await abrirModelo(m, { aviso: 'Registrado e assinado por você.' });
+      await abrirModelo(m, { aviso: t('toast.registrado') });
     } catch (err) {
-      const [t, x] = msgDe(err); toast(`${t}: ${x}`);
+      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
     } finally {
       btn.disabled = false;
     }
@@ -2037,14 +2508,14 @@ const DebtID = (() => {
 
   /* ---------------- check a code ---------------- */
   async function abrirTexto(txt) {
-    if (!perfil) { toast('Crie seu perfil primeiro.'); return; }
+    if (!perfil) { toast(t('toast.criePerfil')); return; }
     try {
       const m = await D.lerCodigo(txt);
       $('#f-codigo').value = ''; $('#msgConf').innerHTML = '';
       await abrirModelo(m);
     } catch (err) {
-      const [t, x] = msgDe(err);
-      $('#msgConf').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err);
+      $('#msgConf').innerHTML = alertaHTML(ti, x);
       if (location.hash !== '#conferir') irPara('conferir');
     }
   }
@@ -2069,7 +2540,7 @@ const DebtID = (() => {
     const a = app();
     if (a && a.scanQR) {
       return new Promise(res => {
-        window.__debtidQR = (texto, erro) => { window.__debtidQR = null; if (erro) toast(erro); res(texto ? String(texto) : null); };
+        window.__debtidQR = (texto, erro) => { window.__debtidQR = null; if (erro) toast(t('toast.qrApp')); res(texto ? String(texto) : null); };
         try { a.scanQR(); } catch { window.__debtidQR = null; res(null); }
       });
     }
@@ -2081,7 +2552,7 @@ const DebtID = (() => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
     } catch {
-      toast('Não deu para abrir a câmera. Libere o acesso ou cole o código.');
+      toast(t('toast.camera'));
       return null;
     }
     const detector = new BarcodeDetector({ formats: ['qr_code'] });
@@ -2092,7 +2563,7 @@ const DebtID = (() => {
       const fim = txt => {
         if (!ativo) return;
         ativo = false;
-        stream.getTracks().forEach(t => t.stop());
+        stream.getTracks().forEach(tr => tr.stop());
         video.srcObject = null; tela.hidden = true; $('#scanFechar').onclick = null;
         res(txt);
       };
@@ -2137,11 +2608,11 @@ const DebtID = (() => {
     if (navigator.share) {
       try { await navigator.share({ text: texto }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
     }
-    toast(await copiar(texto) ? 'Copiado. Cole na conversa para enviar.' : 'Não deu para compartilhar.');
+    toast(t(await copiar(texto) ? 'toast.copiadoCola' : 'toast.semCompartilhar'));
   }
   function imprimir() {
     const m = atual.m;
-    const nome = `Recibo DebtID - ${m.devedor.nome} - ${fmt.data(m.dados.de).replace(/\//g, '-')}`;
+    const nome = t('rc.pdf', { nome: m.devedor.nome, data: fmt.data(m.dados.de).replace(/\//g, '-').replace(/,/g, '') });
     const a = app();
     if (a && a.print) { try { a.print(nome); return; } catch { /* fall through */ } }
     document.title = nome;
@@ -2176,7 +2647,7 @@ const DebtID = (() => {
         if (!reg || reg.status === 'aguardando') {
           const estavaAguardando = !!reg;
           reg = upsert(registroDe(m, meu, 'validado'));
-          if (estavaAguardando && !aviso) aviso = 'Pronto! Registro validado pelos dois.';
+          if (estavaAguardando && !aviso) aviso = t('toast.validado');
         }
         ctx = reg.status === 'quitado' ? 'quitado' : 'validado';
       } else {
@@ -2196,40 +2667,40 @@ const DebtID = (() => {
     let cls, icone, titulo, texto, botoes = '';
     if (ctx === 'aguardando') {
       cls = 'st-aguardando'; icone = 'relogio';
-      titulo = `Aguardando ${esc(outra.nome)} confirmar`;
-      texto = `Mostre o QR code para ${esc(outra.nome)} ler no DebtID, ou envie o código por mensagem. Depois, leia aqui o QR de confirmação que vai aparecer no celular dessa pessoa.`;
-      botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}Ler confirmação</button>
-                <button class="btn" type="button" data-acao="colar">${ico('copiar')}Colar confirmação</button>`;
+      titulo = t('st.aguardandoT', { nome: esc(outra.nome) });
+      texto = t('st.aguardando', { nome: esc(outra.nome) });
+      botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerConf')}</button>
+                <button class="btn" type="button" data-acao="colar">${ico('copiar')}${t('st.colarConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
       cls = 'st-recebida'; icone = 'doc';
-      titulo = `${esc(emissor.nome)} registrou um empréstimo com você`;
-      texto = souDevedor
-        ? `Segundo ${esc(emissor.nome)}, você pegou ${fmt.brl(d.valor)} emprestado em ${fmt.data(d.de)} e vai pagar ${fmt.brl(c.total)} até ${fmt.data(d.dp)}.`
-        : `Segundo ${esc(emissor.nome)}, você emprestou ${fmt.brl(d.valor)} em ${fmt.data(d.de)} e vai receber ${fmt.brl(c.total)} até ${fmt.data(d.dp)}.`;
-      texto += ' Confira os dados antes de assinar.';
-      botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}Confirmar e assinar</button>
-                <button class="btn" type="button" data-acao="recusar">Não reconheço</button>`;
+      titulo = t('st.recebidaT', { nome: esc(emissor.nome) });
+      texto = t(souDevedor ? 'st.recebidaDevedor' : 'st.recebidaCredor',
+        { nome: esc(emissor.nome), valor: fmt.brl(d.valor), de: fmt.data(d.de), total: fmt.brl(c.total), dp: fmt.data(d.dp) });
+      texto += ' ' + t('st.confira');
+      botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}${t('st.confirmar')}</button>
+                <button class="btn" type="button" data-acao="recusar">${t('st.naoReconheco')}</button>`;
     } else if (ctx === 'validado') {
       cls = 'st-validado'; icone = 'check';
-      titulo = 'Validado pelos dois';
-      texto = `${esc(m.credor.nome)} e ${esc(m.devedor.nome)} assinaram este registro.`;
-      if (extra.recemConfirmado) texto += ` Agora mostre o QR para ${esc(emissor.nome)} ler, para o registro ficar validado no celular dessa pessoa também.`;
-      if (d.dp < hojeDia()) texto += ` O pagamento venceu em ${fmt.data(d.dp)}.`;
-      if (reg) botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}Marcar como quitado</button>`;
+      titulo = t('st.validadoT');
+      texto = t('st.validado', { a: esc(m.credor.nome), b: esc(m.devedor.nome) });
+      if (extra.recemConfirmado) texto += ' ' + t('st.mostreVolta', { nome: esc(emissor.nome) });
+      if (d.dp < hojeDia()) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
+      if (reg) botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}${t('st.quitar')}</button>`;
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
-      titulo = 'Quitado';
-      texto = `Marcado como quitado em ${new Date(reg.quitadoEm || Date.now()).toLocaleDateString('pt-BR')}. Essa marcação fica só neste aparelho.`;
-      botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}Desfazer</button>`;
+      titulo = t('st.quitadoT');
+      const q = new Date(reg.quitadoEm || Date.now());
+      texto = t('st.quitado', { data: fmt.data(Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000)) });
+      botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
     } else if (ctx === 'terceiro') {
       cls = 'st-terceiro'; icone = 'escudo';
-      titulo = 'Registro validado';
-      texto = `Assinado por ${esc(m.credor.nome)} e ${esc(m.devedor.nome)}. Você não participa deste empréstimo.`;
+      titulo = t('st.terceiroT');
+      texto = t('st.terceiro', { a: esc(m.credor.nome), b: esc(m.devedor.nome) });
     } else {
       cls = 'st-antigo'; icone = 'alerta';
-      titulo = 'Código antigo, sem assinatura';
-      texto = 'Gerado por uma versão anterior do app. Mostra os dados, mas não comprova quem registrou.';
+      titulo = t('st.antigoT');
+      texto = t('st.antigo');
     }
     return `<section class="status ${cls}"><span class="st-ico">${ico(icone)}</span><div><h3>${titulo}</h3><p>${texto}</p>${botoes ? `<div class="btns">${botoes}</div>` : ''}</div></section>`;
   }
@@ -2238,17 +2709,17 @@ const DebtID = (() => {
     const { m, ctx } = atual;
     if (ctx === 'recebida') return '';
     const aguardando = ctx === 'aguardando';
-    const legenda = aguardando ? `Código para ${esc(parteOutra(m).nome)} confirmar` : m.tipo === 'v1' ? 'Código antigo' : 'Código do registro validado';
-    const dica = aguardando ? 'Mostre o QR na tela ou envie o código por mensagem.' : 'Qualquer pessoa com o DebtID confere as assinaturas por este código.';
+    const legenda = aguardando ? t('qr.paraConfirmar', { nome: esc(parteOutra(m).nome) }) : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
+    const dica = t(aguardando ? 'qr.dicaAg' : 'qr.dica');
     return `<section class="qr-card">
-      <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: 'QR code do registro' })}</div>
+      <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: esc(t('qr.rotulo')) })}</div>
       <div class="qr-info">
         <p class="kicker">${legenda}</p>
         <code class="codigo">${esc(m.codigo)}</code>
         <div class="btns">
-          <button class="btn btn-alt" type="button" data-acao="copiar">${ico('copiar')}Copiar código</button>
-          <button class="btn" type="button" data-acao="enviar">${ico('enviar')}Compartilhar</button>
-          ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}Imprimir / PDF</button>`}
+          <button class="btn btn-alt" type="button" data-acao="copiar">${ico('copiar')}${t('qr.copiar')}</button>
+          <button class="btn" type="button" data-acao="enviar">${ico('enviar')}${t('aj.compartilhar')}</button>
+          ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}${t('qr.imprimir')}</button>`}
         </div>
         <p class="hint">${dica}</p>
       </div>
@@ -2257,24 +2728,21 @@ const DebtID = (() => {
 
   function resumoHTML(m) {
     const c = m.calc, d = m.dados;
-    const pct = d.valor ? new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(c.lucro / d.valor * 100) : '0';
+    const pct = fmt.num(d.valor ? Math.round(c.lucro / d.valor * 10000) / 100 : 0);
     return `<div class="summary">
-      <div class="stat s-1"><span>Total a pagar</span><b>${rs(fmt.brl(c.total))}</b><small>arredondado para cima</small></div>
-      <div class="stat s-2"><span>Lucro do credor</span><b>${rs(fmt.brl(c.lucro))}</b><small>${pct}% do valor</small></div>
-      <div class="stat s-3"><span>Prazo</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
-      <div class="stat s-4"><span>Juros calculados</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>antes do arredondamento</small></div>
+      <div class="stat s-1"><span>${t('res.total')}</span><b>${rs(fmt.brl(c.total))}</b><small>${t('res.totalNota')}</small></div>
+      <div class="stat s-2"><span>${t('res.lucro')}</span><b>${rs(fmt.brl(c.lucro))}</b><small>${t('res.lucroNota', { pct })}</small></div>
+      <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
+      <div class="stat s-4"><span>${t('res.juros')}</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>${t('res.jurosNota')}</small></div>
     </div>`;
   }
 
   function textoJuros(d, c) {
-    if (d.taxa === 0) return 'O empréstimo é feito <b>sem juros</b>.';
-    const base = d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias';
-    if (d.composto) {
-      return `Sobre esse valor incidem juros compostos de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, capitalizados ao longo dos ${fmt.dias(c.dias)} de prazo (${base}), o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
-    }
-    const prop = d.modo === 'total' ? 'aplicados uma única vez sobre o valor emprestado'
-      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${base})`;
-    return `Sobre esse valor incidem juros simples de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, ${prop}, o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
+    if (d.taxa === 0) return t('juros.sem');
+    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: fmt.brl(c.lucro),
+                base: t(d.modo === 'mes' ? 'juros.baseMes' : 'juros.baseAno') };
+    if (d.composto) return t('juros.compostos', v);
+    return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
   }
 
   function reciboHTML(m) {
@@ -2282,52 +2750,55 @@ const DebtID = (() => {
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
-      ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>Assinou em ${fmt.momento(parte.ts, parte.tz)}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>Informado como “${esc(parte.nomeInformado)}”</small>` : ''}</div>`
-      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${m.tipo === 'v1' ? 'Sem assinatura digital' : 'Aguardando confirmação'}</small></div>`;
+      ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>${t('rc.assinou', { quando: fmt.momento(parte.ts, parte.tz) })}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>${t('rc.informado', { nome: esc(parte.nomeInformado) })}</small>` : ''}</div>`
+      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : 'rc.aguardando')}</small></div>`;
     let situacao, nota, situacaoCurta;
     if (m.tipo === 'validado') {
-      situacao = `Registro assinado digitalmente por ${credor} e por ${devedor} no DebtID.`;
-      situacaoCurta = 'Validado pelos dois';
-      nota = 'Assinado com chaves que ficam só no aparelho de cada pessoa. Confira no DebtID, em Conferir.';
+      situacao = t('rc.situacaoVal', { a: credor, b: devedor });
+      situacaoCurta = t('rc.curtaVal');
+      nota = t('rc.notaVal');
     } else if (m.tipo === 'proposta') {
-      situacao = `Registrado e assinado por ${esc(parteEmissora(m).nome)}; aguardando a assinatura de ${esc(parteOutra(m).nome)}.`;
-      situacaoCurta = 'Aguardando confirmação';
-      nota = `Ainda falta a assinatura de ${esc(parteOutra(m).nome)}. Confira no DebtID, em Conferir.`;
+      const a = esc(parteEmissora(m).nome), b = esc(parteOutra(m).nome);
+      situacao = t('rc.situacaoProp', { a, b });
+      situacaoCurta = t('rc.curtaProp');
+      nota = t('rc.notaProp', { b });
     } else {
-      situacao = 'Registro antigo, sem assinatura digital.';
-      situacaoCurta = 'Sem assinatura';
-      nota = 'Código antigo, sem assinatura digital.';
+      situacao = t('rc.situacaoV1');
+      situacaoCurta = t('rc.curtaV1');
+      nota = t('rc.notaV1');
     }
     const confirmado = m.confirmadoEm ? fmt.momento(m.confirmadoEm.ts, m.confirmadoEm.tz) : '—';
+    const taxa = d.taxa === 0 ? t('rc.semJuros')
+      : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : t(d.composto ? 'rc.compostos' : 'rc.simples')}`;
     return `
       <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
       <div class="rc-body">
-        <p class="kicker">Recibo e termo de compromisso</p>
-        <h3 class="rc-title">Recibo de empréstimo</h3>
-        <p class="rc-text">Eu, <b>${devedor}</b>, declaro que recebi de <b>${credor}</b>, em ${fmt.dataExtenso(d.de)}, a quantia de <b>${fmt.brl(d.valor)}</b> (${extenso(d.valor)}), a título de empréstimo.</p>
-        <p class="rc-text">${textoJuros(d, c)} Comprometo-me a pagar a ${credor} o total de <b>${fmt.brl(c.total)}</b> (${extenso(c.total)}) até <b>${fmt.dataExtenso(d.dp)}</b>, no prazo de <b>${fmt.dias(c.dias)}</b> contados da data do empréstimo.</p>
-        <p class="rc-note">${situacao} ${d.composto ? 'Juros compostos (juros sobre juros)' : 'Juros simples'}, com o total arredondado para cima no centavo.</p>
+        <p class="kicker">${t('rc.kicker')}</p>
+        <h3 class="rc-title">${t('rc.titulo')}</h3>
+        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: fmt.brl(d.valor), extenso: extenso(d.valor) })}</p>
+        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: fmt.brl(c.total), extenso: extenso(c.total), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
+        <p class="rc-note">${situacao} ${t('rc.arred', { tipo: t(d.composto ? 'rc.tipoCompostos' : 'rc.tipoSimples') })}</p>
         <dl class="rc-grid">
-          ${linha('Credor', credor)}
-          ${linha('Devedor', devedor)}
-          ${linha('Valor emprestado', fmt.brl(d.valor))}
-          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : d.composto ? ', compostos' : ', simples'}`)}
-          ${linha('Data do empréstimo', fmt.data(d.de))}
-          ${linha('Data de pagamento', fmt.data(d.dp))}
-          ${linha('Prazo', fmt.dias(c.dias))}
-          ${linha('Juros calculados', fmt.brl4(c.jurosCentavos))}
-          ${linha('Lucro do credor', fmt.brl(c.lucro))}
-          ${linha('Situação', situacaoCurta)}
-          ${linha('Registrado em', fmt.momento(d.ts, d.tz))}
-          ${linha('Confirmado em', confirmado)}
-          ${linha('Total a pagar', fmt.brl(c.total), 'hl')}
+          ${linha(t('rc.credor'), credor)}
+          ${linha(t('rc.devedor'), devedor)}
+          ${linha(t('rc.valor'), fmt.brl(d.valor))}
+          ${linha(t('rc.taxa'), taxa)}
+          ${linha(t('rc.de'), fmt.data(d.de))}
+          ${linha(t('rc.dp'), fmt.data(d.dp))}
+          ${linha(t('rc.prazo'), fmt.dias(c.dias))}
+          ${linha(t('rc.juros'), fmt.brl4(c.jurosCentavos))}
+          ${linha(t('rc.lucro'), fmt.brl(c.lucro))}
+          ${linha(t('rc.situacao'), situacaoCurta)}
+          ${linha(t('rc.registrado'), fmt.momento(d.ts, d.tz))}
+          ${linha(t('rc.confirmado'), confirmado)}
+          ${linha(t('rc.total'), fmt.brl(c.total), 'hl')}
         </dl>
-        <div class="rc-sign">${assinatura(m.credor, 'Credor')}${assinatura(m.devedor, 'Devedor')}</div>
+        <div class="rc-sign">${assinatura(m.credor, t('rc.credor'))}${assinatura(m.devedor, t('rc.devedor'))}</div>
       </div>
       <div class="rc-key">
-        <div class="rc-qr">${D.QR.svg(m.codigo, { nivel: 'M', margem: 2, rotulo: 'QR code do registro' })}</div>
+        <div class="rc-qr">${D.QR.svg(m.codigo, { nivel: 'M', margem: 2, rotulo: esc(t('qr.rotulo')) })}</div>
         <div>
-          <p class="rc-key-label">Código de verificação</p>
+          <p class="rc-key-label">${t('rc.codigo')}</p>
           <code>${esc(m.codigo)}</code>
           <p class="rc-key-note">${ico('cadeado')}<span>${nota}</span></p>
         </div>
@@ -2338,32 +2809,27 @@ const DebtID = (() => {
     const { m, reg } = atual;
     $('#detalhe').innerHTML = statusHTML() + qrHTML() + resumoHTML(m) +
       `<article class="receipt">${reciboHTML(m)}</article>` +
-      (reg ? `<div class="form-foot"><button class="btn btn-ghost" type="button" data-acao="excluir">${ico('lixo')}Excluir registro deste aparelho</button></div>` : '');
+      (reg ? `<div class="form-foot"><button class="btn btn-ghost" type="button" data-acao="excluir">${ico('lixo')}${t('det.excluir')}</button></div>` : '');
   }
 
   function mensagemCompartilhar() {
     const { m, ctx } = atual;
     if (ctx === 'aguardando') {
-      return `${perfil.nome} registrou um empréstimo com você no DebtID: ${fmt.brl(m.calc.total)} até ${fmt.data(m.dados.dp)}.\n` +
-             `Para confirmar, abra o DebtID, toque em Conferir e cole este código:\n\n${m.codigo}`;
+      return t('share.aguardando', { eu: perfil.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp), codigo: m.codigo });
     }
-    if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) {
-      return `Confirmei nosso empréstimo no DebtID. Abra o DebtID, toque em Conferir e cole este código para validar:\n\n${m.codigo}`;
-    }
-    return `Empréstimo registrado no DebtID (Ref. ${m.ref}). Código para conferir:\n\n${m.codigo}`;
+    if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) return t('share.confirmei', { codigo: m.codigo });
+    return t('share.geral', { ref: m.ref, codigo: m.codigo });
   }
 
   async function confirmarAtual(botao) {
     const m = atual.m;
     const meuPapel = m.emissor === 'credor' ? 'devedor' : 'credor';
     const outro = parteEmissora(m);
-    const acao = meuPapel === 'devedor'
-      ? `pegou ${fmt.brl(m.dados.valor)} emprestado de ${outro.nome}`
-      : `emprestou ${fmt.brl(m.dados.valor)} para ${outro.nome}`;
     const ok = await perguntar({
-      titulo: 'Confirmar e assinar?',
-      texto: `Sua assinatura confirma que você ${acao}, com total de ${fmt.brl(m.calc.total)} até ${fmt.data(m.dados.dp)}. Depois de assinado, não dá para desfazer.`,
-      ok: 'Assinar'
+      titulo: t('modal.assinarT'),
+      texto: t(meuPapel === 'devedor' ? 'modal.assinarDevedor' : 'modal.assinarCredor',
+        { valor: fmt.brl(m.dados.valor), nome: outro.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp) }),
+      ok: t('modal.assinarOk')
     });
     if (!ok) return;
     if (botao) botao.disabled = true;
@@ -2371,9 +2837,9 @@ const DebtID = (() => {
       const cod = await D.confirmarProposta(perfil, m.codigo);
       const mv = await D.lerCodigo(cod);
       upsert(registroDe(mv, meuPapel, 'validado'));
-      await abrirModelo(mv, { recemConfirmado: true, aviso: 'Assinado! Agora mostre o QR de volta.' });
+      await abrirModelo(mv, { recemConfirmado: true, aviso: t('toast.assinado') });
     } catch (err) {
-      const [t, x] = msgDe(err); toast(`${t}: ${x}`);
+      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
       if (botao) botao.disabled = false;
     }
   }
@@ -2383,58 +2849,57 @@ const DebtID = (() => {
     if (!b) return;
     const acao = b.dataset.acao;
     if (acao === 'ler-qr') return lerEAbrir();
-    if (acao === 'copiar-backup') return toast(await copiar($('#codigoBackup').textContent) ? 'Backup copiado.' : 'Não deu para copiar.');
+    if (acao === 'copiar-backup') return toast(t(await copiar($('#codigoBackup').textContent) ? 'toast.backupCopiado' : 'toast.semCopiarCurto'));
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
     if (!atual) return;
     const { reg } = atual;
     switch (acao) {
       case 'colar': irPara('conferir'); setTimeout(() => $('#f-codigo').focus(), 60); break;
       case 'confirmar': confirmarAtual(b); break;
-      case 'recusar': atual = null; irPara('conferir'); toast('Nada foi assinado.'); break;
-      case 'copiar': toast(await copiar(atual.m.codigo) ? 'Código copiado.' : 'Não deu para copiar. Selecione o código.'); break;
+      case 'recusar': atual = null; irPara('conferir'); toast(t('toast.nadaAssinado')); break;
+      case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
       case 'imprimir': imprimir(); break;
       case 'quitar':
         atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), atualizadoEm: Date.now() });
-        atual.ctx = 'quitado'; renderDetalhe(); toast('Marcado como quitado.'); break;
+        atual.ctx = 'quitado'; renderDetalhe(); toast(t('toast.quitado')); break;
       case 'desquitar':
         atual.reg = upsert({ id: reg.id, status: 'validado', quitadoEm: null, atualizadoEm: Date.now() });
         atual.ctx = 'validado'; renderDetalhe(); break;
       case 'excluir':
-        if (await perguntar({ titulo: 'Excluir registro?', texto: 'Ele some deste aparelho. Quem tiver o código continua podendo conferir.', ok: 'Excluir', perigo: true })) {
+        if (await perguntar({ titulo: t('modal.excluirT'), texto: t('modal.excluir'), ok: t('modal.excluirOk'), perigo: true })) {
           registros = registros.filter(r => r.id !== reg.id); salvarRegistros();
-          atual = null; irPara('registros'); toast('Registro excluído.');
+          atual = null; irPara('registros'); toast(t('toast.excluido'));
         }
         break;
     }
   });
 
   /* ---------------- records list ---------------- */
-  const ROTULO = { aguardando: 'Aguardando', validado: 'Validado', quitado: 'Quitado' };
   function renderRegistros() {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
     const validos = registros.filter(r => r.status === 'validado');
     const soma = papel => validos.filter(r => r.papel === papel).reduce((s, r) => s + r.total, 0);
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>A receber</span><b>${rs(fmt.brl(soma('credor')))}</b><small>validados, sem quitados</small></div>` +
-      `<div class="stat s-3"><span>A pagar</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>validados, sem quitados</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span><b>${rs(fmt.brl(soma('credor')))}</b><small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>${t('reg.totaisNota')}</small></div>`;
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
     if (!registros.length) {
-      el.innerHTML = `<div class="vazio"><b>Nenhum registro ainda</b><p>Quando você registrar ou confirmar um empréstimo, ele aparece aqui.</p><a class="btn btn-primary" href="#inicio">${ico('plus')}Novo registro</a></div>`;
+      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#inicio">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
       return;
     }
-    if (!lista.length) { el.innerHTML = '<div class="vazio">Nada com esse filtro.</div>'; return; }
+    if (!lista.length) { el.innerHTML = `<div class="vazio">${t('reg.filtroVazio')}</div>`; return; }
     el.innerHTML = lista.map(r => {
       const recebe = r.papel === 'credor';
       const vencido = r.status === 'validado' && r.dp < dia;
-      const quando = r.status === 'quitado' ? 'quitado' : (vencido ? 'venceu ' : 'vence ') + fmt.data(r.dp);
+      const quando = r.status === 'quitado' ? t('reg.quitado') : t(vencido ? 'reg.venceu' : 'reg.vence', { data: fmt.data(r.dp) });
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
-        <span class="reg-main"><b>${esc(r.outro)}</b><small>${recebe ? 'Você emprestou' : 'Você deve'} · ${quando}</small></span>
-        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${vencido ? 'Vencido' : ROTULO[r.status]}</span></span>
+        <span class="reg-main"><b>${esc(r.outro)}</b><small>${t(recebe ? 'reg.emprestou' : 'reg.deve')} · ${quando}</small></span>
+        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
       </button>`;
     }).join('');
   }
@@ -2443,7 +2908,7 @@ const DebtID = (() => {
     if (!b) return;
     const r = registros.find(x => x.id === b.dataset.reg);
     if (!r) return;
-    try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [t, x] = msgDe(err); toast(`${t}: ${x}`); }
+    try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [ti, x] = msgDe(err); toast(`${ti}: ${x}`); }
   });
 
   /* ---------------- settings ---------------- */
@@ -2455,13 +2920,14 @@ const DebtID = (() => {
     $('#f-nome-ajuste').value = perfil.nome;
     $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
+    $$('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
   }
   $('#formNome').addEventListener('submit', e => {
     e.preventDefault();
     const nome = limparNome($('#f-nome-ajuste').value);
-    if (nome.length < 2) return toast('Digite seu nome.');
+    if (nome.length < 2) return toast(t('toast.digiteNome'));
     perfil = { ...perfil, nome: nome.slice(0, 80) };
-    gravarJSON(K.perfil, perfil); renderAjustes(); toast('Nome atualizado.');
+    gravarJSON(K.perfil, perfil); renderAjustes(); toast(t('toast.nomeAtualizado'));
   });
   const mostrar = (id, sim) => { $(id).hidden = !sim; };
   $('#btnBackup').addEventListener('click', () => {
@@ -2477,8 +2943,8 @@ const DebtID = (() => {
   $('#formBackup').addEventListener('submit', async e => {
     e.preventDefault();
     const s1 = $('#f-bk1').value, s2 = $('#f-bk2').value;
-    if (s1.length < 6) { $('#msgBackup').innerHTML = alertaHTML('Senha curta', 'Use pelo menos 6 caracteres.'); return; }
-    if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML('Senhas diferentes', 'As duas senhas precisam ser iguais.'); return; }
+    if (s1.length < 6) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaCurtaT'), t('bk.senhaCurta')); return; }
+    if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
     const btn = e.submitter || $('#formBackup button'); btn.disabled = true;
     try {
       const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema) }, s1);
@@ -2486,7 +2952,7 @@ const DebtID = (() => {
       mostrar('#formBackup', false); mostrar('#saidaBackup', true); $('#msgBackup').innerHTML = '';
       $('#f-bk1').value = $('#f-bk2').value = '';
     } catch (err) {
-      const [t, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
   const PESO = { aguardando: 0, validado: 1, quitado: 2 };
@@ -2497,9 +2963,9 @@ const DebtID = (() => {
       if (!obj || obj.tipo !== 'debtid-backup' || !obj.perfil || !obj.perfil.jwk || !obj.perfil.id) throw new D.ChaveErro('BACKUP_FORMATO');
       if (perfil && perfil.id !== obj.perfil.id) {
         const ok = await perguntar({
-          titulo: 'Trocar de perfil?',
-          texto: `Isso troca o perfil atual (ID ${perfil.id}) pelo do backup (ID ${obj.perfil.id}). Os registros dos dois continuam guardados.`,
-          ok: 'Trocar'
+          titulo: t('modal.trocarT'),
+          texto: t('modal.trocar', { a: perfil.id, b: obj.perfil.id }),
+          ok: t('modal.trocarOk')
         });
         if (!ok) return;
       }
@@ -2515,10 +2981,10 @@ const DebtID = (() => {
       if (obj.ui) aplicarUI(obj.ui);
       if (obj.tema === 'dark' || obj.tema === 'light') { gravarTexto(K.tema, obj.tema); aplicarTema(); }
       msgEl.innerHTML = '';
-      toast('Backup restaurado.');
+      toast(t('toast.backupRestaurado'));
       irPara('registros');
     } catch (err) {
-      const [t, x] = msgDe(err); msgEl.innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); msgEl.innerHTML = alertaHTML(ti, x);
     } finally { if (btn) btn.disabled = false; }
   }
   $('#formRestaurar').addEventListener('submit', e => {
@@ -2527,9 +2993,9 @@ const DebtID = (() => {
   });
   $('#btnApagar').addEventListener('click', async () => {
     const ok = await perguntar({
-      titulo: 'Apagar tudo?',
-      texto: 'Seu perfil, sua chave de assinatura e todos os registros saem deste aparelho. Sem backup, não dá para recuperar.',
-      ok: 'Apagar tudo', perigo: true
+      titulo: t('modal.apagarT'),
+      texto: t('modal.apagar'),
+      ok: t('modal.apagarOk'), perigo: true
     });
     if (!ok) return;
     try { [K.perfil, K.regs].forEach(k => localStorage.removeItem(k)); } catch { /* ignore */ }
@@ -2540,15 +3006,24 @@ const DebtID = (() => {
   /* ---------------- onboarding ---------------- */
   function prepararBoasVindas() {
     $$('input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
-    mostrar('#bv1', true); mostrar('#bv2', false); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
+    $$('input[name="idioma-bv"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    passoBV('#bv0'); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
   }
+  function passoBV(id) {
+    ['#bv0', '#bv1', '#bv2'].forEach(x => mostrar(x, x === id));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  $('#bvIdioma').addEventListener('click', () => {
+    aplicarIdioma(DebtIDIdioma.atual(), true);
+    passoBV('#bv1');
+  });
+  $('#bvVoltarIdioma').addEventListener('click', () => passoBV('#bv0'));
   $('#bvContinuar').addEventListener('click', () => {
     aplicarUI(raiz.dataset.ui);
-    mostrar('#bv1', false); mostrar('#bv2', true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    passoBV('#bv2');
     setTimeout(() => $('#f-nome').focus(), 50);
   });
-  $('#bvVoltar').addEventListener('click', () => { mostrar('#bv2', false); mostrar('#bv1', true); });
+  $('#bvVoltar').addEventListener('click', () => passoBV('#bv1'));
   $('#bvTenhoBackup').addEventListener('click', () => {
     const abrir = $('#formRestaurarBV').hidden;
     mostrar('#formRestaurarBV', abrir);
@@ -2561,19 +3036,39 @@ const DebtID = (() => {
   $('#formPerfil').addEventListener('submit', async e => {
     e.preventDefault();
     const nome = limparNome($('#f-nome').value);
-    if (mostrarErros(nome.length < 2 ? { nome: 'Digite seu nome completo.' } : {}, $('#formPerfil'))) return;
+    if (mostrarErros(nome.length < 2 ? { nome: t('erro.nome') } : {}, $('#formPerfil'))) return;
     const btn = $('#btnCriarPerfil'); btn.disabled = true;
     try {
       perfil = await D.criarPerfil(nome.slice(0, 80));
-      if (!gravarJSON(K.perfil, perfil)) toast('Atenção: não consegui salvar o perfil neste aparelho.');
-      toast('Perfil criado!');
+      if (!gravarJSON(K.perfil, perfil)) toast(t('toast.perfilNaoSalvo'));
+      else toast(t('toast.perfilCriado'));
       irPara('inicio');
     } catch (err) {
-      const [t, x] = msgDe(err); $('#msgBV').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); $('#msgBV').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
 
+  /* ---------------- language ---------------- */
+  function aplicarIdioma(l, salvar) {
+    // amounts already typed are re-read in the old language and rewritten in the new one
+    const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
+    const lang = DebtIDIdioma.aplicar(l);
+    D.definirIdioma(lang);
+    if (salvar) gravarTexto(K.idioma, lang);
+    $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
+    if (v > 0) campo('valor').value = fmt.num2(Math.round(v * 100) / 100);
+    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.num(Math.round(tx * 10000) / 10000);
+    $$('.field.invalid').forEach(f => { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; });
+    ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
+    aplicarTema();
+    atualizaDicas();
+    const v2 = location.hash.slice(1);
+    if (v2 === 'registros') renderRegistros();
+    if (v2 === 'detalhe' && atual) renderDetalhe();
+  }
+
   /* ---------------- startup ---------------- */
+  aplicarIdioma(DebtIDIdioma.atual(), false);
   aplicarUI(raiz.dataset.ui);
   aplicarTema();
   verificarLeitor();

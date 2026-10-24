@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
                 send.setType("text/plain");
                 send.putExtra(Intent.EXTRA_TEXT, text);
                 try {
-                    startActivity(Intent.createChooser(send, "Enviar código"));
+                    startActivity(Intent.createChooser(send, "DebtID"));
                 } catch (Exception e) {
                     // no app can share text
                 }
@@ -164,7 +164,7 @@ public class MainActivity extends Activity {
                 if (webView == null) return;
                 PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
                 if (printManager == null) return;
-                String name = (title == null || title.trim().isEmpty()) ? "Recibo DebtID" : title;
+                String name = (title == null || title.trim().isEmpty()) ? "DebtID" : title;
                 PrintDocumentAdapter adapter = webView.createPrintDocumentAdapter(name);
                 PrintAttributes attributes = new PrintAttributes.Builder()
                         .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
@@ -184,8 +184,8 @@ public class MainActivity extends Activity {
                 scanner.startScan()
                         .addOnSuccessListener(barcode -> returnQr(barcode.getRawValue(), null))
                         .addOnCanceledListener(() -> returnQr(null, null))
-                        .addOnFailureListener(error -> returnQr(null,
-                                "Não deu para abrir o leitor de QR. Cole o código."));
+                        // the page shows the error message in the user's language
+                        .addOnFailureListener(error -> returnQr(null, "scanner_unavailable"));
             });
         }
 

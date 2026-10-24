@@ -634,31 +634,67 @@ const DebtID = (() => {
     return { gerar, svg };
   })();
 
-  /* =================== formatting (pt-BR) =================== */
-  const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const nf4 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-  const nfT = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
-  const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  /* =================== formatting (pt-BR or English) =================== */
+  const LOC = {
+    pt: {
+      tag: 'pt-BR',
+      meses: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+      modo: { total: 'no total', mes: 'ao mês', ano: 'ao ano' }, dia: 'dia', dias: 'dias', as: 'às',
+      milhar: '.', decimal: ','
+    },
+    en: {
+      tag: 'en-US',
+      meses: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      modo: { total: 'in total', mes: 'per month', ano: 'per year' }, dia: 'day', dias: 'days', as: 'at',
+      milhar: ',', decimal: '.'
+    }
+  };
+  let idioma = 'pt', L = LOC.pt, nf2, nf4, nfT;
+  /** Sets the language used by fmt, extenso and lerNumero ('pt' or 'en'). Stored codes are not affected. */
+  function definirIdioma(l) {
+    idioma = l === 'en' ? 'en' : 'pt';
+    L = LOC[idioma];
+    nf2 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    nf4 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+    return idioma;
+  }
+  definirIdioma('pt');
   const p2 = n => String(n).padStart(2, '0');
   const dataUTC = dia => new Date(dia * 86400000);
+  const curto = m => L.meses[m].slice(0, 3);
   const fmt = {
-    brl: c => 'R$ ' + nf2.format(c / 100),
-    brl4: c => 'R$ ' + nf4.format(c / 100),
+    idioma: () => idioma,
+    num2: n => nf2.format(n),
+    num: n => nfT.format(n),
+    brl: c => 'R$ ' + nf2.format(c / 100),
+    brl4: c => 'R$ ' + nf4.format(c / 100),
     taxa: t => nfT.format(t / 10000) + '%',
-    modo: m => ({ total: 'no total', mes: 'ao mês', ano: 'ao ano' })[m],
-    dias: n => n + (n === 1 ? ' dia' : ' dias'),
-    data: dia => { const x = dataUTC(dia); return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`; },
-    dataCurta: dia => { const x = dataUTC(dia); return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`; },
-    dataExtenso: dia => { const x = dataUTC(dia), dd = x.getUTCDate(); return `${dd === 1 ? '1º' : dd} de ${MESES[x.getUTCMonth()]} de ${x.getUTCFullYear()}`; },
+    modo: m => L.modo[m],
+    dias: n => n + ' ' + (n === 1 ? L.dia : L.dias),
+    data: dia => {
+      const x = dataUTC(dia);
+      return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}, ${x.getUTCFullYear()}`
+                             : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`;
+    },
+    dataCurta: dia => {
+      const x = dataUTC(dia);
+      return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}` : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`;
+    },
+    dataExtenso: dia => {
+      const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
+      return idioma === 'en' ? `${m} ${dd}, ${x.getUTCFullYear()}` : `${dd === 1 ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
+    },
     momento: (ts, tz) => {
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
-      return `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()} às ` +
-             `${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ` +
+      const dia = Math.floor((ts + tz * 900) / 86400);
+      return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ` +
              `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
     }
   };
 
-  /* =================== amounts in words (pt-BR) =================== */
+  /* =================== amounts in words =================== */
+  // Brazilian Portuguese
   const UN = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
   const DZ = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const CT = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
@@ -692,27 +728,52 @@ const DebtID = (() => {
     }
     return out;
   }
+  // English (the currency stays the Brazilian real: "reais" and "centavos")
+  const EN_UN = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const EN_DZ = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  const EN_ESC = ['', 'thousand', 'million', 'billion', 'trillion'];
+  function ate999En(n) {
+    const c = Math.floor(n / 100), r = n % 100, partes = [];
+    if (c) partes.push(EN_UN[c] + ' hundred');
+    if (r) partes.push(r < 20 ? EN_UN[r] : EN_DZ[Math.floor(r / 10)] + (r % 10 ? '-' + EN_UN[r % 10] : ''));
+    return partes.join(' ');
+  }
+  function inteiroExtensoEn(n) {
+    if (n === 0) return 'zero';
+    const partes = [];
+    for (let k = 0; n > 0; k++, n = Math.floor(n / 1000)) {
+      const v = n % 1000;
+      if (v) partes.unshift(ate999En(v) + (k ? ' ' + EN_ESC[k] : ''));
+    }
+    return partes.join(' ');
+  }
   function extenso(centavos) {
     const r = Math.floor(centavos / 100), c = centavos % 100, partes = [];
+    if (idioma === 'en') {
+      if (r) partes.push(inteiroExtensoEn(r) + (r === 1 ? ' real' : ' reais'));
+      if (c) partes.push(inteiroExtensoEn(c) + (c === 1 ? ' centavo' : ' centavos'));
+      return partes.length ? partes.join(' and ') : 'zero reais';
+    }
     if (r) partes.push(inteiroExtenso(r) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? 'real' : 'reais'));
     if (c) partes.push(inteiroExtenso(c) + (c === 1 ? ' centavo' : ' centavos'));
     return partes.length ? partes.join(' e ') : 'zero real';
   }
 
-  /* =================== typed numbers (lenient pt-BR parsing) =================== */
+  /* =================== typed numbers (lenient parsing) ===================
+     Accepts both "1.250,50" and "1,250.50". When only one kind of separator appears, the
+     current language decides: the decimal mark is "," in Portuguese and "." in English. */
   function lerNumero(bruto, milhar) {
-    let s = String(bruto).replace(/[R$\s% ]/g, '');
+    let s = String(bruto).replace(/[R$\s% ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;
     const vg = s.lastIndexOf(','), pt = s.lastIndexOf('.');
     if (vg > -1 && pt > -1) {
       const decimal = vg > pt ? ',' : '.';
       s = s.split(decimal === ',' ? '.' : ',').join('').replace(decimal, '.');
-    } else if (vg > -1) {
-      const partes = s.split(',');
-      s = partes.length > 2 ? partes.join('') : s.replace(',', '.');
-    } else if (pt > -1) {
-      const partes = s.split('.');
-      if (partes.length > 2 || (milhar && partes[1].length === 3)) s = partes.join('');
+    } else if (vg > -1 || pt > -1) {
+      const sep = vg > -1 ? ',' : '.', partes = s.split(sep);
+      if (sep === L.decimal) s = partes.length > 2 ? partes.join('') : partes.join('.');
+      else if (partes.length > 2 || (milhar && partes[1].length === 3)) s = partes.join('');
+      else s = partes.join('.');
     }
     if ((s.match(/\./g) || []).length > 1) return NaN;
     const n = Number(s);
@@ -720,7 +781,7 @@ const DebtID = (() => {
   }
 
   return {
-    calcular, ceilCentavos, fmt, extenso, lerNumero, LIMITES, MODOS, ChaveErro,
+    calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     criarPerfil, idDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     exportarBackup, importarBackup, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum }

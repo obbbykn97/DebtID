@@ -1,9 +1,11 @@
 /* =====================================================================
-   DebtID — user interface (the app text itself is in Portuguese)
+   DebtID — user interface (texts live in i18n.js, in Portuguese and English)
    ===================================================================== */
 (() => {
   'use strict';
   const D = DebtID, { fmt, extenso } = D;
+  const { t } = DebtIDIdioma;
+  D.definirIdioma(DebtIDIdioma.atual());
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const raiz = document.documentElement;
@@ -15,7 +17,7 @@
   const app = () => window.DebtIDApp || null; // Android app bridge (only exists inside the APK)
 
   /* ---------------- local storage ---------------- */
-  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema' };
+  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma' };
   const lerJSON = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
   const gravarJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const lerTexto = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -26,7 +28,7 @@
   let registros = lerJSON(K.regs, []);
   if (!Array.isArray(registros)) registros = [];
   const salvarRegistros = () => {
-    if (!gravarJSON(K.regs, registros)) toast('Não consegui salvar neste aparelho.');
+    if (!gravarJSON(K.regs, registros)) toast(t('toast.semSalvar'));
   };
   function upsert(r) {
     const i = registros.findIndex(x => x.id === r.id);
@@ -43,7 +45,7 @@
 
   /* ---------------- look and theme ---------------- */
   const prefEscuro = matchMedia('(prefers-color-scheme: dark)');
-  const temaPref = () => { const t = lerTexto(K.tema); return t === 'dark' || t === 'light' ? t : 'sistema'; };
+  const temaPref = () => { const v = lerTexto(K.tema); return v === 'dark' || v === 'light' ? v : 'sistema'; };
   function corDasBarras() {
     const cs = getComputedStyle(raiz);
     const pro = raiz.dataset.ui === 'pro', escuro = raiz.dataset.theme === 'dark';
@@ -55,9 +57,9 @@
   }
   function aplicarTema() {
     const pref = temaPref();
-    const t = pref === 'sistema' ? (prefEscuro.matches ? 'dark' : 'light') : pref;
-    raiz.dataset.theme = t;
-    const rot = t === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+    const tema = pref === 'sistema' ? (prefEscuro.matches ? 'dark' : 'light') : pref;
+    raiz.dataset.theme = tema;
+    const rot = t(tema === 'dark' ? 'tema.paraClaro' : 'tema.paraEscuro');
     const b = $('#temaBtn'); b.setAttribute('aria-label', rot); b.title = rot;
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === pref; });
     corDasBarras();
@@ -79,15 +81,16 @@
     if (e.target.name === 'ui' || e.target.name === 'ui-bv') aplicarUI(e.target.value);
     if (e.target.name === 'tema') { gravarTexto(K.tema, e.target.value === 'sistema' ? null : e.target.value); aplicarTema(); }
     if (e.target.name === 'filtro') renderRegistros();
+    if (e.target.name === 'idioma' || e.target.name === 'idioma-bv') aplicarIdioma(e.target.value, true);
   });
 
   /* ---------------- toasts and dialogs ---------------- */
   let timerToast;
-  function toast(t) {
-    const x = $('#toast'); x.textContent = t; x.classList.add('show');
+  function toast(msg) {
+    const x = $('#toast'); x.textContent = msg; x.classList.add('show');
     clearTimeout(timerToast); timerToast = setTimeout(() => x.classList.remove('show'), 2600);
   }
-  function perguntar({ titulo, texto, ok = 'Confirmar', perigo = false }) {
+  function perguntar({ titulo, texto, ok = t('modal.confirmar'), perigo = false }) {
     return new Promise(res => {
       const m = $('#modal'), bOk = $('#modalOk'), bNao = $('#modalCancelar');
       $('#modalTitulo').textContent = titulo; $('#modalTexto').textContent = texto;
@@ -100,21 +103,12 @@
       document.addEventListener('keydown', tecla);
     });
   }
-  const ERROS = {
-    VAZIA: ['Nenhum código', 'Cole um código ou leia um QR code.'],
-    FORMATO: ['Código não reconhecido', 'Não encontrei um código do DebtID nesse texto. Ele termina com um traço e 4 caracteres de conferência.'],
-    CHECKSUM: ['Código digitado errado', 'O código está incompleto ou com algum caractere trocado. Confira maiúsculas e minúsculas, ou leia o QR.'],
-    CORROMPIDA: ['Código corrompido', 'O código passou na conferência, mas os dados internos não puderam ser lidos.'],
-    VERSAO: ['Versão desconhecida', 'Este código foi gerado por uma versão do DebtID que este app não conhece.'],
-    INCONSISTENTE: ['Dados inconsistentes', 'O total gravado não bate com o recálculo. O código pode ter sido adulterado.'],
-    ASSINATURA: ['Assinatura inválida', 'O código foi alterado depois de assinado. Não confie neste registro.'],
-    PROPRIA: ['Mesmo perfil dos dois lados', 'O registro precisa ser confirmado por outra pessoa, com outro perfil.'],
-    NAO_E_PROPOSTA: ['Nada para confirmar', 'Este código já está validado.'],
-    SEM_CRIPTO: ['Navegador sem suporte', 'Este navegador não tem as funções de criptografia necessárias. Use o app ou um navegador atualizado.'],
-    SENHA: ['Senha incorreta', 'A senha não abre este backup.'],
-    BACKUP_FORMATO: ['Backup inválido', 'Esse texto não é um backup do DebtID ou está incompleto.']
+  const msgDe = err => {
+    const cod = err && err.codigo;
+    if (cod && ('erros.' + cod) in DebtIDTextos.pt) return t('erros.' + cod).split('|');
+    const [titulo, texto] = t('erros.GENERICO').split('|');
+    return [titulo, (err && err.message) || texto];
   };
-  const msgDe = err => ERROS[err && err.codigo] || ['Algo deu errado', (err && err.message) || 'Tente de novo.'];
   const alertaHTML = (titulo, texto, ok = false) =>
     `<div class="alert${ok ? ' ok' : ''}"><i>${ico(ok ? 'check' : 'alerta')}</i><div><b>${esc(titulo)}</b><p>${esc(texto)}</p></div></div>`;
 
@@ -167,17 +161,6 @@
   const hoje = new Date();
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
-  const DICAS = {
-    simples: {
-      total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
-      mes: 'Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).',
-      ano: 'Juros simples: proporcionais aos dias do prazo (ano de 365 dias).'
-    },
-    compostos: {
-      mes: 'Juros sobre juros: a cada mês, a taxa incide sobre o valor já corrigido (mês comercial de 30 dias).',
-      ano: 'Juros sobre juros: a cada ano, a taxa incide sobre o valor já corrigido (ano de 365 dias).'
-    }
-  };
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
   function atualizaDicas() {
     const composto = marcado('tipo') === 'compostos';
@@ -185,22 +168,22 @@
     opTotal.disabled = composto; // compound interest needs a period (month or year)
     if (composto && opTotal.checked) $('#m-mes').checked = true;
     const modo = marcado('modo') || 'mes';
-    $('#hintModo').textContent = DICAS[composto ? 'compostos' : 'simples'][modo];
+    $('#hintModo').textContent = t(`dica.${composto ? 'compostos' : 'simples'}.${modo}`);
     const credor = marcado('papel') !== 'devedor';
-    $('#l-outro').textContent = credor ? 'Nome de quem pega emprestado' : 'Nome de quem empresta';
+    $('#l-outro').textContent = t(credor ? 'form.outroDevedor' : 'form.outroCredor');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
     const caixa = $('#prazoAoVivo'), ok = de != null && dp != null && dp >= de;
     caixa.classList.toggle('off', !ok);
-    caixa.lastElementChild.textContent = ok ? 'Prazo: ' + fmt.dias(dp - de) : 'Prazo: —';
+    caixa.lastElementChild.textContent = ok ? t('form.prazo', { x: fmt.dias(dp - de) }) : t('form.prazoVazio');
     // live total preview while typing
-    const v = D.lerNumero(campo('valor').value, true), t = D.lerNumero(campo('taxa').value, false);
-    const valor = Math.round(v * 100), taxa = Math.round(t * 10000);
+    const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
+    const valor = Math.round(v * 100), taxa = Math.round(tx * 10000);
     const previa = $('#totalAoVivo');
     const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
     previa.classList.toggle('off', !temPrevia);
     previa.lastElementChild.textContent = temPrevia
-      ? 'Total: ' + fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total)
-      : 'Total: —';
+      ? t('form.totalPrevia', { x: fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total) })
+      : t('form.totalVazio');
   }
   form.addEventListener('change', atualizaDicas);
   form.addEventListener('input', e => {
@@ -209,37 +192,35 @@
     if (f && f.classList.contains('invalid')) { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; }
   });
   atualizaDicas();
-  const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const nfT = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 });
   campo('valor').addEventListener('blur', () => {
     const n = D.lerNumero(campo('valor').value, true);
-    if (n > 0) campo('valor').value = nf2.format(Math.round(n * 100) / 100);
+    if (n > 0) campo('valor').value = fmt.num2(Math.round(n * 100) / 100);
   });
   campo('taxa').addEventListener('blur', () => {
     const n = D.lerNumero(campo('taxa').value, false);
-    if (n >= 0) campo('taxa').value = nfT.format(Math.round(n * 10000) / 10000);
+    if (n >= 0) campo('taxa').value = fmt.num(Math.round(n * 10000) / 10000);
   });
   const limparNome = s => String(s).normalize('NFC').replace(/\s+/g, ' ').trim();
 
   function lerFormulario() {
     const erros = {};
     const outro = limparNome(campo('outro').value);
-    if (!outro) erros.outro = marcado('papel') === 'devedor' ? 'Informe quem empresta.' : 'Informe quem pega emprestado.';
-    else if (outro.length > 80) erros.outro = 'Use no máximo 80 caracteres.';
+    if (!outro) erros.outro = t(marcado('papel') === 'devedor' ? 'erro.outroCredor' : 'erro.outroDevedor');
+    else if (outro.length > 80) erros.outro = t('erro.max80');
     const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 100);
-    if (!campo('valor').value.trim()) erros.valor = 'Informe o valor emprestado.';
-    else if (!Number.isFinite(v)) erros.valor = 'Valor inválido. Ex.: 1.250,00';
-    else if (valor < 1) erros.valor = 'O valor precisa ser maior que zero.';
-    else if (valor > D.LIMITES.valor) erros.valor = 'Valor máximo: R$ 1 bilhão.';
-    const t = D.lerNumero(campo('taxa').value, false), taxa = Math.round(t * 10000);
-    if (!campo('taxa').value.trim()) erros.taxa = 'Informe a taxa (pode ser 0).';
-    else if (!Number.isFinite(t)) erros.taxa = 'Taxa inválida. Ex.: 2,5';
-    else if (taxa > D.LIMITES.taxa) erros.taxa = 'Taxa máxima: 1000%.';
+    if (!campo('valor').value.trim()) erros.valor = t('erro.valorVazio');
+    else if (!Number.isFinite(v)) erros.valor = t('erro.valorInvalido');
+    else if (valor < 1) erros.valor = t('erro.valorZero');
+    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax');
+    const tx = D.lerNumero(campo('taxa').value, false), taxa = Math.round(tx * 10000);
+    if (!campo('taxa').value.trim()) erros.taxa = t('erro.taxaVazia');
+    else if (!Number.isFinite(tx)) erros.taxa = t('erro.taxaInvalida');
+    else if (taxa > D.LIMITES.taxa) erros.taxa = t('erro.taxaMax');
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
-    if (de == null) erros.de = 'Escolha a data do empréstimo.';
-    if (dp == null) erros.dp = 'Escolha a data de pagamento.';
-    else if (de != null && dp < de) erros.dp = 'O pagamento não pode ser antes do empréstimo.';
-    else if (de != null && dp - de > D.LIMITES.dias) erros.dp = 'Prazo máximo: 100 anos.';
+    if (de == null) erros.de = t('erro.de');
+    if (dp == null) erros.dp = t('erro.dp');
+    else if (de != null && dp < de) erros.dp = t('erro.dpAntes');
+    else if (de != null && dp - de > D.LIMITES.dias) erros.dp = t('erro.prazoMax');
     return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
@@ -262,9 +243,9 @@
       const m = await D.lerCodigo(codigo);
       upsert(registroDe(m, dados.papel, 'aguardando'));
       campo('outro').value = ''; campo('valor').value = ''; campo('taxa').value = '';
-      await abrirModelo(m, { aviso: 'Registrado e assinado por você.' });
+      await abrirModelo(m, { aviso: t('toast.registrado') });
     } catch (err) {
-      const [t, x] = msgDe(err); toast(`${t}: ${x}`);
+      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
     } finally {
       btn.disabled = false;
     }
@@ -272,14 +253,14 @@
 
   /* ---------------- check a code ---------------- */
   async function abrirTexto(txt) {
-    if (!perfil) { toast('Crie seu perfil primeiro.'); return; }
+    if (!perfil) { toast(t('toast.criePerfil')); return; }
     try {
       const m = await D.lerCodigo(txt);
       $('#f-codigo').value = ''; $('#msgConf').innerHTML = '';
       await abrirModelo(m);
     } catch (err) {
-      const [t, x] = msgDe(err);
-      $('#msgConf').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err);
+      $('#msgConf').innerHTML = alertaHTML(ti, x);
       if (location.hash !== '#conferir') irPara('conferir');
     }
   }
@@ -304,7 +285,7 @@
     const a = app();
     if (a && a.scanQR) {
       return new Promise(res => {
-        window.__debtidQR = (texto, erro) => { window.__debtidQR = null; if (erro) toast(erro); res(texto ? String(texto) : null); };
+        window.__debtidQR = (texto, erro) => { window.__debtidQR = null; if (erro) toast(t('toast.qrApp')); res(texto ? String(texto) : null); };
         try { a.scanQR(); } catch { window.__debtidQR = null; res(null); }
       });
     }
@@ -316,7 +297,7 @@
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
     } catch {
-      toast('Não deu para abrir a câmera. Libere o acesso ou cole o código.');
+      toast(t('toast.camera'));
       return null;
     }
     const detector = new BarcodeDetector({ formats: ['qr_code'] });
@@ -327,7 +308,7 @@
       const fim = txt => {
         if (!ativo) return;
         ativo = false;
-        stream.getTracks().forEach(t => t.stop());
+        stream.getTracks().forEach(tr => tr.stop());
         video.srcObject = null; tela.hidden = true; $('#scanFechar').onclick = null;
         res(txt);
       };
@@ -372,11 +353,11 @@
     if (navigator.share) {
       try { await navigator.share({ text: texto }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
     }
-    toast(await copiar(texto) ? 'Copiado. Cole na conversa para enviar.' : 'Não deu para compartilhar.');
+    toast(t(await copiar(texto) ? 'toast.copiadoCola' : 'toast.semCompartilhar'));
   }
   function imprimir() {
     const m = atual.m;
-    const nome = `Recibo DebtID - ${m.devedor.nome} - ${fmt.data(m.dados.de).replace(/\//g, '-')}`;
+    const nome = t('rc.pdf', { nome: m.devedor.nome, data: fmt.data(m.dados.de).replace(/\//g, '-').replace(/,/g, '') });
     const a = app();
     if (a && a.print) { try { a.print(nome); return; } catch { /* fall through */ } }
     document.title = nome;
@@ -411,7 +392,7 @@
         if (!reg || reg.status === 'aguardando') {
           const estavaAguardando = !!reg;
           reg = upsert(registroDe(m, meu, 'validado'));
-          if (estavaAguardando && !aviso) aviso = 'Pronto! Registro validado pelos dois.';
+          if (estavaAguardando && !aviso) aviso = t('toast.validado');
         }
         ctx = reg.status === 'quitado' ? 'quitado' : 'validado';
       } else {
@@ -431,40 +412,40 @@
     let cls, icone, titulo, texto, botoes = '';
     if (ctx === 'aguardando') {
       cls = 'st-aguardando'; icone = 'relogio';
-      titulo = `Aguardando ${esc(outra.nome)} confirmar`;
-      texto = `Mostre o QR code para ${esc(outra.nome)} ler no DebtID, ou envie o código por mensagem. Depois, leia aqui o QR de confirmação que vai aparecer no celular dessa pessoa.`;
-      botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}Ler confirmação</button>
-                <button class="btn" type="button" data-acao="colar">${ico('copiar')}Colar confirmação</button>`;
+      titulo = t('st.aguardandoT', { nome: esc(outra.nome) });
+      texto = t('st.aguardando', { nome: esc(outra.nome) });
+      botoes = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerConf')}</button>
+                <button class="btn" type="button" data-acao="colar">${ico('copiar')}${t('st.colarConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
       cls = 'st-recebida'; icone = 'doc';
-      titulo = `${esc(emissor.nome)} registrou um empréstimo com você`;
-      texto = souDevedor
-        ? `Segundo ${esc(emissor.nome)}, você pegou ${fmt.brl(d.valor)} emprestado em ${fmt.data(d.de)} e vai pagar ${fmt.brl(c.total)} até ${fmt.data(d.dp)}.`
-        : `Segundo ${esc(emissor.nome)}, você emprestou ${fmt.brl(d.valor)} em ${fmt.data(d.de)} e vai receber ${fmt.brl(c.total)} até ${fmt.data(d.dp)}.`;
-      texto += ' Confira os dados antes de assinar.';
-      botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}Confirmar e assinar</button>
-                <button class="btn" type="button" data-acao="recusar">Não reconheço</button>`;
+      titulo = t('st.recebidaT', { nome: esc(emissor.nome) });
+      texto = t(souDevedor ? 'st.recebidaDevedor' : 'st.recebidaCredor',
+        { nome: esc(emissor.nome), valor: fmt.brl(d.valor), de: fmt.data(d.de), total: fmt.brl(c.total), dp: fmt.data(d.dp) });
+      texto += ' ' + t('st.confira');
+      botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}${t('st.confirmar')}</button>
+                <button class="btn" type="button" data-acao="recusar">${t('st.naoReconheco')}</button>`;
     } else if (ctx === 'validado') {
       cls = 'st-validado'; icone = 'check';
-      titulo = 'Validado pelos dois';
-      texto = `${esc(m.credor.nome)} e ${esc(m.devedor.nome)} assinaram este registro.`;
-      if (extra.recemConfirmado) texto += ` Agora mostre o QR para ${esc(emissor.nome)} ler, para o registro ficar validado no celular dessa pessoa também.`;
-      if (d.dp < hojeDia()) texto += ` O pagamento venceu em ${fmt.data(d.dp)}.`;
-      if (reg) botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}Marcar como quitado</button>`;
+      titulo = t('st.validadoT');
+      texto = t('st.validado', { a: esc(m.credor.nome), b: esc(m.devedor.nome) });
+      if (extra.recemConfirmado) texto += ' ' + t('st.mostreVolta', { nome: esc(emissor.nome) });
+      if (d.dp < hojeDia()) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
+      if (reg) botoes = `<button class="btn" type="button" data-acao="quitar">${ico('check')}${t('st.quitar')}</button>`;
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
-      titulo = 'Quitado';
-      texto = `Marcado como quitado em ${new Date(reg.quitadoEm || Date.now()).toLocaleDateString('pt-BR')}. Essa marcação fica só neste aparelho.`;
-      botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}Desfazer</button>`;
+      titulo = t('st.quitadoT');
+      const q = new Date(reg.quitadoEm || Date.now());
+      texto = t('st.quitado', { data: fmt.data(Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000)) });
+      botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
     } else if (ctx === 'terceiro') {
       cls = 'st-terceiro'; icone = 'escudo';
-      titulo = 'Registro validado';
-      texto = `Assinado por ${esc(m.credor.nome)} e ${esc(m.devedor.nome)}. Você não participa deste empréstimo.`;
+      titulo = t('st.terceiroT');
+      texto = t('st.terceiro', { a: esc(m.credor.nome), b: esc(m.devedor.nome) });
     } else {
       cls = 'st-antigo'; icone = 'alerta';
-      titulo = 'Código antigo, sem assinatura';
-      texto = 'Gerado por uma versão anterior do app. Mostra os dados, mas não comprova quem registrou.';
+      titulo = t('st.antigoT');
+      texto = t('st.antigo');
     }
     return `<section class="status ${cls}"><span class="st-ico">${ico(icone)}</span><div><h3>${titulo}</h3><p>${texto}</p>${botoes ? `<div class="btns">${botoes}</div>` : ''}</div></section>`;
   }
@@ -473,17 +454,17 @@
     const { m, ctx } = atual;
     if (ctx === 'recebida') return '';
     const aguardando = ctx === 'aguardando';
-    const legenda = aguardando ? `Código para ${esc(parteOutra(m).nome)} confirmar` : m.tipo === 'v1' ? 'Código antigo' : 'Código do registro validado';
-    const dica = aguardando ? 'Mostre o QR na tela ou envie o código por mensagem.' : 'Qualquer pessoa com o DebtID confere as assinaturas por este código.';
+    const legenda = aguardando ? t('qr.paraConfirmar', { nome: esc(parteOutra(m).nome) }) : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
+    const dica = t(aguardando ? 'qr.dicaAg' : 'qr.dica');
     return `<section class="qr-card">
-      <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: 'QR code do registro' })}</div>
+      <div class="qr">${D.QR.svg(m.codigo, { nivel: 'M', rotulo: esc(t('qr.rotulo')) })}</div>
       <div class="qr-info">
         <p class="kicker">${legenda}</p>
         <code class="codigo">${esc(m.codigo)}</code>
         <div class="btns">
-          <button class="btn btn-alt" type="button" data-acao="copiar">${ico('copiar')}Copiar código</button>
-          <button class="btn" type="button" data-acao="enviar">${ico('enviar')}Compartilhar</button>
-          ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}Imprimir / PDF</button>`}
+          <button class="btn btn-alt" type="button" data-acao="copiar">${ico('copiar')}${t('qr.copiar')}</button>
+          <button class="btn" type="button" data-acao="enviar">${ico('enviar')}${t('aj.compartilhar')}</button>
+          ${aguardando ? '' : `<button class="btn" type="button" data-acao="imprimir">${ico('imprimir')}${t('qr.imprimir')}</button>`}
         </div>
         <p class="hint">${dica}</p>
       </div>
@@ -492,24 +473,21 @@
 
   function resumoHTML(m) {
     const c = m.calc, d = m.dados;
-    const pct = d.valor ? new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(c.lucro / d.valor * 100) : '0';
+    const pct = fmt.num(d.valor ? Math.round(c.lucro / d.valor * 10000) / 100 : 0);
     return `<div class="summary">
-      <div class="stat s-1"><span>Total a pagar</span><b>${rs(fmt.brl(c.total))}</b><small>arredondado para cima</small></div>
-      <div class="stat s-2"><span>Lucro do credor</span><b>${rs(fmt.brl(c.lucro))}</b><small>${pct}% do valor</small></div>
-      <div class="stat s-3"><span>Prazo</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
-      <div class="stat s-4"><span>Juros calculados</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>antes do arredondamento</small></div>
+      <div class="stat s-1"><span>${t('res.total')}</span><b>${rs(fmt.brl(c.total))}</b><small>${t('res.totalNota')}</small></div>
+      <div class="stat s-2"><span>${t('res.lucro')}</span><b>${rs(fmt.brl(c.lucro))}</b><small>${t('res.lucroNota', { pct })}</small></div>
+      <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
+      <div class="stat s-4"><span>${t('res.juros')}</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>${t('res.jurosNota')}</small></div>
     </div>`;
   }
 
   function textoJuros(d, c) {
-    if (d.taxa === 0) return 'O empréstimo é feito <b>sem juros</b>.';
-    const base = d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias';
-    if (d.composto) {
-      return `Sobre esse valor incidem juros compostos de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, capitalizados ao longo dos ${fmt.dias(c.dias)} de prazo (${base}), o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
-    }
-    const prop = d.modo === 'total' ? 'aplicados uma única vez sobre o valor emprestado'
-      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${base})`;
-    return `Sobre esse valor incidem juros simples de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, ${prop}, o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
+    if (d.taxa === 0) return t('juros.sem');
+    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: fmt.brl(c.lucro),
+                base: t(d.modo === 'mes' ? 'juros.baseMes' : 'juros.baseAno') };
+    if (d.composto) return t('juros.compostos', v);
+    return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
   }
 
   function reciboHTML(m) {
@@ -517,52 +495,55 @@
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
-      ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>Assinou em ${fmt.momento(parte.ts, parte.tz)}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>Informado como “${esc(parte.nomeInformado)}”</small>` : ''}</div>`
-      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${m.tipo === 'v1' ? 'Sem assinatura digital' : 'Aguardando confirmação'}</small></div>`;
+      ? `<div class="sig"><span class="selo">${ico('check')}</span><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>ID ${esc(parte.id)}</small><small>${t('rc.assinou', { quando: fmt.momento(parte.ts, parte.tz) })}</small>${parte.nomeInformado && parte.nomeInformado !== parte.nome ? `<small>${t('rc.informado', { nome: esc(parte.nomeInformado) })}</small>` : ''}</div>`
+      : `<div class="sig off"><span class="sig-role">${papel}</span><b>${esc(parte.nome)}</b><small>${t(m.tipo === 'v1' ? 'rc.semAssinatura' : 'rc.aguardando')}</small></div>`;
     let situacao, nota, situacaoCurta;
     if (m.tipo === 'validado') {
-      situacao = `Registro assinado digitalmente por ${credor} e por ${devedor} no DebtID.`;
-      situacaoCurta = 'Validado pelos dois';
-      nota = 'Assinado com chaves que ficam só no aparelho de cada pessoa. Confira no DebtID, em Conferir.';
+      situacao = t('rc.situacaoVal', { a: credor, b: devedor });
+      situacaoCurta = t('rc.curtaVal');
+      nota = t('rc.notaVal');
     } else if (m.tipo === 'proposta') {
-      situacao = `Registrado e assinado por ${esc(parteEmissora(m).nome)}; aguardando a assinatura de ${esc(parteOutra(m).nome)}.`;
-      situacaoCurta = 'Aguardando confirmação';
-      nota = `Ainda falta a assinatura de ${esc(parteOutra(m).nome)}. Confira no DebtID, em Conferir.`;
+      const a = esc(parteEmissora(m).nome), b = esc(parteOutra(m).nome);
+      situacao = t('rc.situacaoProp', { a, b });
+      situacaoCurta = t('rc.curtaProp');
+      nota = t('rc.notaProp', { b });
     } else {
-      situacao = 'Registro antigo, sem assinatura digital.';
-      situacaoCurta = 'Sem assinatura';
-      nota = 'Código antigo, sem assinatura digital.';
+      situacao = t('rc.situacaoV1');
+      situacaoCurta = t('rc.curtaV1');
+      nota = t('rc.notaV1');
     }
     const confirmado = m.confirmadoEm ? fmt.momento(m.confirmadoEm.ts, m.confirmadoEm.tz) : '—';
+    const taxa = d.taxa === 0 ? t('rc.semJuros')
+      : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : t(d.composto ? 'rc.compostos' : 'rc.simples')}`;
     return `
       <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
       <div class="rc-body">
-        <p class="kicker">Recibo e termo de compromisso</p>
-        <h3 class="rc-title">Recibo de empréstimo</h3>
-        <p class="rc-text">Eu, <b>${devedor}</b>, declaro que recebi de <b>${credor}</b>, em ${fmt.dataExtenso(d.de)}, a quantia de <b>${fmt.brl(d.valor)}</b> (${extenso(d.valor)}), a título de empréstimo.</p>
-        <p class="rc-text">${textoJuros(d, c)} Comprometo-me a pagar a ${credor} o total de <b>${fmt.brl(c.total)}</b> (${extenso(c.total)}) até <b>${fmt.dataExtenso(d.dp)}</b>, no prazo de <b>${fmt.dias(c.dias)}</b> contados da data do empréstimo.</p>
-        <p class="rc-note">${situacao} ${d.composto ? 'Juros compostos (juros sobre juros)' : 'Juros simples'}, com o total arredondado para cima no centavo.</p>
+        <p class="kicker">${t('rc.kicker')}</p>
+        <h3 class="rc-title">${t('rc.titulo')}</h3>
+        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: fmt.brl(d.valor), extenso: extenso(d.valor) })}</p>
+        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: fmt.brl(c.total), extenso: extenso(c.total), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
+        <p class="rc-note">${situacao} ${t('rc.arred', { tipo: t(d.composto ? 'rc.tipoCompostos' : 'rc.tipoSimples') })}</p>
         <dl class="rc-grid">
-          ${linha('Credor', credor)}
-          ${linha('Devedor', devedor)}
-          ${linha('Valor emprestado', fmt.brl(d.valor))}
-          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : d.composto ? ', compostos' : ', simples'}`)}
-          ${linha('Data do empréstimo', fmt.data(d.de))}
-          ${linha('Data de pagamento', fmt.data(d.dp))}
-          ${linha('Prazo', fmt.dias(c.dias))}
-          ${linha('Juros calculados', fmt.brl4(c.jurosCentavos))}
-          ${linha('Lucro do credor', fmt.brl(c.lucro))}
-          ${linha('Situação', situacaoCurta)}
-          ${linha('Registrado em', fmt.momento(d.ts, d.tz))}
-          ${linha('Confirmado em', confirmado)}
-          ${linha('Total a pagar', fmt.brl(c.total), 'hl')}
+          ${linha(t('rc.credor'), credor)}
+          ${linha(t('rc.devedor'), devedor)}
+          ${linha(t('rc.valor'), fmt.brl(d.valor))}
+          ${linha(t('rc.taxa'), taxa)}
+          ${linha(t('rc.de'), fmt.data(d.de))}
+          ${linha(t('rc.dp'), fmt.data(d.dp))}
+          ${linha(t('rc.prazo'), fmt.dias(c.dias))}
+          ${linha(t('rc.juros'), fmt.brl4(c.jurosCentavos))}
+          ${linha(t('rc.lucro'), fmt.brl(c.lucro))}
+          ${linha(t('rc.situacao'), situacaoCurta)}
+          ${linha(t('rc.registrado'), fmt.momento(d.ts, d.tz))}
+          ${linha(t('rc.confirmado'), confirmado)}
+          ${linha(t('rc.total'), fmt.brl(c.total), 'hl')}
         </dl>
-        <div class="rc-sign">${assinatura(m.credor, 'Credor')}${assinatura(m.devedor, 'Devedor')}</div>
+        <div class="rc-sign">${assinatura(m.credor, t('rc.credor'))}${assinatura(m.devedor, t('rc.devedor'))}</div>
       </div>
       <div class="rc-key">
-        <div class="rc-qr">${D.QR.svg(m.codigo, { nivel: 'M', margem: 2, rotulo: 'QR code do registro' })}</div>
+        <div class="rc-qr">${D.QR.svg(m.codigo, { nivel: 'M', margem: 2, rotulo: esc(t('qr.rotulo')) })}</div>
         <div>
-          <p class="rc-key-label">Código de verificação</p>
+          <p class="rc-key-label">${t('rc.codigo')}</p>
           <code>${esc(m.codigo)}</code>
           <p class="rc-key-note">${ico('cadeado')}<span>${nota}</span></p>
         </div>
@@ -573,32 +554,27 @@
     const { m, reg } = atual;
     $('#detalhe').innerHTML = statusHTML() + qrHTML() + resumoHTML(m) +
       `<article class="receipt">${reciboHTML(m)}</article>` +
-      (reg ? `<div class="form-foot"><button class="btn btn-ghost" type="button" data-acao="excluir">${ico('lixo')}Excluir registro deste aparelho</button></div>` : '');
+      (reg ? `<div class="form-foot"><button class="btn btn-ghost" type="button" data-acao="excluir">${ico('lixo')}${t('det.excluir')}</button></div>` : '');
   }
 
   function mensagemCompartilhar() {
     const { m, ctx } = atual;
     if (ctx === 'aguardando') {
-      return `${perfil.nome} registrou um empréstimo com você no DebtID: ${fmt.brl(m.calc.total)} até ${fmt.data(m.dados.dp)}.\n` +
-             `Para confirmar, abra o DebtID, toque em Conferir e cole este código:\n\n${m.codigo}`;
+      return t('share.aguardando', { eu: perfil.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp), codigo: m.codigo });
     }
-    if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) {
-      return `Confirmei nosso empréstimo no DebtID. Abra o DebtID, toque em Conferir e cole este código para validar:\n\n${m.codigo}`;
-    }
-    return `Empréstimo registrado no DebtID (Ref. ${m.ref}). Código para conferir:\n\n${m.codigo}`;
+    if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) return t('share.confirmei', { codigo: m.codigo });
+    return t('share.geral', { ref: m.ref, codigo: m.codigo });
   }
 
   async function confirmarAtual(botao) {
     const m = atual.m;
     const meuPapel = m.emissor === 'credor' ? 'devedor' : 'credor';
     const outro = parteEmissora(m);
-    const acao = meuPapel === 'devedor'
-      ? `pegou ${fmt.brl(m.dados.valor)} emprestado de ${outro.nome}`
-      : `emprestou ${fmt.brl(m.dados.valor)} para ${outro.nome}`;
     const ok = await perguntar({
-      titulo: 'Confirmar e assinar?',
-      texto: `Sua assinatura confirma que você ${acao}, com total de ${fmt.brl(m.calc.total)} até ${fmt.data(m.dados.dp)}. Depois de assinado, não dá para desfazer.`,
-      ok: 'Assinar'
+      titulo: t('modal.assinarT'),
+      texto: t(meuPapel === 'devedor' ? 'modal.assinarDevedor' : 'modal.assinarCredor',
+        { valor: fmt.brl(m.dados.valor), nome: outro.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp) }),
+      ok: t('modal.assinarOk')
     });
     if (!ok) return;
     if (botao) botao.disabled = true;
@@ -606,9 +582,9 @@
       const cod = await D.confirmarProposta(perfil, m.codigo);
       const mv = await D.lerCodigo(cod);
       upsert(registroDe(mv, meuPapel, 'validado'));
-      await abrirModelo(mv, { recemConfirmado: true, aviso: 'Assinado! Agora mostre o QR de volta.' });
+      await abrirModelo(mv, { recemConfirmado: true, aviso: t('toast.assinado') });
     } catch (err) {
-      const [t, x] = msgDe(err); toast(`${t}: ${x}`);
+      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
       if (botao) botao.disabled = false;
     }
   }
@@ -618,58 +594,57 @@
     if (!b) return;
     const acao = b.dataset.acao;
     if (acao === 'ler-qr') return lerEAbrir();
-    if (acao === 'copiar-backup') return toast(await copiar($('#codigoBackup').textContent) ? 'Backup copiado.' : 'Não deu para copiar.');
+    if (acao === 'copiar-backup') return toast(t(await copiar($('#codigoBackup').textContent) ? 'toast.backupCopiado' : 'toast.semCopiarCurto'));
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
     if (!atual) return;
     const { reg } = atual;
     switch (acao) {
       case 'colar': irPara('conferir'); setTimeout(() => $('#f-codigo').focus(), 60); break;
       case 'confirmar': confirmarAtual(b); break;
-      case 'recusar': atual = null; irPara('conferir'); toast('Nada foi assinado.'); break;
-      case 'copiar': toast(await copiar(atual.m.codigo) ? 'Código copiado.' : 'Não deu para copiar. Selecione o código.'); break;
+      case 'recusar': atual = null; irPara('conferir'); toast(t('toast.nadaAssinado')); break;
+      case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
       case 'imprimir': imprimir(); break;
       case 'quitar':
         atual.reg = upsert({ id: reg.id, status: 'quitado', quitadoEm: Date.now(), atualizadoEm: Date.now() });
-        atual.ctx = 'quitado'; renderDetalhe(); toast('Marcado como quitado.'); break;
+        atual.ctx = 'quitado'; renderDetalhe(); toast(t('toast.quitado')); break;
       case 'desquitar':
         atual.reg = upsert({ id: reg.id, status: 'validado', quitadoEm: null, atualizadoEm: Date.now() });
         atual.ctx = 'validado'; renderDetalhe(); break;
       case 'excluir':
-        if (await perguntar({ titulo: 'Excluir registro?', texto: 'Ele some deste aparelho. Quem tiver o código continua podendo conferir.', ok: 'Excluir', perigo: true })) {
+        if (await perguntar({ titulo: t('modal.excluirT'), texto: t('modal.excluir'), ok: t('modal.excluirOk'), perigo: true })) {
           registros = registros.filter(r => r.id !== reg.id); salvarRegistros();
-          atual = null; irPara('registros'); toast('Registro excluído.');
+          atual = null; irPara('registros'); toast(t('toast.excluido'));
         }
         break;
     }
   });
 
   /* ---------------- records list ---------------- */
-  const ROTULO = { aguardando: 'Aguardando', validado: 'Validado', quitado: 'Quitado' };
   function renderRegistros() {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
     const validos = registros.filter(r => r.status === 'validado');
     const soma = papel => validos.filter(r => r.papel === papel).reduce((s, r) => s + r.total, 0);
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>A receber</span><b>${rs(fmt.brl(soma('credor')))}</b><small>validados, sem quitados</small></div>` +
-      `<div class="stat s-3"><span>A pagar</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>validados, sem quitados</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span><b>${rs(fmt.brl(soma('credor')))}</b><small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>${t('reg.totaisNota')}</small></div>`;
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
     if (!registros.length) {
-      el.innerHTML = `<div class="vazio"><b>Nenhum registro ainda</b><p>Quando você registrar ou confirmar um empréstimo, ele aparece aqui.</p><a class="btn btn-primary" href="#inicio">${ico('plus')}Novo registro</a></div>`;
+      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#inicio">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
       return;
     }
-    if (!lista.length) { el.innerHTML = '<div class="vazio">Nada com esse filtro.</div>'; return; }
+    if (!lista.length) { el.innerHTML = `<div class="vazio">${t('reg.filtroVazio')}</div>`; return; }
     el.innerHTML = lista.map(r => {
       const recebe = r.papel === 'credor';
       const vencido = r.status === 'validado' && r.dp < dia;
-      const quando = r.status === 'quitado' ? 'quitado' : (vencido ? 'venceu ' : 'vence ') + fmt.data(r.dp);
+      const quando = r.status === 'quitado' ? t('reg.quitado') : t(vencido ? 'reg.venceu' : 'reg.vence', { data: fmt.data(r.dp) });
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
-        <span class="reg-main"><b>${esc(r.outro)}</b><small>${recebe ? 'Você emprestou' : 'Você deve'} · ${quando}</small></span>
-        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${vencido ? 'Vencido' : ROTULO[r.status]}</span></span>
+        <span class="reg-main"><b>${esc(r.outro)}</b><small>${t(recebe ? 'reg.emprestou' : 'reg.deve')} · ${quando}</small></span>
+        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
       </button>`;
     }).join('');
   }
@@ -678,7 +653,7 @@
     if (!b) return;
     const r = registros.find(x => x.id === b.dataset.reg);
     if (!r) return;
-    try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [t, x] = msgDe(err); toast(`${t}: ${x}`); }
+    try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [ti, x] = msgDe(err); toast(`${ti}: ${x}`); }
   });
 
   /* ---------------- settings ---------------- */
@@ -690,13 +665,14 @@
     $('#f-nome-ajuste').value = perfil.nome;
     $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
+    $$('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
   }
   $('#formNome').addEventListener('submit', e => {
     e.preventDefault();
     const nome = limparNome($('#f-nome-ajuste').value);
-    if (nome.length < 2) return toast('Digite seu nome.');
+    if (nome.length < 2) return toast(t('toast.digiteNome'));
     perfil = { ...perfil, nome: nome.slice(0, 80) };
-    gravarJSON(K.perfil, perfil); renderAjustes(); toast('Nome atualizado.');
+    gravarJSON(K.perfil, perfil); renderAjustes(); toast(t('toast.nomeAtualizado'));
   });
   const mostrar = (id, sim) => { $(id).hidden = !sim; };
   $('#btnBackup').addEventListener('click', () => {
@@ -712,8 +688,8 @@
   $('#formBackup').addEventListener('submit', async e => {
     e.preventDefault();
     const s1 = $('#f-bk1').value, s2 = $('#f-bk2').value;
-    if (s1.length < 6) { $('#msgBackup').innerHTML = alertaHTML('Senha curta', 'Use pelo menos 6 caracteres.'); return; }
-    if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML('Senhas diferentes', 'As duas senhas precisam ser iguais.'); return; }
+    if (s1.length < 6) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaCurtaT'), t('bk.senhaCurta')); return; }
+    if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
     const btn = e.submitter || $('#formBackup button'); btn.disabled = true;
     try {
       const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema) }, s1);
@@ -721,7 +697,7 @@
       mostrar('#formBackup', false); mostrar('#saidaBackup', true); $('#msgBackup').innerHTML = '';
       $('#f-bk1').value = $('#f-bk2').value = '';
     } catch (err) {
-      const [t, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
   const PESO = { aguardando: 0, validado: 1, quitado: 2 };
@@ -732,9 +708,9 @@
       if (!obj || obj.tipo !== 'debtid-backup' || !obj.perfil || !obj.perfil.jwk || !obj.perfil.id) throw new D.ChaveErro('BACKUP_FORMATO');
       if (perfil && perfil.id !== obj.perfil.id) {
         const ok = await perguntar({
-          titulo: 'Trocar de perfil?',
-          texto: `Isso troca o perfil atual (ID ${perfil.id}) pelo do backup (ID ${obj.perfil.id}). Os registros dos dois continuam guardados.`,
-          ok: 'Trocar'
+          titulo: t('modal.trocarT'),
+          texto: t('modal.trocar', { a: perfil.id, b: obj.perfil.id }),
+          ok: t('modal.trocarOk')
         });
         if (!ok) return;
       }
@@ -750,10 +726,10 @@
       if (obj.ui) aplicarUI(obj.ui);
       if (obj.tema === 'dark' || obj.tema === 'light') { gravarTexto(K.tema, obj.tema); aplicarTema(); }
       msgEl.innerHTML = '';
-      toast('Backup restaurado.');
+      toast(t('toast.backupRestaurado'));
       irPara('registros');
     } catch (err) {
-      const [t, x] = msgDe(err); msgEl.innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); msgEl.innerHTML = alertaHTML(ti, x);
     } finally { if (btn) btn.disabled = false; }
   }
   $('#formRestaurar').addEventListener('submit', e => {
@@ -762,9 +738,9 @@
   });
   $('#btnApagar').addEventListener('click', async () => {
     const ok = await perguntar({
-      titulo: 'Apagar tudo?',
-      texto: 'Seu perfil, sua chave de assinatura e todos os registros saem deste aparelho. Sem backup, não dá para recuperar.',
-      ok: 'Apagar tudo', perigo: true
+      titulo: t('modal.apagarT'),
+      texto: t('modal.apagar'),
+      ok: t('modal.apagarOk'), perigo: true
     });
     if (!ok) return;
     try { [K.perfil, K.regs].forEach(k => localStorage.removeItem(k)); } catch { /* ignore */ }
@@ -775,15 +751,24 @@
   /* ---------------- onboarding ---------------- */
   function prepararBoasVindas() {
     $$('input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
-    mostrar('#bv1', true); mostrar('#bv2', false); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
+    $$('input[name="idioma-bv"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    passoBV('#bv0'); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
   }
+  function passoBV(id) {
+    ['#bv0', '#bv1', '#bv2'].forEach(x => mostrar(x, x === id));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  $('#bvIdioma').addEventListener('click', () => {
+    aplicarIdioma(DebtIDIdioma.atual(), true);
+    passoBV('#bv1');
+  });
+  $('#bvVoltarIdioma').addEventListener('click', () => passoBV('#bv0'));
   $('#bvContinuar').addEventListener('click', () => {
     aplicarUI(raiz.dataset.ui);
-    mostrar('#bv1', false); mostrar('#bv2', true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    passoBV('#bv2');
     setTimeout(() => $('#f-nome').focus(), 50);
   });
-  $('#bvVoltar').addEventListener('click', () => { mostrar('#bv2', false); mostrar('#bv1', true); });
+  $('#bvVoltar').addEventListener('click', () => passoBV('#bv1'));
   $('#bvTenhoBackup').addEventListener('click', () => {
     const abrir = $('#formRestaurarBV').hidden;
     mostrar('#formRestaurarBV', abrir);
@@ -796,19 +781,39 @@
   $('#formPerfil').addEventListener('submit', async e => {
     e.preventDefault();
     const nome = limparNome($('#f-nome').value);
-    if (mostrarErros(nome.length < 2 ? { nome: 'Digite seu nome completo.' } : {}, $('#formPerfil'))) return;
+    if (mostrarErros(nome.length < 2 ? { nome: t('erro.nome') } : {}, $('#formPerfil'))) return;
     const btn = $('#btnCriarPerfil'); btn.disabled = true;
     try {
       perfil = await D.criarPerfil(nome.slice(0, 80));
-      if (!gravarJSON(K.perfil, perfil)) toast('Atenção: não consegui salvar o perfil neste aparelho.');
-      toast('Perfil criado!');
+      if (!gravarJSON(K.perfil, perfil)) toast(t('toast.perfilNaoSalvo'));
+      else toast(t('toast.perfilCriado'));
       irPara('inicio');
     } catch (err) {
-      const [t, x] = msgDe(err); $('#msgBV').innerHTML = alertaHTML(t, x);
+      const [ti, x] = msgDe(err); $('#msgBV').innerHTML = alertaHTML(ti, x);
     } finally { btn.disabled = false; }
   });
 
+  /* ---------------- language ---------------- */
+  function aplicarIdioma(l, salvar) {
+    // amounts already typed are re-read in the old language and rewritten in the new one
+    const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
+    const lang = DebtIDIdioma.aplicar(l);
+    D.definirIdioma(lang);
+    if (salvar) gravarTexto(K.idioma, lang);
+    $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
+    if (v > 0) campo('valor').value = fmt.num2(Math.round(v * 100) / 100);
+    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.num(Math.round(tx * 10000) / 10000);
+    $$('.field.invalid').forEach(f => { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; });
+    ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
+    aplicarTema();
+    atualizaDicas();
+    const v2 = location.hash.slice(1);
+    if (v2 === 'registros') renderRegistros();
+    if (v2 === 'detalhe' && atual) renderDetalhe();
+  }
+
   /* ---------------- startup ---------------- */
+  aplicarIdioma(DebtIDIdioma.atual(), false);
   aplicarUI(raiz.dataset.ui);
   aplicarTema();
   verificarLeitor();

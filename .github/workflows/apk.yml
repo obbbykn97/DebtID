@@ -58,7 +58,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          printf '%s\n' \
+            "**English:** download \`DebtID.apk\` on your Android phone and open it to install." \
+            "" \
+            "**Português:** baixe o \`DebtID.apk\` no seu celular Android e abra o arquivo para instalar." > notes.md
           gh release create "v1.${{ github.run_number }}" DebtID.apk \
             --title "DebtID 1.${{ github.run_number }}" \
-            --notes "Download DebtID.apk on your Android phone and open it to install." \
+            --notes-file notes.md \
             --latest || echo "::warning::Could not create the release; the APK is available under Artifacts."
