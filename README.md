@@ -4,14 +4,14 @@
 
 <p align="center"><b>English</b> · <a href="README.pt-BR.md">Português</a></p>
 
-<p align="center">A loan calculator and IOU that both sides sign — with a QR code anyone can verify in seconds.<br>
+<p align="center">A loan calculator and IOU in any currency that both sides sign — with a QR code anyone can verify in seconds.<br>
 Everything runs on the device: no server, no account, no network access.</p>
 
 ---
 
 ## How it works
 
-1. **The person who records the loan** enters the amount, rate and dates. DebtID creates a signed code, shown as a QR code.
+1. **The person who records the loan** picks the currency and enters the amount, rate and dates. DebtID creates a signed code, shown as a QR code.
 2. **The other person** scans the QR code in their own DebtID, checks the numbers and confirms with their own signature.
 3. **The first person** scans the confirmation QR code back. Done: the loan is **validated by both sides**, on both phones.
 
@@ -19,10 +19,11 @@ Either side can start: the lender or the borrower.
 
 ## Features
 
-- **Simple or compound interest** — applied once over the whole loan, per month (30-day months) or per year, with a live total preview. Totals always round up to the next cent.
+- **Any currency**: 150+ world currencies plus Bitcoin (the default), Ether and Tether, with search by name or code. Pick a default in *Settings* and change it for any loan. The currency is part of the signed code, totals round up to the currency's smallest unit (cents, satoshis…) and amounts in different currencies are never added together. There is no conversion between currencies: the app works offline.
+- **Simple or compound interest** — applied once over the whole loan, per month (30-day months) or per year, with a live total preview. Totals always round up.
 - **Receipt** with amounts spelled out, both digital signatures and the QR code, ready to print or save as PDF.
 - **Records** with status (pending, validated, paid, overdue) and running totals of what you are owed and what you owe.
-- **Two languages**, English and Brazilian Portuguese. The app asks on first launch and you can switch any time in *Settings*. Amounts are always in Brazilian reais (R$).
+- **Two languages**, English and Brazilian Portuguese. The app asks on first launch and you can switch any time in *Settings*.
 - **Two looks**, *Professional* and *Soft*, each with light and dark themes.
 - **Password-protected backup** of your profile and records, so you can move to a new phone and keep the same ID.
 - **Android app**: QR scanning through Google Play services (no camera permission), and codes can be received straight from another app's *Share* menu.

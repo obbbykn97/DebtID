@@ -10,7 +10,8 @@ const DebtID = (() => {
   const SEGREDO = 'fiado·v1·7c2e91d4-b83f-4a6e-9f15-2d0ac4e8b6f3';
   const MODOS = ['total', 'mes', 'ano'];
   const PAPEIS = ['credor', 'devedor'];
-  const LIMITES = { valor: 100000000000, taxa: 10000000, dias: 36500, nomeBytes: 320 };
+  // valor and totals are in the currency's smallest unit (cents, satoshis...) and must stay below 2^53
+  const LIMITES = { valor: 1e15, taxa: 10000000, dias: 36500, nomeBytes: 320 };
 
   const enc = new TextEncoder();
   const dec = new TextDecoder('utf-8', { fatal: true });
@@ -23,12 +24,216 @@ const DebtID = (() => {
     constructor(codigo) { super(codigo); this.codigo = codigo; }
   }
 
+  /* =================== currencies ===================
+     code|decimals|symbol|pt singular|pt plural|pt gender (m/f)|en singular|en plural|pt list name|en list name|subunit
+     Empty list names use the capitalized singular. Empty subunit: cents (2 decimals) or none (0 decimals).
+     ISO 4217 active currencies (as of 2026: no BGN or HRK, which became the euro; XCG replaced ANG; SLE, ZWG),
+     plus Bitcoin (default), Ether and Tether. */
+  const DADOS_MOEDAS = `
+BTC|8|₿|bitcoin|bitcoins|m|bitcoin|bitcoins|Bitcoin|Bitcoin|sat
+ETH|9|Ξ|ether|ethers|m|ether|ether|Ether (Ethereum)|Ether (Ethereum)|gwei
+USDT|2|USDT|tether|tethers|m|tether|tethers|Tether (USDT)|Tether (USDT)|
+BRL|2|R$|real|reais|m|real|reais|Real brasileiro|Brazilian real|centavo
+USD|2|US$|dólar americano|dólares americanos|m|US dollar|US dollars|||
+EUR|2|€|euro|euros|m|euro|euros|||eur
+GBP|2|£|libra esterlina|libras esterlinas|f|pound sterling|pounds sterling||British pound|gbp
+JPY|0|JP¥|iene|ienes|m|yen|yen|Iene japonês|Japanese yen|
+CNY|2|CN¥|yuan|yuans|m|yuan|yuan|Yuan chinês|Chinese yuan|fen
+CHF|2|CHF|franco suíço|francos suíços|m|Swiss franc|Swiss francs|||
+CAD|2|CA$|dólar canadense|dólares canadenses|m|Canadian dollar|Canadian dollars|||
+AUD|2|AU$|dólar australiano|dólares australianos|m|Australian dollar|Australian dollars|||
+ARS|2|ARS|peso argentino|pesos argentinos|m|Argentine peso|Argentine pesos|||centavo
+MXN|2|MX$|peso mexicano|pesos mexicanos|m|Mexican peso|Mexican pesos|||centavo
+INR|2|₹|rupia indiana|rupias indianas|f|Indian rupee|Indian rupees|||paisa
+AED|2|AED|dirham dos Emirados Árabes|dirhams dos Emirados Árabes|m|UAE dirham|UAE dirhams|||fils
+AFN|2|AFN|afegane|afeganes|m|afghani|afghanis|Afegane afegão|Afghan afghani|
+ALL|2|ALL|lek albanês|leks albaneses|m|Albanian lek|Albanian leks|||
+AMD|2|֏|dram armênio|drams armênios|m|Armenian dram|Armenian drams|||
+AOA|2|AOA|kwanza|kwanzas|m|kwanza|kwanzas|Kwanza angolano|Angolan kwanza|
+AWG|2|AWG|florim arubano|florins arubanos|m|Aruban florin|Aruban florins|||
+AZN|2|₼|manat azerbaijano|manats azerbaijanos|m|Azerbaijani manat|Azerbaijani manats|||
+BAM|2|BAM|marco conversível|marcos conversíveis|m|convertible mark|convertible marks|Marco conversível (Bósnia)|Convertible mark (Bosnia)|
+BBD|2|BBD|dólar barbadiano|dólares barbadianos|m|Barbadian dollar|Barbadian dollars|||
+BDT|2|৳|taka|takas|m|taka|takas|Taka bengali|Bangladeshi taka|
+BHD|3|BHD|dinar bareinita|dinares bareinitas|m|Bahraini dinar|Bahraini dinars|||fils
+BIF|0|BIF|franco burundinês|francos burundineses|m|Burundian franc|Burundian francs|||
+BMD|2|BMD|dólar bermudense|dólares bermudenses|m|Bermudian dollar|Bermudian dollars|||
+BND|2|BND|dólar bruneano|dólares bruneanos|m|Brunei dollar|Brunei dollars|||
+BOB|2|BOB|boliviano|bolivianos|m|boliviano|bolivianos|Boliviano (Bolívia)|Bolivian boliviano|centavo
+BSD|2|BSD|dólar bahamense|dólares bahamenses|m|Bahamian dollar|Bahamian dollars|||
+BTN|2|BTN|ngultrum|ngultruns|m|ngultrum|ngultrums|Ngultrum butanês|Bhutanese ngultrum|
+BWP|2|BWP|pula|pulas|f|pula|pula|Pula (Botsuana)|Botswana pula|
+BYN|2|BYN|rublo bielorrusso|rublos bielorrussos|m|Belarusian ruble|Belarusian rubles|||kop
+BZD|2|BZD|dólar belizenho|dólares belizenhos|m|Belize dollar|Belize dollars|||
+CDF|2|CDF|franco congolês|francos congoleses|m|Congolese franc|Congolese francs|||
+CLP|0|CLP|peso chileno|pesos chilenos|m|Chilean peso|Chilean pesos|||
+COP|2|COP|peso colombiano|pesos colombianos|m|Colombian peso|Colombian pesos|||centavo
+CRC|2|₡|colón costa-riquenho|colones costa-riquenhos|m|Costa Rican colón|Costa Rican colones|||
+CUP|2|CUP|peso cubano|pesos cubanos|m|Cuban peso|Cuban pesos|||centavo
+CVE|2|CVE|escudo cabo-verdiano|escudos cabo-verdianos|m|Cape Verdean escudo|Cape Verdean escudos|||centavo
+CZK|2|Kč|coroa tcheca|coroas tchecas|f|Czech koruna|Czech korunas|||
+DJF|0|DJF|franco djibutiano|francos djibutianos|m|Djiboutian franc|Djiboutian francs|||
+DKK|2|DKK|coroa dinamarquesa|coroas dinamarquesas|f|Danish krone|Danish kroner|||
+DOP|2|DOP|peso dominicano|pesos dominicanos|m|Dominican peso|Dominican pesos|||centavo
+DZD|2|DZD|dinar argelino|dinares argelinos|m|Algerian dinar|Algerian dinars|||
+EGP|2|EGP|libra egípcia|libras egípcias|f|Egyptian pound|Egyptian pounds|||
+ERN|2|ERN|nakfa|nakfas|m|nakfa|nakfas|Nakfa eritreu|Eritrean nakfa|
+ETB|2|ETB|birr etíope|birrs etíopes|m|Ethiopian birr|Ethiopian birrs|||
+FJD|2|FJD|dólar fijiano|dólares fijianos|m|Fijian dollar|Fijian dollars|||
+FKP|2|FKP|libra das Malvinas|libras das Malvinas|f|Falkland Islands pound|Falkland Islands pounds|||gbp
+GEL|2|₾|lari georgiano|laris georgianos|m|Georgian lari|Georgian laris|||
+GHS|2|₵|cedi ganês|cedis ganeses|m|Ghanaian cedi|Ghanaian cedis|||
+GIP|2|GIP|libra de Gibraltar|libras de Gibraltar|f|Gibraltar pound|Gibraltar pounds|||gbp
+GMD|2|GMD|dalasi gambiano|dalasis gambianos|m|Gambian dalasi|Gambian dalasis|||
+GNF|0|GNF|franco guineano|francos guineanos|m|Guinean franc|Guinean francs|||
+GTQ|2|GTQ|quetzal guatemalteco|quetzais guatemaltecos|m|Guatemalan quetzal|Guatemalan quetzales|||centavo
+GYD|2|GYD|dólar guianense|dólares guianenses|m|Guyanese dollar|Guyanese dollars|||
+HKD|2|HK$|dólar de Hong Kong|dólares de Hong Kong|m|Hong Kong dollar|Hong Kong dollars|||
+HNL|2|HNL|lempira hondurenha|lempiras hondurenhas|f|Honduran lempira|Honduran lempiras|||centavo
+HTG|2|HTG|gourde haitiano|gourdes haitianos|m|Haitian gourde|Haitian gourdes|||
+HUF|2|HUF|florim húngaro|florins húngaros|m|Hungarian forint|Hungarian forints|||
+IDR|2|IDR|rupia indonésia|rupias indonésias|f|Indonesian rupiah|Indonesian rupiahs|||
+ILS|2|₪|shekel israelense|shekels israelenses|m|Israeli shekel|Israeli shekels|Novo shekel israelense|Israeli new shekel|
+IQD|3|IQD|dinar iraquiano|dinares iraquianos|m|Iraqi dinar|Iraqi dinars|||fils
+IRR|2|IRR|rial iraniano|riais iranianos|m|Iranian rial|Iranian rials|||
+ISK|0|ISK|coroa islandesa|coroas islandesas|f|Icelandic króna|Icelandic krónur|||
+JMD|2|JMD|dólar jamaicano|dólares jamaicanos|m|Jamaican dollar|Jamaican dollars|||
+JOD|3|JOD|dinar jordaniano|dinares jordanianos|m|Jordanian dinar|Jordanian dinars|||fils
+KES|2|KES|xelim queniano|xelins quenianos|m|Kenyan shilling|Kenyan shillings|||
+KGS|2|KGS|som quirguiz|soms quirguizes|m|Kyrgyzstani som|Kyrgyzstani soms|||
+KHR|2|KHR|riel cambojano|riels cambojanos|m|Cambodian riel|Cambodian riels|||
+KMF|0|KMF|franco comorense|francos comorenses|m|Comorian franc|Comorian francs|||
+KPW|2|KPW|won norte-coreano|wons norte-coreanos|m|North Korean won|North Korean won|||
+KRW|0|₩|won sul-coreano|wons sul-coreanos|m|South Korean won|South Korean won|||
+KWD|3|KWD|dinar kuwaitiano|dinares kuwaitianos|m|Kuwaiti dinar|Kuwaiti dinars|||fils
+KYD|2|KYD|dólar das Ilhas Cayman|dólares das Ilhas Cayman|m|Cayman Islands dollar|Cayman Islands dollars|||
+KZT|2|₸|tenge cazaque|tenges cazaques|m|Kazakhstani tenge|Kazakhstani tenges|||
+LAK|2|₭|kip laosiano|kips laosianos|m|Lao kip|Lao kips|||
+LBP|2|LBP|libra libanesa|libras libanesas|f|Lebanese pound|Lebanese pounds|||
+LKR|2|LKR|rupia do Sri Lanka|rupias do Sri Lanka|f|Sri Lankan rupee|Sri Lankan rupees|||
+LRD|2|LRD|dólar liberiano|dólares liberianos|m|Liberian dollar|Liberian dollars|||
+LSL|2|LSL|loti|malotis|m|loti|maloti|Loti (Lesoto)|Lesotho loti|
+LYD|3|LYD|dinar líbio|dinares líbios|m|Libyan dinar|Libyan dinars|||dirham
+MAD|2|MAD|dirham marroquino|dirhams marroquinos|m|Moroccan dirham|Moroccan dirhams|||
+MDL|2|MDL|leu moldávio|lei moldávios|m|Moldovan leu|Moldovan lei|||
+MGA|2|MGA|ariary|ariarys|m|ariary|ariary|Ariary malgaxe|Malagasy ariary|
+MKD|2|MKD|dinar macedônio|dinares macedônios|m|Macedonian denar|Macedonian denars|||
+MMK|2|MMK|kyat birmanês|kyats birmaneses|m|Myanmar kyat|Myanmar kyats|||
+MNT|2|₮|tugrik mongol|tugriks mongóis|m|Mongolian tögrög|Mongolian tögrögs|||
+MOP|2|MOP|pataca de Macau|patacas de Macau|f|Macanese pataca|Macanese patacas|||
+MRU|2|MRU|uguia mauritana|uguias mauritanas|f|Mauritanian ouguiya|Mauritanian ouguiyas|||
+MUR|2|MUR|rupia mauriciana|rupias mauricianas|f|Mauritian rupee|Mauritian rupees|||
+MVR|2|MVR|rufia maldiva|rufias maldivas|f|Maldivian rufiyaa|Maldivian rufiyaa|||
+MWK|2|MWK|kwacha malauiano|kwachas malauianos|m|Malawian kwacha|Malawian kwacha|||
+MYR|2|MYR|ringgit malaio|ringgits malaios|m|Malaysian ringgit|Malaysian ringgits|||
+MZN|2|MZN|metical|meticais|m|metical|meticais|Metical moçambicano|Mozambican metical|centavo
+NAD|2|NAD|dólar namibiano|dólares namibianos|m|Namibian dollar|Namibian dollars|||
+NGN|2|₦|naira|nairas|f|naira|naira|Naira nigeriana|Nigerian naira|
+NIO|2|NIO|córdoba nicaraguense|córdobas nicaraguenses|m|Nicaraguan córdoba|Nicaraguan córdobas|||centavo
+NOK|2|NOK|coroa norueguesa|coroas norueguesas|f|Norwegian krone|Norwegian kroner|||
+NPR|2|NPR|rupia nepalesa|rupias nepalesas|f|Nepalese rupee|Nepalese rupees|||paisa
+NZD|2|NZ$|dólar neozelandês|dólares neozelandeses|m|New Zealand dollar|New Zealand dollars|||
+OMR|3|OMR|rial omanense|riais omanenses|m|Omani rial|Omani rials|||baisa
+PAB|2|PAB|balboa|balboas|m|balboa|balboas|Balboa panamenho|Panamanian balboa|
+PEN|2|PEN|sol peruano|sóis peruanos|m|Peruvian sol|Peruvian soles|||
+PGK|2|PGK|kina|kinas|f|kina|kina|Kina (Papua-Nova Guiné)|Papua New Guinean kina|
+PHP|2|₱|peso filipino|pesos filipinos|m|Philippine peso|Philippine pesos|||
+PKR|2|PKR|rupia paquistanesa|rupias paquistanesas|f|Pakistani rupee|Pakistani rupees|||paisa
+PLN|2|zł|zloty|zlotys|m|złoty|złotys|Zloty polonês|Polish złoty|grosz
+PYG|0|₲|guarani|guaranis|m|guaraní|guaranís|Guarani paraguaio|Paraguayan guaraní|
+QAR|2|QAR|rial catariano|riais catarianos|m|Qatari riyal|Qatari riyals|||
+RON|2|RON|leu romeno|lei romenos|m|Romanian leu|Romanian lei|||
+RSD|2|RSD|dinar sérvio|dinares sérvios|m|Serbian dinar|Serbian dinars|||
+RUB|2|₽|rublo russo|rublos russos|m|Russian ruble|Russian rubles|||kop
+RWF|0|RWF|franco ruandês|francos ruandeses|m|Rwandan franc|Rwandan francs|||
+SAR|2|SAR|rial saudita|riais sauditas|m|Saudi riyal|Saudi riyals|||
+SBD|2|SBD|dólar das Ilhas Salomão|dólares das Ilhas Salomão|m|Solomon Islands dollar|Solomon Islands dollars|||
+SCR|2|SCR|rupia seichelense|rupias seichelenses|f|Seychellois rupee|Seychellois rupees|||
+SDG|2|SDG|libra sudanesa|libras sudanesas|f|Sudanese pound|Sudanese pounds|||
+SEK|2|SEK|coroa sueca|coroas suecas|f|Swedish krona|Swedish kronor|||
+SGD|2|SGD|dólar de Singapura|dólares de Singapura|m|Singapore dollar|Singapore dollars|||
+SHP|2|SHP|libra de Santa Helena|libras de Santa Helena|f|Saint Helena pound|Saint Helena pounds|||gbp
+SLE|2|SLE|leone|leones|m|leone|leones|Leone (Serra Leoa)|Sierra Leonean leone|
+SOS|2|SOS|xelim somali|xelins somalis|m|Somali shilling|Somali shillings|||
+SRD|2|SRD|dólar surinamês|dólares surinameses|m|Surinamese dollar|Surinamese dollars|||
+SSP|2|SSP|libra sul-sudanesa|libras sul-sudanesas|f|South Sudanese pound|South Sudanese pounds|||
+STN|2|STN|dobra|dobras|f|dobra|dobras|Dobra (São Tomé e Príncipe)|São Tomé and Príncipe dobra|
+SYP|2|SYP|libra síria|libras sírias|f|Syrian pound|Syrian pounds|||
+SZL|2|SZL|lilangeni|emalangeni|m|lilangeni|emalangeni|Lilangeni (Essuatíni)|Swazi lilangeni|
+THB|2|฿|baht|bahts|m|baht|baht|Baht tailandês|Thai baht|
+TJS|2|TJS|somoni|somonis|m|somoni|somonis|Somoni tadjique|Tajikistani somoni|
+TMT|2|TMT|manat turcomeno|manats turcomenos|m|Turkmen manat|Turkmen manats|||
+TND|3|TND|dinar tunisiano|dinares tunisianos|m|Tunisian dinar|Tunisian dinars|||mill
+TOP|2|TOP|paanga|paangas|f|paʻanga|paʻanga|Paanga tonganesa|Tongan paʻanga|
+TRY|2|₺|lira turca|liras turcas|f|Turkish lira|Turkish liras|||kurus
+TTD|2|TTD|dólar de Trinidad e Tobago|dólares de Trinidad e Tobago|m|Trinidad and Tobago dollar|Trinidad and Tobago dollars|||
+TWD|2|NT$|novo dólar taiwanês|novos dólares taiwaneses|m|New Taiwan dollar|New Taiwan dollars|||
+TZS|2|TZS|xelim tanzaniano|xelins tanzanianos|m|Tanzanian shilling|Tanzanian shillings|||
+UAH|2|₴|grívnia|grívnias|f|hryvnia|hryvnias|Grívnia ucraniana|Ukrainian hryvnia|kop
+UGX|0|UGX|xelim ugandense|xelins ugandenses|m|Ugandan shilling|Ugandan shillings|||
+UYU|2|UYU|peso uruguaio|pesos uruguaios|m|Uruguayan peso|Uruguayan pesos|||centavo
+UZS|2|UZS|som uzbeque|soms uzbeques|m|Uzbekistani som|Uzbekistani soms|||
+VES|2|VES|bolívar|bolívares|m|bolívar|bolívares|Bolívar venezuelano|Venezuelan bolívar|
+VND|0|₫|dong|dongs|m|dong|dong|Dong vietnamita|Vietnamese dong|
+VUV|0|VUV|vatu|vatus|m|vatu|vatu|Vatu (Vanuatu)|Vanuatu vatu|
+WST|2|WST|tala|talas|m|tala|tala|Tala samoano|Samoan tala|
+XAF|0|FCFA|franco CFA|francos CFA|m|CFA franc|CFA francs|Franco CFA da África Central|Central African CFA franc|
+XCD|2|XCD|dólar do Caribe Oriental|dólares do Caribe Oriental|m|East Caribbean dollar|East Caribbean dollars|||
+XCG|2|XCG|florim caribenho|florins caribenhos|m|Caribbean guilder|Caribbean guilders|||
+XOF|0|CFA|franco CFA|francos CFA|m|CFA franc|CFA francs|Franco CFA da África Ocidental|West African CFA franc|
+XPF|0|XPF|franco CFP|francos CFP|m|CFP franc|CFP francs|||
+YER|2|YER|rial iemenita|riais iemenitas|m|Yemeni rial|Yemeni rials|||
+ZAR|2|ZAR|rand|rands|m|rand|rand|Rand sul-africano|South African rand|
+ZMW|2|ZMW|kwacha zambiano|kwachas zambianos|m|Zambian kwacha|Zambian kwacha|||
+ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
+  // subunit names: pt [singular, plural], en [singular, plural]
+  const SUBUNIDADES = {
+    cent: { pt: ['centavo', 'centavos'], en: ['cent', 'cents'] },
+    centavo: { pt: ['centavo', 'centavos'], en: ['centavo', 'centavos'] },
+    eur: { pt: ['cêntimo', 'cêntimos'], en: ['cent', 'cents'] },
+    gbp: { pt: ['penny', 'pence'], en: ['penny', 'pence'] },
+    sat: { pt: ['satoshi', 'satoshis'], en: ['satoshi', 'satoshis'] },
+    gwei: { pt: ['gwei', 'gwei'], en: ['gwei', 'gwei'] },
+    fen: { pt: ['fen', 'fens'], en: ['fen', 'fen'] },
+    paisa: { pt: ['paisa', 'paisas'], en: ['paisa', 'paise'] },
+    kop: { pt: ['copeque', 'copeques'], en: ['kopeck', 'kopecks'] },
+    grosz: { pt: ['grosz', 'groszy'], en: ['grosz', 'groszy'] },
+    kurus: { pt: ['kuruş', 'kuruş'], en: ['kuruş', 'kuruş'] },
+    fils: { pt: ['fils', 'fils'], en: ['fils', 'fils'] },
+    baisa: { pt: ['baisa', 'baisas'], en: ['baisa', 'baisa'] },
+    mill: { pt: ['milésimo', 'milésimos'], en: ['millime', 'millimes'] },
+    dirham: { pt: ['dirham', 'dirhams'], en: ['dirham', 'dirhams'] }
+  };
+  const maiuscula = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const MOEDAS = {};
+  const CODIGOS_MOEDAS = [];
+  for (const linha of DADOS_MOEDAS.trim().split('\n')) {
+    const [codigo, casas, simbolo, ptS, ptP, g, enS, enP, ptNome, enNome, sub] = linha.split('|');
+    MOEDAS[codigo] = {
+      codigo, casas: +casas, simbolo,
+      pt: { s: ptS, p: ptP, fem: g === 'f', nome: ptNome || maiuscula(ptS) },
+      en: { s: enS, p: enP, nome: enNome || maiuscula(enS) },
+      sub: +casas === 0 ? null : SUBUNIDADES[sub || 'cent']
+    };
+    CODIGOS_MOEDAS.push(codigo);
+  }
+  const MOEDAS_POPULARES = ['BTC', 'USD', 'EUR', 'BRL', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD', 'ARS', 'MXN', 'INR', 'ETH', 'USDT'];
+  const CODIGO_MOEDA_VALIDO = /^[A-Z0-9]{2,8}$/;
+  /** Currency details. Unknown codes (from a newer app version) still display, by code. */
+  function infoMoeda(codigo, casas) {
+    const m = MOEDAS[codigo];
+    if (m && (casas == null || casas === m.casas)) return m;
+    const c = casas == null ? 2 : casas;
+    if (m) return { ...m, casas: c, sub: null };
+    return { codigo, casas: c, simbolo: codigo, pt: { s: codigo, p: codigo, fem: false, nome: codigo }, en: { s: codigo, p: codigo, nome: codigo }, sub: null };
+  }
+
   /* =================== interest math =================== */
-  // x in cents (may be fractional). toFixed(4) strips binary noise
-  // (e.g. 26438.000000000004) before ALWAYS rounding up.
+  // x in the smallest unit of the currency (cents, satoshis...; may be fractional). toFixed(4) strips
+  // binary noise (e.g. 26438.000000000004) before ALWAYS rounding up.
   const ceilCentavos = x => Math.ceil(Number(x.toFixed(4)));
 
-  // d.valor: cents · d.taxa: percent × 10,000 · d.de/d.dp: days since 1970
+  // d.valor: smallest currency unit · d.taxa: percent × 10,000 · d.de/d.dp: days since 1970
   // Simple:   I = P · i · n
   // Compound: A = P · (1 + i)^n  (n may be fractional: exponential convention)
   // n = days/30 (monthly, 30-day month) or days/365 (yearly); "total" applies the rate once.
@@ -212,6 +417,7 @@ const DebtID = (() => {
   function validarDados(d) {
     if (d.valor < 1 || d.valor > LIMITES.valor || d.taxa > LIMITES.taxa || d.dp - d.de > LIMITES.dias ||
         d.de > 120000 || d.ts > 8e9 || d.tz < -60 || d.tz > 60) throw new ChaveErro('CORROMPIDA');
+    if (d.total != null && !Number.isSafeInteger(d.total)) throw new ChaveErro('CORROMPIDA');
   }
 
   /* =================== signing keys (ECDSA P-256) =================== */
@@ -281,33 +487,42 @@ const DebtID = (() => {
     }
   }
 
-  /* =================== v2 codes (signed) =================== */
-  // [2][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
-  const VERSAO = 2, PROPOSTA = 1, VALIDADO = 2;
-  const TAG_PROPOSTA = enc.encode('DebtID/v2/proposta');
-  const TAG_CONFIRMA = enc.encode('DebtID/v2/confirma');
+  /* =================== signed codes (v2: reais; v3: any currency) =================== */
+  // [version][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
+  // v3 adds the currency code and its number of decimals right after the flags.
+  const VERSAO = 3, PROPOSTA = 1, VALIDADO = 2;
+  const TAGS = {
+    2: { p: enc.encode('DebtID/v2/proposta'), c: enc.encode('DebtID/v2/confirma') },
+    3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') }
+  };
 
-  function escreverP(d) {
+  function escreverP(d, versao) {
     const e = new Escritor();
     e.bytes(d.id);
     e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2) | (d.composto ? 8 : 0));
+    if (versao >= 3) { e.texto(d.moeda); e.byte(d.casas); }
     e.num(d.valor); e.num(d.taxa); e.num(d.de); e.num(d.dp - d.de);
     e.num(d.ts); e.num(d.tz + 64); e.num(d.total);
     e.texto(d.nomeEmissor); e.texto(d.nomeOutro);
     e.bytes(d.pubEmissor);
     return e.fim();
   }
-  function lerP(L) {
+  function lerP(L, versao) {
     const ini = L.i;
     const id = L.bytes(6);
     const f = L.byte();
     const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1], composto = !!(f & 8);
     if (!modo || f > 15) throw new ChaveErro('CORROMPIDA');
+    let moeda = 'BRL', casas = 2;
+    if (versao >= 3) {
+      moeda = L.texto(); casas = L.byte();
+      if (!CODIGO_MOEDA_VALIDO.test(moeda) || casas > 9) throw new ChaveErro('CORROMPIDA');
+    }
     const valor = L.num(), taxa = L.num(), de = L.num(), dias = L.num();
     const ts = L.num(), tz = L.num() - 64, total = L.num();
     const nomeEmissor = L.texto(), nomeOutro = L.texto();
     const pubEmissor = L.bytes(33);
-    const d = { id, modo, composto, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
+    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
     validarDados(d);
     conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
@@ -328,18 +543,23 @@ const DebtID = (() => {
     return { ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) };
   };
 
-  // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, valor, taxa, modo, composto, de, dp }
+  // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, moeda (code, default BRL),
+  //          valor (smallest unit of that currency), taxa, modo, composto, de, dp }
   async function criarProposta(perfil, dados) {
     const { ts, tz } = agora();
+    const moeda = dados.moeda || 'BRL';
+    if (!CODIGO_MOEDA_VALIDO.test(moeda)) throw new RangeError('moeda inválida');
     const d = {
       id: crypto.getRandomValues(new Uint8Array(6)),
       modo: dados.modo, composto: !!dados.composto && dados.modo !== 'total', papel: dados.papel,
+      moeda, casas: infoMoeda(moeda).casas,
       valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: pubDoPerfil(perfil)
     };
     d.total = calcular(d).total;
-    const p = escreverP(d);
-    const sig = await assinar(perfil, juntar(TAG_PROPOSTA, p));
+    validarDados(d);
+    const p = escreverP(d, VERSAO);
+    const sig = await assinar(perfil, juntar(TAGS[VERSAO].p, p));
     return embalar(juntar([VERSAO, PROPOSTA], p, sig));
   }
 
@@ -351,8 +571,9 @@ const DebtID = (() => {
     if (iguais(minha, m.bruto.p.pubEmissor)) throw new ChaveErro('PROPRIA');
     const { ts, tz } = agora();
     const c = escreverC({ ts, tz, nome: perfil.nome, pub: minha });
-    const sig2 = await assinar(perfil, juntar(TAG_CONFIRMA, m.bruto.pBytes, m.bruto.sig1, c));
-    return embalar(juntar([VERSAO, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
+    const v = m.bruto.versao; // a v2 proposal is confirmed as v2: the signatures cover its exact bytes
+    const sig2 = await assinar(perfil, juntar(TAGS[v].c, m.bruto.pBytes, m.bruto.sig1, c));
+    return embalar(juntar([v, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
   }
 
   // Reads any code (v1 or v2), checks the signatures and builds a model for display.
@@ -361,16 +582,17 @@ const DebtID = (() => {
     if (dados[0] === 1) {
       const { d, credor, devedor } = lerV1(dados);
       return {
-        tipo: 'v1', codigo, idHex: null, ref: codigo.slice(-4), dados: d, calc: calcular(d), emissor: null,
+        tipo: 'v1', codigo, idHex: null, ref: codigo.slice(-4), dados: { ...d, moeda: 'BRL', casas: 2 }, calc: calcular(d), emissor: null,
         credor: { nome: credor, assinou: false }, devedor: { nome: devedor, assinou: false }
       };
     }
-    if (dados[0] !== VERSAO) throw new ChaveErro('VERSAO');
+    const versao = dados[0];
+    if (!TAGS[versao]) throw new ChaveErro('VERSAO');
     const tipo = dados[1];
     if (tipo !== PROPOSTA && tipo !== VALIDADO) throw new ChaveErro('VERSAO');
     const L = new Leitor(dados);
     L.i = 2;
-    const { d, bytes: pBytes } = lerP(L);
+    const { d, bytes: pBytes } = lerP(L, versao);
     const sig1 = L.bytes(64);
     let c = null, cBytes = null, sig2 = null;
     if (tipo === VALIDADO) {
@@ -378,17 +600,17 @@ const DebtID = (() => {
       sig2 = L.bytes(64);
     }
     if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
-    if (!(await confere(d.pubEmissor, juntar(TAG_PROPOSTA, pBytes), sig1))) throw new ChaveErro('ASSINATURA');
+    if (!(await confere(d.pubEmissor, juntar(TAGS[versao].p, pBytes), sig1))) throw new ChaveErro('ASSINATURA');
     if (c) {
       if (iguais(c.pub, d.pubEmissor)) throw new ChaveErro('PROPRIA');
-      if (!(await confere(c.pub, juntar(TAG_CONFIRMA, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
+      if (!(await confere(c.pub, juntar(TAGS[versao].c, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
     }
     const idEmissor = await idDe(d.pubEmissor);
     const parteEmissor = { nome: d.nomeEmissor, id: idEmissor, pub: b64url(d.pubEmissor), assinou: true, ts: d.ts, tz: d.tz };
     const parteOutra = c
       ? { nome: c.nome, id: await idDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
       : { nome: d.nomeOutro, assinou: false };
-    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
+    const dadosExibir = { moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
     const idHex = hex(d.id).toUpperCase();
     return {
       tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
@@ -396,7 +618,7 @@ const DebtID = (() => {
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
       devedor: d.papel === 'devedor' ? parteEmissor : parteOutra,
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,
-      bruto: { p: d, pBytes, sig1 }
+      bruto: { p: d, pBytes, sig1, versao }
     };
   }
 
@@ -649,13 +871,11 @@ const DebtID = (() => {
       milhar: ',', decimal: '.'
     }
   };
-  let idioma = 'pt', L = LOC.pt, nf2, nf4, nfT;
+  let idioma = 'pt', L = LOC.pt, nfT;
   /** Sets the language used by fmt, extenso and lerNumero ('pt' or 'en'). Stored codes are not affected. */
   function definirIdioma(l) {
     idioma = l === 'en' ? 'en' : 'pt';
     L = LOC[idioma];
-    nf2 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    nf4 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
     nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     return idioma;
   }
@@ -663,12 +883,32 @@ const DebtID = (() => {
   const p2 = n => String(n).padStart(2, '0');
   const dataUTC = dia => new Date(dia * 86400000);
   const curto = m => L.meses[m].slice(0, 3);
+  const cacheNF = {};
+  const nf = (min, max) => {
+    const k = `${L.tag}|${min}|${max}`;
+    return cacheNF[k] || (cacheNF[k] = new Intl.NumberFormat(L.tag, { minimumFractionDigits: min, maximumFractionDigits: max }));
+  };
+  // exact formatting of an integer amount in the smallest unit (no floating point in the decimals)
+  function numMoeda(v, casas, minCasas = casas) {
+    const neg = v < 0, a = Math.abs(v), mult = 10 ** casas, inteiro = Math.floor(a / mult);
+    let fr = casas ? String(a - inteiro * mult).padStart(casas, '0') : '';
+    while (fr.length > minCasas && fr.endsWith('0')) fr = fr.slice(0, -1);
+    return (neg ? '-' : '') + nf(0, 0).format(inteiro) + (fr ? L.decimal + fr : '');
+  }
+  const BRL = MOEDAS.BRL;
   const fmt = {
     idioma: () => idioma,
-    num2: n => nf2.format(n),
     num: n => nfT.format(n),
-    brl: c => 'R$ ' + nf2.format(c / 100),
-    brl4: c => 'R$ ' + nf4.format(c / 100),
+    /** amount (smallest unit) with the currency symbol, e.g. "₿ 0.00125000", "R$ 1.250,00" */
+    dinheiro: (v, m = BRL) => m.simbolo + '\u00a0' + numMoeda(v, m.casas), // no-break space: symbol never wraps alone
+    /** fractional amount (smallest unit) with up to 2 extra decimals, for the raw interest */
+    dinheiro4: (x, m = BRL) => m.simbolo + '\u00a0' + nf(m.casas, m.casas + 2).format(x / 10 ** m.casas),
+    numMoeda,
+    /** number for an input field: no thousands separator, so it reads back the same ("1000", not "1.000") */
+    numEntrada: n => new Intl.NumberFormat(L.tag, { maximumFractionDigits: 4, useGrouping: false }).format(n),
+    nomeMoeda: m => m[idioma].nome,
+    brl: c => fmt.dinheiro(c, BRL),
+    brl4: c => fmt.dinheiro4(c, BRL),
     taxa: t => nfT.format(t / 10000) + '%',
     modo: m => L.modo[m],
     dias: n => n + ' ' + (n === 1 ? L.dia : L.dias),
@@ -699,14 +939,17 @@ const DebtID = (() => {
   const DZ = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const CT = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
   const ESCALAS = [null, null, ['milhão','milhões'], ['bilhão','bilhões'], ['trilhão','trilhões']];
-  function ate999(n) {
+  const UN_F = UN.map((x, i) => (i === 1 ? 'uma' : i === 2 ? 'duas' : x));
+  const CT_F = CT.map(x => x.replace(/os$/, 'as'));
+  function ate999(n, fem) {
     if (n === 100) return 'cem';
+    const U = fem ? UN_F : UN, C = fem ? CT_F : CT;
     const c = Math.floor(n / 100), r = n % 100, partes = [];
-    if (c) partes.push(CT[c]);
-    if (r) partes.push(r < 20 ? UN[r] : DZ[Math.floor(r / 10)] + (r % 10 ? ' e ' + UN[r % 10] : ''));
+    if (c) partes.push(C[c]);
+    if (r) partes.push(r < 20 ? U[r] : DZ[Math.floor(r / 10)] + (r % 10 ? ' e ' + U[r % 10] : ''));
     return partes.join(' e ');
   }
-  function inteiroExtenso(n) {
+  function inteiroExtenso(n, fem = false) {
     if (n === 0) return 'zero';
     const grupos = [];
     while (n > 0) { grupos.push(n % 1000); n = Math.floor(n / 1000); }
@@ -715,9 +958,9 @@ const DebtID = (() => {
       const v = grupos[k];
       if (!v) continue;
       let s;
-      if (k === 0) s = ate999(v);
-      else if (k === 1) s = v === 1 ? 'mil' : ate999(v) + ' mil';
-      else s = ate999(v) + ' ' + ESCALAS[k][v === 1 ? 0 : 1];
+      if (k === 0) s = ate999(v, fem);
+      else if (k === 1) s = v === 1 ? 'mil' : ate999(v, fem) + ' mil';
+      else s = ate999(v, false) + ' ' + ESCALAS[k][v === 1 ? 0 : 1];
       partes.push({ s, v });
     }
     let out = partes[0].s;
@@ -728,7 +971,7 @@ const DebtID = (() => {
     }
     return out;
   }
-  // English (the currency stays the Brazilian real: "reais" and "centavos")
+  // English
   const EN_UN = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
   const EN_DZ = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
   const EN_ESC = ['', 'thousand', 'million', 'billion', 'trillion'];
@@ -747,16 +990,19 @@ const DebtID = (() => {
     }
     return partes.join(' ');
   }
-  function extenso(centavos) {
-    const r = Math.floor(centavos / 100), c = centavos % 100, partes = [];
+  /** Amount (smallest unit) in words, e.g. "duzentos e quarenta reais e trinta e cinco centavos". */
+  function extenso(v, m = BRL) {
+    const mult = 10 ** m.casas, r = Math.floor(v / mult), c = v - r * mult, partes = [];
+    const nome = m[idioma], sub = m.sub && m.sub[idioma];
+    if (c && !sub) return numMoeda(v, m.casas) + ' ' + nome.p; // currency unknown to this version: digits only
     if (idioma === 'en') {
-      if (r) partes.push(inteiroExtensoEn(r) + (r === 1 ? ' real' : ' reais'));
-      if (c) partes.push(inteiroExtensoEn(c) + (c === 1 ? ' centavo' : ' centavos'));
-      return partes.length ? partes.join(' and ') : 'zero reais';
+      if (r) partes.push(inteiroExtensoEn(r) + ' ' + (r === 1 ? nome.s : nome.p));
+      if (c) partes.push(inteiroExtensoEn(c) + ' ' + sub[c === 1 ? 0 : 1]);
+      return partes.length ? partes.join(' and ') : 'zero ' + nome.p;
     }
-    if (r) partes.push(inteiroExtenso(r) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? 'real' : 'reais'));
-    if (c) partes.push(inteiroExtenso(c) + (c === 1 ? ' centavo' : ' centavos'));
-    return partes.length ? partes.join(' e ') : 'zero real';
+    if (r) partes.push(inteiroExtenso(r, nome.fem) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? nome.s : nome.p));
+    if (c) partes.push(inteiroExtenso(c) + ' ' + sub[c === 1 ? 0 : 1]);
+    return partes.length ? partes.join(' e ') : 'zero ' + nome.p;
   }
 
   /* =================== typed numbers (lenient parsing) ===================
@@ -782,6 +1028,7 @@ const DebtID = (() => {
 
   return {
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
+    MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     exportarBackup, importarBackup, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum }

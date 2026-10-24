@@ -4,14 +4,14 @@
 
 <p align="center"><a href="README.md">English</a> · <b>Português</b></p>
 
-<p align="center">Calculadora e registro de empréstimos que os dois lados assinam, com um QR code que qualquer pessoa confere em segundos.<br>
+<p align="center">Calculadora e registro de empréstimos em qualquer moeda, que os dois lados assinam, com um QR code que qualquer pessoa confere em segundos.<br>
 Tudo roda no aparelho: sem servidor, sem conta e sem acesso à internet.</p>
 
 ---
 
 ## Como funciona
 
-1. **Quem registra o empréstimo** informa o valor, a taxa e as datas. O DebtID gera um código assinado, mostrado como QR code.
+1. **Quem registra o empréstimo** escolhe a moeda e informa o valor, a taxa e as datas. O DebtID gera um código assinado, mostrado como QR code.
 2. **A outra pessoa** lê o QR code no DebtID dela, confere os valores e confirma com a própria assinatura.
 3. **Quem registrou** lê de volta o QR code de confirmação. Pronto: o empréstimo fica **validado pelos dois**, nos dois celulares.
 
@@ -19,10 +19,11 @@ Qualquer um dos lados pode começar: quem empresta ou quem pega emprestado.
 
 ## Recursos
 
-- **Juros simples ou compostos**: aplicados uma vez sobre o empréstimo todo, ao mês (mês comercial de 30 dias) ou ao ano, com prévia do total enquanto você digita. O total é sempre arredondado para cima no centavo.
+- **Qualquer moeda**: mais de 150 moedas do mundo, além de Bitcoin (o padrão), Ether e Tether, com busca por nome ou código. A moeda padrão fica em *Ajustes* e dá para trocar em cada empréstimo. A moeda faz parte do código assinado, o total arredonda para cima na menor fração da moeda (centavo, satoshi…) e valores em moedas diferentes nunca são somados. Não há conversão entre moedas: o app funciona sem internet.
+- **Juros simples ou compostos**: aplicados uma vez sobre o empréstimo todo, ao mês (mês comercial de 30 dias) ou ao ano, com prévia do total enquanto você digita. O total é sempre arredondado para cima.
 - **Recibo** com os valores por extenso, as duas assinaturas digitais e o QR code, pronto para imprimir ou salvar em PDF.
 - **Registros** com situação (aguardando, validado, quitado, vencido) e o total do que você tem a receber e a pagar.
-- **Dois idiomas**, português e inglês. O app pergunta na primeira vez que você abre e dá para trocar quando quiser em *Ajustes*. Os valores são sempre em reais (R$).
+- **Dois idiomas**, português e inglês. O app pergunta na primeira vez que você abre e dá para trocar quando quiser em *Ajustes*.
 - **Duas aparências**, *Profissional* e *Soft*, cada uma com tema claro e escuro.
 - **Backup protegido por senha** do perfil e dos registros, para trocar de celular e manter o mesmo ID.
 - **App Android**: leitura de QR pelo Google Play services (sem permissão de câmera), e dá para receber códigos direto do menu *Compartilhar* de outro app.

@@ -239,7 +239,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 @media (min-width:780px){.summary{grid-template-columns:repeat(4,1fr);gap:16px}}
 .stat{border:2px solid var(--line);border-radius:18px;padding:13px 14px 14px;box-shadow:var(--sh);min-width:0;container-type:inline-size;color:var(--on)}
 .stat span{display:block;font-size:13px;font-weight:800}
-.stat b{display:block;font-family:var(--display);font-weight:900;font-size:clamp(18px,19cqi,28px);line-height:1.1;margin-top:6px;letter-spacing:-.015em;overflow-wrap:break-word}
+.stat b{display:block;font-family:var(--display);font-weight:900;font-size:clamp(13px,calc(100cqi / var(--n,5.3)),28px);line-height:1.1;margin-top:6px;letter-spacing:-.015em;overflow-wrap:break-word}
 .stat b i{font-style:normal;font-size:.56em;margin-right:.18em;opacity:.8}
 .stat small{display:block;font-size:12px;margin-top:5px;opacity:.78;font-weight:600}
 .s-1{background:var(--yellow)} .s-2{background:var(--lime)} .s-3{background:var(--rose)} .s-4{background:var(--peri-soft)}
@@ -387,6 +387,24 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .modal-box h3{font-size:20px;margin:0 0 8px}
 .modal-box p{margin:0 0 18px;color:var(--ink-2)}
 .modal-box .btns{flex-direction:row-reverse}
+.moeda-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;padding:8px 14px;background:var(--field);border:2px solid var(--line);border-radius:14px;color:var(--ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
+.moeda-btn:focus-visible{outline:3px solid var(--peri);outline-offset:2px}
+.moeda-btn .mo-nome{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.moeda-btn .ico{width:18px;height:18px;flex:none;opacity:.7}
+.mo-sim{flex:none;display:inline-grid;place-items:center;min-width:38px;height:30px;padding:0 6px;border-radius:9px;background:var(--line);color:var(--card);font-weight:800;font-size:13px;letter-spacing:-.01em;white-space:nowrap}
+.mo-cod{flex:none;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.ajuste .moeda-btn{margin-top:4px}
+.moedas-box{display:flex;flex-direction:column;gap:12px;max-height:min(640px,calc(100dvh - 32px));padding-bottom:12px}
+.moedas-topo{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.moedas-topo h3{margin:0}
+.moedas-lista{overflow-y:auto;overscroll-behavior:contain;margin:0 -8px;padding:0 8px;min-height:120px}
+.moedas-lista h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 4px 6px}
+.moedas-lista h4:first-child{margin-top:2px}
+.moeda-op{display:flex;align-items:center;gap:10px;width:100%;padding:9px 6px;background:none;border:0;border-radius:10px;color:var(--ink);font:inherit;font-size:15.5px;text-align:left;cursor:pointer}
+.moeda-op:hover,.moeda-op:focus-visible{background:var(--field);outline:none}
+.moeda-op[aria-selected="true"]{background:var(--field);box-shadow:inset 0 0 0 2px var(--line)}
+.moeda-op .mo-nome{flex:1;min-width:0}
+.moedas-vazio{padding:18px 6px;color:var(--muted)}
 .scanner{position:fixed;inset:0;z-index:60;background:#000;color:#fff;display:grid;place-items:center}
 .scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .scan-frame{position:relative;width:min(70vw,320px);aspect-ratio:1;border:3px solid #DFF45C;border-radius:24px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
@@ -554,6 +572,10 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .alert i{border:0;background:var(--ink);color:var(--bg)}
 [data-ui="pro"] .passos li::before{border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:700}
 [data-ui="pro"] .modal-box{border:0;border-radius:0;box-shadow:none;border-top:4px solid var(--accent)}
+[data-ui="pro"] .moeda-btn{border:1px solid var(--rule);border-bottom-color:var(--line);border-radius:0}
+[data-ui="pro"] .mo-sim{border-radius:0}
+[data-ui="pro"] .moeda-op{border-radius:0}
+[data-ui="pro"] .moeda-op[aria-selected="true"]{box-shadow:inset 3px 0 0 var(--accent)}
 [data-ui="pro"] .toast{background:var(--band);color:var(--band-ink);border:1px solid var(--rule);box-shadow:none;border-radius:999px;font-weight:600}
 [data-ui="pro"] .foot{border:0;border-top:1px solid var(--rule);border-radius:0;padding-top:18px;padding-bottom:28px;margin-top:40px}
 [data-ui="pro"] .ui-op{border-radius:0;border:1px solid var(--rule)}
@@ -693,8 +715,8 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
               <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
               <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
               <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
-              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">R$</text>
-              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">264,39</text>
+              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">₿</text>
+              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">0,0026</text>
               <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
@@ -768,9 +790,13 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
                   <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" data-i18n-ph="form.outroPh" autocomplete="off"></div>
                   <div class="err" id="e-outro"></div>
                 </div>
+                <div class="field span2">
+                  <span class="label" id="l-moeda" data-i18n="form.moeda">Moeda</span>
+                  <button class="moeda-btn" type="button" id="btnMoeda" aria-labelledby="l-moeda btnMoeda" aria-haspopup="dialog"><span class="mo-sim">₿</span><span class="mo-nome">Bitcoin</span><span class="mo-cod">BTC</span><svg class="ico" aria-hidden="true"><use href="#i-baixo"/></svg></button>
+                </div>
                 <div class="field" data-f="valor">
                   <label for="f-valor" data-i18n="form.valor">Valor emprestado</label>
-                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00" data-i18n-ph="form.valorPh"></div>
+                  <div class="control"><span class="affix" id="affixMoeda">₿</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00000000"></div>
                   <div class="err" id="e-valor"></div>
                 </div>
                 <div class="field" data-f="taxa">
@@ -897,6 +923,11 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
                 <input type="radio" name="idioma" id="id-pt" value="pt"><label for="id-pt" lang="pt-BR">Português</label>
                 <input type="radio" name="idioma" id="id-en" value="en"><label for="id-en" lang="en">English</label>
               </div>
+            </div>
+            <div class="ajuste">
+              <h3 id="t-moeda" data-i18n="aj.moeda">Moeda padrão</h3>
+              <button class="moeda-btn" type="button" id="btnMoedaPadrao" aria-labelledby="t-moeda btnMoedaPadrao" aria-haspopup="dialog"><span class="mo-sim">₿</span><span class="mo-nome">Bitcoin</span><span class="mo-cod">BTC</span><svg class="ico" aria-hidden="true"><use href="#i-baixo"/></svg></button>
+              <p class="hint" data-i18n="aj.moedaHint">Usada nos novos registros. Em cada empréstimo dá para escolher outra.</p>
             </div>
             <div class="ajuste">
               <h3 id="t-aparencia" data-i18n="aj.aparencia">Aparência</h3>
@@ -1056,6 +1087,17 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
   </div>
 </div>
 
+<div class="modal" id="moedas" hidden role="dialog" aria-modal="true" aria-labelledby="moedasTitulo">
+  <div class="modal-box moedas-box">
+    <div class="moedas-topo">
+      <h3 id="moedasTitulo" data-i18n="moeda.escolher">Escolha a moeda</h3>
+      <button class="btn btn-ghost" type="button" id="moedasFechar" data-i18n="scan.fechar">Fechar</button>
+    </div>
+    <div class="control"><input id="moedasBusca" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Buscar por nome ou código" data-i18n-ph="moeda.buscar"></div>
+    <div class="moedas-lista" id="moedasLista" role="listbox" aria-labelledby="moedasTitulo"></div>
+  </div>
+</div>
+
 <div class="scanner" id="scanner" hidden>
   <video id="scanVideo" playsinline muted></video>
   <div class="scan-frame" aria-hidden="true"></div>
@@ -1073,7 +1115,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
    ===================================================================== */
 const DebtIDTextos = {
   pt: {
-    "meta.descricao": "DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
+    "meta.descricao": "DebtID: calculadora e registro de empréstimos em qualquer moeda, assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
     "nav.secoes": "Seções", "nav.navegacao": "Navegação",
     "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
@@ -1083,7 +1125,7 @@ const DebtIDTextos = {
     "hero.lead": "Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.",
     "hero.chip1": "Juros simples e compostos", "hero.chip2": "Assinado pelos dois", "hero.chip3": "QR code",
     "comum.novoRegistro": "Novo registro", "hero.ler": "Ler um código",
-    "art.recibo": "RECIBO", "art.selo": "assinado pelos dois", "art.valor": "264,39",
+    "art.recibo": "RECIBO", "art.selo": "assinado pelos dois", "art.valor": "0,0026",
     "hp.eyebrow": "Calcule · Registre · Comprove",
     "hp.sub": "<span>Assinado pelos dois</span> <em>— sem discussão</em>",
     "hp.f1t": "Assinatura digital", "hp.f1": "Credor e devedor assinam com chaves que ficam só no celular de cada um.",
@@ -1094,7 +1136,7 @@ const DebtIDTextos = {
     "form.passo": "Passo 1 de 3",
     "form.papel": "Neste empréstimo, eu sou…", "form.credor": "Quem empresta", "form.devedor": "Quem pega emprestado",
     "form.outroDevedor": "Nome de quem pega emprestado", "form.outroCredor": "Nome de quem empresta", "form.outroPh": "Ex.: Bruno Lima",
-    "form.valor": "Valor emprestado", "form.valorPh": "0,00",
+    "form.moeda": "Moeda", "form.valor": "Valor emprestado", "form.valorPh": "0,00",
     "form.taxa": "Taxa de juros", "form.taxaPh": "Ex.: 10 ou 2,5",
     "form.tipo": "Tipo de juros", "form.simples": "Simples", "form.compostos": "Compostos",
     "form.modo": "A taxa vale…", "form.modoTotal": "no total", "form.modoMes": "ao mês", "form.modoAno": "ao ano",
@@ -1111,7 +1153,8 @@ const DebtIDTextos = {
     "erro.outroDevedor": "Informe quem pega emprestado.", "erro.outroCredor": "Informe quem empresta.",
     "erro.max80": "Use no máximo 80 caracteres.",
     "erro.valorVazio": "Informe o valor emprestado.", "erro.valorInvalido": "Valor inválido. Ex.: 1.250,00",
-    "erro.valorZero": "O valor precisa ser maior que zero.", "erro.valorMax": "Valor máximo: R$ 1 bilhão.",
+    "erro.valorZero": "O valor precisa ser maior que zero.", "erro.valorMax": "Valor máximo: {x}.",
+    "erro.totalAlto": "O total passa do limite. Diminua o valor, a taxa ou o prazo.",
     "erro.taxaVazia": "Informe a taxa (pode ser 0).", "erro.taxaInvalida": "Taxa inválida. Ex.: 2,5", "erro.taxaMax": "Taxa máxima: 1000%.",
     "erro.de": "Escolha a data do empréstimo.", "erro.dp": "Escolha a data de pagamento.",
     "erro.dpAntes": "O pagamento não pode ser antes do empréstimo.", "erro.prazoMax": "Prazo máximo: 100 anos.",
@@ -1166,6 +1209,9 @@ const DebtIDTextos = {
     "aj.perfilHint": "O ID identifica sua chave de assinatura. Quem assina com você pode conferir esse ID nos recibos. O nome novo vale para os próximos registros.",
     "aj.aparencia": "Aparência", "aj.pro": "Profissional", "aj.tema": "Tema",
     "aj.sistema": "Sistema", "aj.claro": "Claro", "aj.escuro": "Escuro", "aj.idioma": "Idioma",
+    "aj.moeda": "Moeda padrão", "aj.moedaHint": "Usada nos novos registros. Em cada empréstimo dá para escolher outra.",
+    "moeda.escolher": "Escolha a moeda", "moeda.buscar": "Buscar por nome ou código", "moeda.populares": "Mais usadas",
+    "moeda.todas": "Todas as moedas", "moeda.nenhuma": "Nenhuma moeda encontrada.", "toast.moedaPadrao": "Moeda padrão: {x}.",
     "aj.backupIntro": "Seu perfil e seus registros ficam só neste aparelho. Se trocar de celular ou apagar o app, é o backup que mantém o mesmo ID e o histórico.",
     "aj.criarBackup": "Criar backup", "aj.restaurarBackup": "Restaurar backup",
     "aj.senha1": "Crie uma senha", "aj.senha2": "Repita a senha",
@@ -1233,12 +1279,12 @@ const DebtIDTextos = {
     "rc.situacaoProp": "Registrado e assinado por {a}; aguardando a assinatura de {b}.",
     "rc.situacaoV1": "Registro antigo, sem assinatura digital.",
     "rc.tipoCompostos": "Juros compostos (juros sobre juros)", "rc.tipoSimples": "Juros simples",
-    "rc.arred": "{tipo}, com o total arredondado para cima no centavo.",
+    "rc.arred": "{tipo}, com o total arredondado para cima na menor fração da moeda.",
     "rc.curtaVal": "Validado pelos dois", "rc.curtaProp": "Aguardando confirmação", "rc.curtaV1": "Sem assinatura",
     "rc.notaVal": "Assinado com chaves que ficam só no aparelho de cada pessoa. Confira no DebtID, em Conferir.",
     "rc.notaProp": "Ainda falta a assinatura de {b}. Confira no DebtID, em Conferir.",
     "rc.notaV1": "Código antigo, sem assinatura digital.",
-    "rc.credor": "Credor", "rc.devedor": "Devedor", "rc.valor": "Valor emprestado", "rc.taxa": "Taxa de juros",
+    "rc.moeda": "Moeda", "rc.credor": "Credor", "rc.devedor": "Devedor", "rc.valor": "Valor emprestado", "rc.taxa": "Taxa de juros",
     "rc.semJuros": "sem juros", "rc.compostos": ", compostos", "rc.simples": ", simples",
     "rc.de": "Data do empréstimo", "rc.dp": "Data de pagamento", "rc.prazo": "Prazo", "rc.juros": "Juros calculados",
     "rc.lucro": "Lucro do credor", "rc.situacao": "Situação", "rc.registrado": "Registrado em", "rc.confirmado": "Confirmado em",
@@ -1253,7 +1299,7 @@ const DebtIDTextos = {
   },
 
   en: {
-    "meta.descricao": "DebtID: a loan calculator and IOU signed by both sides, with a QR code. Everything stays on your device.",
+    "meta.descricao": "DebtID: a loan calculator and IOU in any currency, signed by both sides, with a QR code. Everything stays on your device.",
     "nav.secoes": "Sections", "nav.navegacao": "Navigation",
     "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
@@ -1263,7 +1309,7 @@ const DebtIDTextos = {
     "hero.lead": "Work out the interest, record the loan and ask the other person to confirm. Each side signs with a key that never leaves their own phone, so nobody can later say they never agreed.",
     "hero.chip1": "Simple & compound interest", "hero.chip2": "Signed by both sides", "hero.chip3": "QR code",
     "comum.novoRegistro": "New record", "hero.ler": "Read a code",
-    "art.recibo": "RECEIPT", "art.selo": "signed by both sides", "art.valor": "264.39",
+    "art.recibo": "RECEIPT", "art.selo": "signed by both sides", "art.valor": "0.0026",
     "hp.eyebrow": "Calculate · Record · Prove",
     "hp.sub": "<span>Signed by both sides</span> <em>— no arguments</em>",
     "hp.f1t": "Digital signature", "hp.f1": "Lender and borrower sign with keys that stay on their own phones.",
@@ -1274,7 +1320,7 @@ const DebtIDTextos = {
     "form.passo": "Step 1 of 3",
     "form.papel": "In this loan, I am…", "form.credor": "The lender", "form.devedor": "The borrower",
     "form.outroDevedor": "Borrower's name", "form.outroCredor": "Lender's name", "form.outroPh": "e.g. Bruno Lima",
-    "form.valor": "Amount lent", "form.valorPh": "0.00",
+    "form.moeda": "Currency", "form.valor": "Amount lent", "form.valorPh": "0.00",
     "form.taxa": "Interest rate", "form.taxaPh": "e.g. 10 or 2.5",
     "form.tipo": "Interest type", "form.simples": "Simple", "form.compostos": "Compound",
     "form.modo": "The rate applies…", "form.modoTotal": "in total", "form.modoMes": "per month", "form.modoAno": "per year",
@@ -1291,7 +1337,8 @@ const DebtIDTextos = {
     "erro.outroDevedor": "Enter the borrower's name.", "erro.outroCredor": "Enter the lender's name.",
     "erro.max80": "Use at most 80 characters.",
     "erro.valorVazio": "Enter the amount lent.", "erro.valorInvalido": "Invalid amount. e.g. 1,250.00",
-    "erro.valorZero": "The amount must be greater than zero.", "erro.valorMax": "Maximum amount: R$ 1 billion.",
+    "erro.valorZero": "The amount must be greater than zero.", "erro.valorMax": "Maximum amount: {x}.",
+    "erro.totalAlto": "The total is over the limit. Lower the amount, the rate or the term.",
     "erro.taxaVazia": "Enter the rate (it can be 0).", "erro.taxaInvalida": "Invalid rate. e.g. 2.5", "erro.taxaMax": "Maximum rate: 1000%.",
     "erro.de": "Pick the loan date.", "erro.dp": "Pick the due date.",
     "erro.dpAntes": "The due date can't be before the loan date.", "erro.prazoMax": "Maximum term: 100 years.",
@@ -1346,6 +1393,9 @@ const DebtIDTextos = {
     "aj.perfilHint": "The ID identifies your signing key. People who sign with you can check it on receipts. A new name applies to future records.",
     "aj.aparencia": "Look", "aj.pro": "Professional", "aj.tema": "Theme",
     "aj.sistema": "System", "aj.claro": "Light", "aj.escuro": "Dark", "aj.idioma": "Language",
+    "aj.moeda": "Default currency", "aj.moedaHint": "Used for new records. You can pick another one for each loan.",
+    "moeda.escolher": "Choose a currency", "moeda.buscar": "Search by name or code", "moeda.populares": "Most used",
+    "moeda.todas": "All currencies", "moeda.nenhuma": "No currency found.", "toast.moedaPadrao": "Default currency: {x}.",
     "aj.backupIntro": "Your profile and records live only on this device. If you switch phones or delete the app, the backup is what keeps your ID and history.",
     "aj.criarBackup": "Create backup", "aj.restaurarBackup": "Restore backup",
     "aj.senha1": "Choose a password", "aj.senha2": "Repeat the password",
@@ -1413,12 +1463,12 @@ const DebtIDTextos = {
     "rc.situacaoProp": "Recorded and signed by {a}; waiting for {b}'s signature.",
     "rc.situacaoV1": "Old record, without a digital signature.",
     "rc.tipoCompostos": "Compound interest (interest on interest)", "rc.tipoSimples": "Simple interest",
-    "rc.arred": "{tipo}, with the total rounded up to the next cent.",
+    "rc.arred": "{tipo}, with the total rounded up to the currency's smallest unit.",
     "rc.curtaVal": "Validated by both sides", "rc.curtaProp": "Awaiting confirmation", "rc.curtaV1": "Unsigned",
     "rc.notaVal": "Signed with keys that stay on each person's device. Verify it in DebtID under Verify.",
     "rc.notaProp": "{b} hasn't signed yet. Verify it in DebtID under Verify.",
     "rc.notaV1": "Old code, without a digital signature.",
-    "rc.credor": "Lender", "rc.devedor": "Borrower", "rc.valor": "Amount lent", "rc.taxa": "Interest rate",
+    "rc.moeda": "Currency", "rc.credor": "Lender", "rc.devedor": "Borrower", "rc.valor": "Amount lent", "rc.taxa": "Interest rate",
     "rc.semJuros": "no interest", "rc.compostos": ", compound", "rc.simples": ", simple",
     "rc.de": "Loan date", "rc.dp": "Due date", "rc.prazo": "Term", "rc.juros": "Calculated interest",
     "rc.lucro": "Lender's profit", "rc.situacao": "Status", "rc.registrado": "Recorded on", "rc.confirmado": "Confirmed on",
@@ -1473,7 +1523,8 @@ const DebtID = (() => {
   const SEGREDO = 'fiado·v1·7c2e91d4-b83f-4a6e-9f15-2d0ac4e8b6f3';
   const MODOS = ['total', 'mes', 'ano'];
   const PAPEIS = ['credor', 'devedor'];
-  const LIMITES = { valor: 100000000000, taxa: 10000000, dias: 36500, nomeBytes: 320 };
+  // valor and totals are in the currency's smallest unit (cents, satoshis...) and must stay below 2^53
+  const LIMITES = { valor: 1e15, taxa: 10000000, dias: 36500, nomeBytes: 320 };
 
   const enc = new TextEncoder();
   const dec = new TextDecoder('utf-8', { fatal: true });
@@ -1486,12 +1537,216 @@ const DebtID = (() => {
     constructor(codigo) { super(codigo); this.codigo = codigo; }
   }
 
+  /* =================== currencies ===================
+     code|decimals|symbol|pt singular|pt plural|pt gender (m/f)|en singular|en plural|pt list name|en list name|subunit
+     Empty list names use the capitalized singular. Empty subunit: cents (2 decimals) or none (0 decimals).
+     ISO 4217 active currencies (as of 2026: no BGN or HRK, which became the euro; XCG replaced ANG; SLE, ZWG),
+     plus Bitcoin (default), Ether and Tether. */
+  const DADOS_MOEDAS = `
+BTC|8|₿|bitcoin|bitcoins|m|bitcoin|bitcoins|Bitcoin|Bitcoin|sat
+ETH|9|Ξ|ether|ethers|m|ether|ether|Ether (Ethereum)|Ether (Ethereum)|gwei
+USDT|2|USDT|tether|tethers|m|tether|tethers|Tether (USDT)|Tether (USDT)|
+BRL|2|R$|real|reais|m|real|reais|Real brasileiro|Brazilian real|centavo
+USD|2|US$|dólar americano|dólares americanos|m|US dollar|US dollars|||
+EUR|2|€|euro|euros|m|euro|euros|||eur
+GBP|2|£|libra esterlina|libras esterlinas|f|pound sterling|pounds sterling||British pound|gbp
+JPY|0|JP¥|iene|ienes|m|yen|yen|Iene japonês|Japanese yen|
+CNY|2|CN¥|yuan|yuans|m|yuan|yuan|Yuan chinês|Chinese yuan|fen
+CHF|2|CHF|franco suíço|francos suíços|m|Swiss franc|Swiss francs|||
+CAD|2|CA$|dólar canadense|dólares canadenses|m|Canadian dollar|Canadian dollars|||
+AUD|2|AU$|dólar australiano|dólares australianos|m|Australian dollar|Australian dollars|||
+ARS|2|ARS|peso argentino|pesos argentinos|m|Argentine peso|Argentine pesos|||centavo
+MXN|2|MX$|peso mexicano|pesos mexicanos|m|Mexican peso|Mexican pesos|||centavo
+INR|2|₹|rupia indiana|rupias indianas|f|Indian rupee|Indian rupees|||paisa
+AED|2|AED|dirham dos Emirados Árabes|dirhams dos Emirados Árabes|m|UAE dirham|UAE dirhams|||fils
+AFN|2|AFN|afegane|afeganes|m|afghani|afghanis|Afegane afegão|Afghan afghani|
+ALL|2|ALL|lek albanês|leks albaneses|m|Albanian lek|Albanian leks|||
+AMD|2|֏|dram armênio|drams armênios|m|Armenian dram|Armenian drams|||
+AOA|2|AOA|kwanza|kwanzas|m|kwanza|kwanzas|Kwanza angolano|Angolan kwanza|
+AWG|2|AWG|florim arubano|florins arubanos|m|Aruban florin|Aruban florins|||
+AZN|2|₼|manat azerbaijano|manats azerbaijanos|m|Azerbaijani manat|Azerbaijani manats|||
+BAM|2|BAM|marco conversível|marcos conversíveis|m|convertible mark|convertible marks|Marco conversível (Bósnia)|Convertible mark (Bosnia)|
+BBD|2|BBD|dólar barbadiano|dólares barbadianos|m|Barbadian dollar|Barbadian dollars|||
+BDT|2|৳|taka|takas|m|taka|takas|Taka bengali|Bangladeshi taka|
+BHD|3|BHD|dinar bareinita|dinares bareinitas|m|Bahraini dinar|Bahraini dinars|||fils
+BIF|0|BIF|franco burundinês|francos burundineses|m|Burundian franc|Burundian francs|||
+BMD|2|BMD|dólar bermudense|dólares bermudenses|m|Bermudian dollar|Bermudian dollars|||
+BND|2|BND|dólar bruneano|dólares bruneanos|m|Brunei dollar|Brunei dollars|||
+BOB|2|BOB|boliviano|bolivianos|m|boliviano|bolivianos|Boliviano (Bolívia)|Bolivian boliviano|centavo
+BSD|2|BSD|dólar bahamense|dólares bahamenses|m|Bahamian dollar|Bahamian dollars|||
+BTN|2|BTN|ngultrum|ngultruns|m|ngultrum|ngultrums|Ngultrum butanês|Bhutanese ngultrum|
+BWP|2|BWP|pula|pulas|f|pula|pula|Pula (Botsuana)|Botswana pula|
+BYN|2|BYN|rublo bielorrusso|rublos bielorrussos|m|Belarusian ruble|Belarusian rubles|||kop
+BZD|2|BZD|dólar belizenho|dólares belizenhos|m|Belize dollar|Belize dollars|||
+CDF|2|CDF|franco congolês|francos congoleses|m|Congolese franc|Congolese francs|||
+CLP|0|CLP|peso chileno|pesos chilenos|m|Chilean peso|Chilean pesos|||
+COP|2|COP|peso colombiano|pesos colombianos|m|Colombian peso|Colombian pesos|||centavo
+CRC|2|₡|colón costa-riquenho|colones costa-riquenhos|m|Costa Rican colón|Costa Rican colones|||
+CUP|2|CUP|peso cubano|pesos cubanos|m|Cuban peso|Cuban pesos|||centavo
+CVE|2|CVE|escudo cabo-verdiano|escudos cabo-verdianos|m|Cape Verdean escudo|Cape Verdean escudos|||centavo
+CZK|2|Kč|coroa tcheca|coroas tchecas|f|Czech koruna|Czech korunas|||
+DJF|0|DJF|franco djibutiano|francos djibutianos|m|Djiboutian franc|Djiboutian francs|||
+DKK|2|DKK|coroa dinamarquesa|coroas dinamarquesas|f|Danish krone|Danish kroner|||
+DOP|2|DOP|peso dominicano|pesos dominicanos|m|Dominican peso|Dominican pesos|||centavo
+DZD|2|DZD|dinar argelino|dinares argelinos|m|Algerian dinar|Algerian dinars|||
+EGP|2|EGP|libra egípcia|libras egípcias|f|Egyptian pound|Egyptian pounds|||
+ERN|2|ERN|nakfa|nakfas|m|nakfa|nakfas|Nakfa eritreu|Eritrean nakfa|
+ETB|2|ETB|birr etíope|birrs etíopes|m|Ethiopian birr|Ethiopian birrs|||
+FJD|2|FJD|dólar fijiano|dólares fijianos|m|Fijian dollar|Fijian dollars|||
+FKP|2|FKP|libra das Malvinas|libras das Malvinas|f|Falkland Islands pound|Falkland Islands pounds|||gbp
+GEL|2|₾|lari georgiano|laris georgianos|m|Georgian lari|Georgian laris|||
+GHS|2|₵|cedi ganês|cedis ganeses|m|Ghanaian cedi|Ghanaian cedis|||
+GIP|2|GIP|libra de Gibraltar|libras de Gibraltar|f|Gibraltar pound|Gibraltar pounds|||gbp
+GMD|2|GMD|dalasi gambiano|dalasis gambianos|m|Gambian dalasi|Gambian dalasis|||
+GNF|0|GNF|franco guineano|francos guineanos|m|Guinean franc|Guinean francs|||
+GTQ|2|GTQ|quetzal guatemalteco|quetzais guatemaltecos|m|Guatemalan quetzal|Guatemalan quetzales|||centavo
+GYD|2|GYD|dólar guianense|dólares guianenses|m|Guyanese dollar|Guyanese dollars|||
+HKD|2|HK$|dólar de Hong Kong|dólares de Hong Kong|m|Hong Kong dollar|Hong Kong dollars|||
+HNL|2|HNL|lempira hondurenha|lempiras hondurenhas|f|Honduran lempira|Honduran lempiras|||centavo
+HTG|2|HTG|gourde haitiano|gourdes haitianos|m|Haitian gourde|Haitian gourdes|||
+HUF|2|HUF|florim húngaro|florins húngaros|m|Hungarian forint|Hungarian forints|||
+IDR|2|IDR|rupia indonésia|rupias indonésias|f|Indonesian rupiah|Indonesian rupiahs|||
+ILS|2|₪|shekel israelense|shekels israelenses|m|Israeli shekel|Israeli shekels|Novo shekel israelense|Israeli new shekel|
+IQD|3|IQD|dinar iraquiano|dinares iraquianos|m|Iraqi dinar|Iraqi dinars|||fils
+IRR|2|IRR|rial iraniano|riais iranianos|m|Iranian rial|Iranian rials|||
+ISK|0|ISK|coroa islandesa|coroas islandesas|f|Icelandic króna|Icelandic krónur|||
+JMD|2|JMD|dólar jamaicano|dólares jamaicanos|m|Jamaican dollar|Jamaican dollars|||
+JOD|3|JOD|dinar jordaniano|dinares jordanianos|m|Jordanian dinar|Jordanian dinars|||fils
+KES|2|KES|xelim queniano|xelins quenianos|m|Kenyan shilling|Kenyan shillings|||
+KGS|2|KGS|som quirguiz|soms quirguizes|m|Kyrgyzstani som|Kyrgyzstani soms|||
+KHR|2|KHR|riel cambojano|riels cambojanos|m|Cambodian riel|Cambodian riels|||
+KMF|0|KMF|franco comorense|francos comorenses|m|Comorian franc|Comorian francs|||
+KPW|2|KPW|won norte-coreano|wons norte-coreanos|m|North Korean won|North Korean won|||
+KRW|0|₩|won sul-coreano|wons sul-coreanos|m|South Korean won|South Korean won|||
+KWD|3|KWD|dinar kuwaitiano|dinares kuwaitianos|m|Kuwaiti dinar|Kuwaiti dinars|||fils
+KYD|2|KYD|dólar das Ilhas Cayman|dólares das Ilhas Cayman|m|Cayman Islands dollar|Cayman Islands dollars|||
+KZT|2|₸|tenge cazaque|tenges cazaques|m|Kazakhstani tenge|Kazakhstani tenges|||
+LAK|2|₭|kip laosiano|kips laosianos|m|Lao kip|Lao kips|||
+LBP|2|LBP|libra libanesa|libras libanesas|f|Lebanese pound|Lebanese pounds|||
+LKR|2|LKR|rupia do Sri Lanka|rupias do Sri Lanka|f|Sri Lankan rupee|Sri Lankan rupees|||
+LRD|2|LRD|dólar liberiano|dólares liberianos|m|Liberian dollar|Liberian dollars|||
+LSL|2|LSL|loti|malotis|m|loti|maloti|Loti (Lesoto)|Lesotho loti|
+LYD|3|LYD|dinar líbio|dinares líbios|m|Libyan dinar|Libyan dinars|||dirham
+MAD|2|MAD|dirham marroquino|dirhams marroquinos|m|Moroccan dirham|Moroccan dirhams|||
+MDL|2|MDL|leu moldávio|lei moldávios|m|Moldovan leu|Moldovan lei|||
+MGA|2|MGA|ariary|ariarys|m|ariary|ariary|Ariary malgaxe|Malagasy ariary|
+MKD|2|MKD|dinar macedônio|dinares macedônios|m|Macedonian denar|Macedonian denars|||
+MMK|2|MMK|kyat birmanês|kyats birmaneses|m|Myanmar kyat|Myanmar kyats|||
+MNT|2|₮|tugrik mongol|tugriks mongóis|m|Mongolian tögrög|Mongolian tögrögs|||
+MOP|2|MOP|pataca de Macau|patacas de Macau|f|Macanese pataca|Macanese patacas|||
+MRU|2|MRU|uguia mauritana|uguias mauritanas|f|Mauritanian ouguiya|Mauritanian ouguiyas|||
+MUR|2|MUR|rupia mauriciana|rupias mauricianas|f|Mauritian rupee|Mauritian rupees|||
+MVR|2|MVR|rufia maldiva|rufias maldivas|f|Maldivian rufiyaa|Maldivian rufiyaa|||
+MWK|2|MWK|kwacha malauiano|kwachas malauianos|m|Malawian kwacha|Malawian kwacha|||
+MYR|2|MYR|ringgit malaio|ringgits malaios|m|Malaysian ringgit|Malaysian ringgits|||
+MZN|2|MZN|metical|meticais|m|metical|meticais|Metical moçambicano|Mozambican metical|centavo
+NAD|2|NAD|dólar namibiano|dólares namibianos|m|Namibian dollar|Namibian dollars|||
+NGN|2|₦|naira|nairas|f|naira|naira|Naira nigeriana|Nigerian naira|
+NIO|2|NIO|córdoba nicaraguense|córdobas nicaraguenses|m|Nicaraguan córdoba|Nicaraguan córdobas|||centavo
+NOK|2|NOK|coroa norueguesa|coroas norueguesas|f|Norwegian krone|Norwegian kroner|||
+NPR|2|NPR|rupia nepalesa|rupias nepalesas|f|Nepalese rupee|Nepalese rupees|||paisa
+NZD|2|NZ$|dólar neozelandês|dólares neozelandeses|m|New Zealand dollar|New Zealand dollars|||
+OMR|3|OMR|rial omanense|riais omanenses|m|Omani rial|Omani rials|||baisa
+PAB|2|PAB|balboa|balboas|m|balboa|balboas|Balboa panamenho|Panamanian balboa|
+PEN|2|PEN|sol peruano|sóis peruanos|m|Peruvian sol|Peruvian soles|||
+PGK|2|PGK|kina|kinas|f|kina|kina|Kina (Papua-Nova Guiné)|Papua New Guinean kina|
+PHP|2|₱|peso filipino|pesos filipinos|m|Philippine peso|Philippine pesos|||
+PKR|2|PKR|rupia paquistanesa|rupias paquistanesas|f|Pakistani rupee|Pakistani rupees|||paisa
+PLN|2|zł|zloty|zlotys|m|złoty|złotys|Zloty polonês|Polish złoty|grosz
+PYG|0|₲|guarani|guaranis|m|guaraní|guaranís|Guarani paraguaio|Paraguayan guaraní|
+QAR|2|QAR|rial catariano|riais catarianos|m|Qatari riyal|Qatari riyals|||
+RON|2|RON|leu romeno|lei romenos|m|Romanian leu|Romanian lei|||
+RSD|2|RSD|dinar sérvio|dinares sérvios|m|Serbian dinar|Serbian dinars|||
+RUB|2|₽|rublo russo|rublos russos|m|Russian ruble|Russian rubles|||kop
+RWF|0|RWF|franco ruandês|francos ruandeses|m|Rwandan franc|Rwandan francs|||
+SAR|2|SAR|rial saudita|riais sauditas|m|Saudi riyal|Saudi riyals|||
+SBD|2|SBD|dólar das Ilhas Salomão|dólares das Ilhas Salomão|m|Solomon Islands dollar|Solomon Islands dollars|||
+SCR|2|SCR|rupia seichelense|rupias seichelenses|f|Seychellois rupee|Seychellois rupees|||
+SDG|2|SDG|libra sudanesa|libras sudanesas|f|Sudanese pound|Sudanese pounds|||
+SEK|2|SEK|coroa sueca|coroas suecas|f|Swedish krona|Swedish kronor|||
+SGD|2|SGD|dólar de Singapura|dólares de Singapura|m|Singapore dollar|Singapore dollars|||
+SHP|2|SHP|libra de Santa Helena|libras de Santa Helena|f|Saint Helena pound|Saint Helena pounds|||gbp
+SLE|2|SLE|leone|leones|m|leone|leones|Leone (Serra Leoa)|Sierra Leonean leone|
+SOS|2|SOS|xelim somali|xelins somalis|m|Somali shilling|Somali shillings|||
+SRD|2|SRD|dólar surinamês|dólares surinameses|m|Surinamese dollar|Surinamese dollars|||
+SSP|2|SSP|libra sul-sudanesa|libras sul-sudanesas|f|South Sudanese pound|South Sudanese pounds|||
+STN|2|STN|dobra|dobras|f|dobra|dobras|Dobra (São Tomé e Príncipe)|São Tomé and Príncipe dobra|
+SYP|2|SYP|libra síria|libras sírias|f|Syrian pound|Syrian pounds|||
+SZL|2|SZL|lilangeni|emalangeni|m|lilangeni|emalangeni|Lilangeni (Essuatíni)|Swazi lilangeni|
+THB|2|฿|baht|bahts|m|baht|baht|Baht tailandês|Thai baht|
+TJS|2|TJS|somoni|somonis|m|somoni|somonis|Somoni tadjique|Tajikistani somoni|
+TMT|2|TMT|manat turcomeno|manats turcomenos|m|Turkmen manat|Turkmen manats|||
+TND|3|TND|dinar tunisiano|dinares tunisianos|m|Tunisian dinar|Tunisian dinars|||mill
+TOP|2|TOP|paanga|paangas|f|paʻanga|paʻanga|Paanga tonganesa|Tongan paʻanga|
+TRY|2|₺|lira turca|liras turcas|f|Turkish lira|Turkish liras|||kurus
+TTD|2|TTD|dólar de Trinidad e Tobago|dólares de Trinidad e Tobago|m|Trinidad and Tobago dollar|Trinidad and Tobago dollars|||
+TWD|2|NT$|novo dólar taiwanês|novos dólares taiwaneses|m|New Taiwan dollar|New Taiwan dollars|||
+TZS|2|TZS|xelim tanzaniano|xelins tanzanianos|m|Tanzanian shilling|Tanzanian shillings|||
+UAH|2|₴|grívnia|grívnias|f|hryvnia|hryvnias|Grívnia ucraniana|Ukrainian hryvnia|kop
+UGX|0|UGX|xelim ugandense|xelins ugandenses|m|Ugandan shilling|Ugandan shillings|||
+UYU|2|UYU|peso uruguaio|pesos uruguaios|m|Uruguayan peso|Uruguayan pesos|||centavo
+UZS|2|UZS|som uzbeque|soms uzbeques|m|Uzbekistani som|Uzbekistani soms|||
+VES|2|VES|bolívar|bolívares|m|bolívar|bolívares|Bolívar venezuelano|Venezuelan bolívar|
+VND|0|₫|dong|dongs|m|dong|dong|Dong vietnamita|Vietnamese dong|
+VUV|0|VUV|vatu|vatus|m|vatu|vatu|Vatu (Vanuatu)|Vanuatu vatu|
+WST|2|WST|tala|talas|m|tala|tala|Tala samoano|Samoan tala|
+XAF|0|FCFA|franco CFA|francos CFA|m|CFA franc|CFA francs|Franco CFA da África Central|Central African CFA franc|
+XCD|2|XCD|dólar do Caribe Oriental|dólares do Caribe Oriental|m|East Caribbean dollar|East Caribbean dollars|||
+XCG|2|XCG|florim caribenho|florins caribenhos|m|Caribbean guilder|Caribbean guilders|||
+XOF|0|CFA|franco CFA|francos CFA|m|CFA franc|CFA francs|Franco CFA da África Ocidental|West African CFA franc|
+XPF|0|XPF|franco CFP|francos CFP|m|CFP franc|CFP francs|||
+YER|2|YER|rial iemenita|riais iemenitas|m|Yemeni rial|Yemeni rials|||
+ZAR|2|ZAR|rand|rands|m|rand|rand|Rand sul-africano|South African rand|
+ZMW|2|ZMW|kwacha zambiano|kwachas zambianos|m|Zambian kwacha|Zambian kwacha|||
+ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
+  // subunit names: pt [singular, plural], en [singular, plural]
+  const SUBUNIDADES = {
+    cent: { pt: ['centavo', 'centavos'], en: ['cent', 'cents'] },
+    centavo: { pt: ['centavo', 'centavos'], en: ['centavo', 'centavos'] },
+    eur: { pt: ['cêntimo', 'cêntimos'], en: ['cent', 'cents'] },
+    gbp: { pt: ['penny', 'pence'], en: ['penny', 'pence'] },
+    sat: { pt: ['satoshi', 'satoshis'], en: ['satoshi', 'satoshis'] },
+    gwei: { pt: ['gwei', 'gwei'], en: ['gwei', 'gwei'] },
+    fen: { pt: ['fen', 'fens'], en: ['fen', 'fen'] },
+    paisa: { pt: ['paisa', 'paisas'], en: ['paisa', 'paise'] },
+    kop: { pt: ['copeque', 'copeques'], en: ['kopeck', 'kopecks'] },
+    grosz: { pt: ['grosz', 'groszy'], en: ['grosz', 'groszy'] },
+    kurus: { pt: ['kuruş', 'kuruş'], en: ['kuruş', 'kuruş'] },
+    fils: { pt: ['fils', 'fils'], en: ['fils', 'fils'] },
+    baisa: { pt: ['baisa', 'baisas'], en: ['baisa', 'baisa'] },
+    mill: { pt: ['milésimo', 'milésimos'], en: ['millime', 'millimes'] },
+    dirham: { pt: ['dirham', 'dirhams'], en: ['dirham', 'dirhams'] }
+  };
+  const maiuscula = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const MOEDAS = {};
+  const CODIGOS_MOEDAS = [];
+  for (const linha of DADOS_MOEDAS.trim().split('\n')) {
+    const [codigo, casas, simbolo, ptS, ptP, g, enS, enP, ptNome, enNome, sub] = linha.split('|');
+    MOEDAS[codigo] = {
+      codigo, casas: +casas, simbolo,
+      pt: { s: ptS, p: ptP, fem: g === 'f', nome: ptNome || maiuscula(ptS) },
+      en: { s: enS, p: enP, nome: enNome || maiuscula(enS) },
+      sub: +casas === 0 ? null : SUBUNIDADES[sub || 'cent']
+    };
+    CODIGOS_MOEDAS.push(codigo);
+  }
+  const MOEDAS_POPULARES = ['BTC', 'USD', 'EUR', 'BRL', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD', 'ARS', 'MXN', 'INR', 'ETH', 'USDT'];
+  const CODIGO_MOEDA_VALIDO = /^[A-Z0-9]{2,8}$/;
+  /** Currency details. Unknown codes (from a newer app version) still display, by code. */
+  function infoMoeda(codigo, casas) {
+    const m = MOEDAS[codigo];
+    if (m && (casas == null || casas === m.casas)) return m;
+    const c = casas == null ? 2 : casas;
+    if (m) return { ...m, casas: c, sub: null };
+    return { codigo, casas: c, simbolo: codigo, pt: { s: codigo, p: codigo, fem: false, nome: codigo }, en: { s: codigo, p: codigo, nome: codigo }, sub: null };
+  }
+
   /* =================== interest math =================== */
-  // x in cents (may be fractional). toFixed(4) strips binary noise
-  // (e.g. 26438.000000000004) before ALWAYS rounding up.
+  // x in the smallest unit of the currency (cents, satoshis...; may be fractional). toFixed(4) strips
+  // binary noise (e.g. 26438.000000000004) before ALWAYS rounding up.
   const ceilCentavos = x => Math.ceil(Number(x.toFixed(4)));
 
-  // d.valor: cents · d.taxa: percent × 10,000 · d.de/d.dp: days since 1970
+  // d.valor: smallest currency unit · d.taxa: percent × 10,000 · d.de/d.dp: days since 1970
   // Simple:   I = P · i · n
   // Compound: A = P · (1 + i)^n  (n may be fractional: exponential convention)
   // n = days/30 (monthly, 30-day month) or days/365 (yearly); "total" applies the rate once.
@@ -1675,6 +1930,7 @@ const DebtID = (() => {
   function validarDados(d) {
     if (d.valor < 1 || d.valor > LIMITES.valor || d.taxa > LIMITES.taxa || d.dp - d.de > LIMITES.dias ||
         d.de > 120000 || d.ts > 8e9 || d.tz < -60 || d.tz > 60) throw new ChaveErro('CORROMPIDA');
+    if (d.total != null && !Number.isSafeInteger(d.total)) throw new ChaveErro('CORROMPIDA');
   }
 
   /* =================== signing keys (ECDSA P-256) =================== */
@@ -1744,33 +2000,42 @@ const DebtID = (() => {
     }
   }
 
-  /* =================== v2 codes (signed) =================== */
-  // [2][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
-  const VERSAO = 2, PROPOSTA = 1, VALIDADO = 2;
-  const TAG_PROPOSTA = enc.encode('DebtID/v2/proposta');
-  const TAG_CONFIRMA = enc.encode('DebtID/v2/confirma');
+  /* =================== signed codes (v2: reais; v3: any currency) =================== */
+  // [version][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
+  // v3 adds the currency code and its number of decimals right after the flags.
+  const VERSAO = 3, PROPOSTA = 1, VALIDADO = 2;
+  const TAGS = {
+    2: { p: enc.encode('DebtID/v2/proposta'), c: enc.encode('DebtID/v2/confirma') },
+    3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') }
+  };
 
-  function escreverP(d) {
+  function escreverP(d, versao) {
     const e = new Escritor();
     e.bytes(d.id);
     e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2) | (d.composto ? 8 : 0));
+    if (versao >= 3) { e.texto(d.moeda); e.byte(d.casas); }
     e.num(d.valor); e.num(d.taxa); e.num(d.de); e.num(d.dp - d.de);
     e.num(d.ts); e.num(d.tz + 64); e.num(d.total);
     e.texto(d.nomeEmissor); e.texto(d.nomeOutro);
     e.bytes(d.pubEmissor);
     return e.fim();
   }
-  function lerP(L) {
+  function lerP(L, versao) {
     const ini = L.i;
     const id = L.bytes(6);
     const f = L.byte();
     const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1], composto = !!(f & 8);
     if (!modo || f > 15) throw new ChaveErro('CORROMPIDA');
+    let moeda = 'BRL', casas = 2;
+    if (versao >= 3) {
+      moeda = L.texto(); casas = L.byte();
+      if (!CODIGO_MOEDA_VALIDO.test(moeda) || casas > 9) throw new ChaveErro('CORROMPIDA');
+    }
     const valor = L.num(), taxa = L.num(), de = L.num(), dias = L.num();
     const ts = L.num(), tz = L.num() - 64, total = L.num();
     const nomeEmissor = L.texto(), nomeOutro = L.texto();
     const pubEmissor = L.bytes(33);
-    const d = { id, modo, composto, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
+    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
     validarDados(d);
     conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
@@ -1791,18 +2056,23 @@ const DebtID = (() => {
     return { ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) };
   };
 
-  // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, valor, taxa, modo, composto, de, dp }
+  // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, moeda (code, default BRL),
+  //          valor (smallest unit of that currency), taxa, modo, composto, de, dp }
   async function criarProposta(perfil, dados) {
     const { ts, tz } = agora();
+    const moeda = dados.moeda || 'BRL';
+    if (!CODIGO_MOEDA_VALIDO.test(moeda)) throw new RangeError('moeda inválida');
     const d = {
       id: crypto.getRandomValues(new Uint8Array(6)),
       modo: dados.modo, composto: !!dados.composto && dados.modo !== 'total', papel: dados.papel,
+      moeda, casas: infoMoeda(moeda).casas,
       valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: pubDoPerfil(perfil)
     };
     d.total = calcular(d).total;
-    const p = escreverP(d);
-    const sig = await assinar(perfil, juntar(TAG_PROPOSTA, p));
+    validarDados(d);
+    const p = escreverP(d, VERSAO);
+    const sig = await assinar(perfil, juntar(TAGS[VERSAO].p, p));
     return embalar(juntar([VERSAO, PROPOSTA], p, sig));
   }
 
@@ -1814,8 +2084,9 @@ const DebtID = (() => {
     if (iguais(minha, m.bruto.p.pubEmissor)) throw new ChaveErro('PROPRIA');
     const { ts, tz } = agora();
     const c = escreverC({ ts, tz, nome: perfil.nome, pub: minha });
-    const sig2 = await assinar(perfil, juntar(TAG_CONFIRMA, m.bruto.pBytes, m.bruto.sig1, c));
-    return embalar(juntar([VERSAO, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
+    const v = m.bruto.versao; // a v2 proposal is confirmed as v2: the signatures cover its exact bytes
+    const sig2 = await assinar(perfil, juntar(TAGS[v].c, m.bruto.pBytes, m.bruto.sig1, c));
+    return embalar(juntar([v, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
   }
 
   // Reads any code (v1 or v2), checks the signatures and builds a model for display.
@@ -1824,16 +2095,17 @@ const DebtID = (() => {
     if (dados[0] === 1) {
       const { d, credor, devedor } = lerV1(dados);
       return {
-        tipo: 'v1', codigo, idHex: null, ref: codigo.slice(-4), dados: d, calc: calcular(d), emissor: null,
+        tipo: 'v1', codigo, idHex: null, ref: codigo.slice(-4), dados: { ...d, moeda: 'BRL', casas: 2 }, calc: calcular(d), emissor: null,
         credor: { nome: credor, assinou: false }, devedor: { nome: devedor, assinou: false }
       };
     }
-    if (dados[0] !== VERSAO) throw new ChaveErro('VERSAO');
+    const versao = dados[0];
+    if (!TAGS[versao]) throw new ChaveErro('VERSAO');
     const tipo = dados[1];
     if (tipo !== PROPOSTA && tipo !== VALIDADO) throw new ChaveErro('VERSAO');
     const L = new Leitor(dados);
     L.i = 2;
-    const { d, bytes: pBytes } = lerP(L);
+    const { d, bytes: pBytes } = lerP(L, versao);
     const sig1 = L.bytes(64);
     let c = null, cBytes = null, sig2 = null;
     if (tipo === VALIDADO) {
@@ -1841,17 +2113,17 @@ const DebtID = (() => {
       sig2 = L.bytes(64);
     }
     if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
-    if (!(await confere(d.pubEmissor, juntar(TAG_PROPOSTA, pBytes), sig1))) throw new ChaveErro('ASSINATURA');
+    if (!(await confere(d.pubEmissor, juntar(TAGS[versao].p, pBytes), sig1))) throw new ChaveErro('ASSINATURA');
     if (c) {
       if (iguais(c.pub, d.pubEmissor)) throw new ChaveErro('PROPRIA');
-      if (!(await confere(c.pub, juntar(TAG_CONFIRMA, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
+      if (!(await confere(c.pub, juntar(TAGS[versao].c, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
     }
     const idEmissor = await idDe(d.pubEmissor);
     const parteEmissor = { nome: d.nomeEmissor, id: idEmissor, pub: b64url(d.pubEmissor), assinou: true, ts: d.ts, tz: d.tz };
     const parteOutra = c
       ? { nome: c.nome, id: await idDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
       : { nome: d.nomeOutro, assinou: false };
-    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
+    const dadosExibir = { moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
     const idHex = hex(d.id).toUpperCase();
     return {
       tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
@@ -1859,7 +2131,7 @@ const DebtID = (() => {
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
       devedor: d.papel === 'devedor' ? parteEmissor : parteOutra,
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,
-      bruto: { p: d, pBytes, sig1 }
+      bruto: { p: d, pBytes, sig1, versao }
     };
   }
 
@@ -2112,13 +2384,11 @@ const DebtID = (() => {
       milhar: ',', decimal: '.'
     }
   };
-  let idioma = 'pt', L = LOC.pt, nf2, nf4, nfT;
+  let idioma = 'pt', L = LOC.pt, nfT;
   /** Sets the language used by fmt, extenso and lerNumero ('pt' or 'en'). Stored codes are not affected. */
   function definirIdioma(l) {
     idioma = l === 'en' ? 'en' : 'pt';
     L = LOC[idioma];
-    nf2 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    nf4 = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
     nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     return idioma;
   }
@@ -2126,12 +2396,32 @@ const DebtID = (() => {
   const p2 = n => String(n).padStart(2, '0');
   const dataUTC = dia => new Date(dia * 86400000);
   const curto = m => L.meses[m].slice(0, 3);
+  const cacheNF = {};
+  const nf = (min, max) => {
+    const k = `${L.tag}|${min}|${max}`;
+    return cacheNF[k] || (cacheNF[k] = new Intl.NumberFormat(L.tag, { minimumFractionDigits: min, maximumFractionDigits: max }));
+  };
+  // exact formatting of an integer amount in the smallest unit (no floating point in the decimals)
+  function numMoeda(v, casas, minCasas = casas) {
+    const neg = v < 0, a = Math.abs(v), mult = 10 ** casas, inteiro = Math.floor(a / mult);
+    let fr = casas ? String(a - inteiro * mult).padStart(casas, '0') : '';
+    while (fr.length > minCasas && fr.endsWith('0')) fr = fr.slice(0, -1);
+    return (neg ? '-' : '') + nf(0, 0).format(inteiro) + (fr ? L.decimal + fr : '');
+  }
+  const BRL = MOEDAS.BRL;
   const fmt = {
     idioma: () => idioma,
-    num2: n => nf2.format(n),
     num: n => nfT.format(n),
-    brl: c => 'R$ ' + nf2.format(c / 100),
-    brl4: c => 'R$ ' + nf4.format(c / 100),
+    /** amount (smallest unit) with the currency symbol, e.g. "₿ 0.00125000", "R$ 1.250,00" */
+    dinheiro: (v, m = BRL) => m.simbolo + '\u00a0' + numMoeda(v, m.casas), // no-break space: symbol never wraps alone
+    /** fractional amount (smallest unit) with up to 2 extra decimals, for the raw interest */
+    dinheiro4: (x, m = BRL) => m.simbolo + '\u00a0' + nf(m.casas, m.casas + 2).format(x / 10 ** m.casas),
+    numMoeda,
+    /** number for an input field: no thousands separator, so it reads back the same ("1000", not "1.000") */
+    numEntrada: n => new Intl.NumberFormat(L.tag, { maximumFractionDigits: 4, useGrouping: false }).format(n),
+    nomeMoeda: m => m[idioma].nome,
+    brl: c => fmt.dinheiro(c, BRL),
+    brl4: c => fmt.dinheiro4(c, BRL),
     taxa: t => nfT.format(t / 10000) + '%',
     modo: m => L.modo[m],
     dias: n => n + ' ' + (n === 1 ? L.dia : L.dias),
@@ -2162,14 +2452,17 @@ const DebtID = (() => {
   const DZ = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const CT = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
   const ESCALAS = [null, null, ['milhão','milhões'], ['bilhão','bilhões'], ['trilhão','trilhões']];
-  function ate999(n) {
+  const UN_F = UN.map((x, i) => (i === 1 ? 'uma' : i === 2 ? 'duas' : x));
+  const CT_F = CT.map(x => x.replace(/os$/, 'as'));
+  function ate999(n, fem) {
     if (n === 100) return 'cem';
+    const U = fem ? UN_F : UN, C = fem ? CT_F : CT;
     const c = Math.floor(n / 100), r = n % 100, partes = [];
-    if (c) partes.push(CT[c]);
-    if (r) partes.push(r < 20 ? UN[r] : DZ[Math.floor(r / 10)] + (r % 10 ? ' e ' + UN[r % 10] : ''));
+    if (c) partes.push(C[c]);
+    if (r) partes.push(r < 20 ? U[r] : DZ[Math.floor(r / 10)] + (r % 10 ? ' e ' + U[r % 10] : ''));
     return partes.join(' e ');
   }
-  function inteiroExtenso(n) {
+  function inteiroExtenso(n, fem = false) {
     if (n === 0) return 'zero';
     const grupos = [];
     while (n > 0) { grupos.push(n % 1000); n = Math.floor(n / 1000); }
@@ -2178,9 +2471,9 @@ const DebtID = (() => {
       const v = grupos[k];
       if (!v) continue;
       let s;
-      if (k === 0) s = ate999(v);
-      else if (k === 1) s = v === 1 ? 'mil' : ate999(v) + ' mil';
-      else s = ate999(v) + ' ' + ESCALAS[k][v === 1 ? 0 : 1];
+      if (k === 0) s = ate999(v, fem);
+      else if (k === 1) s = v === 1 ? 'mil' : ate999(v, fem) + ' mil';
+      else s = ate999(v, false) + ' ' + ESCALAS[k][v === 1 ? 0 : 1];
       partes.push({ s, v });
     }
     let out = partes[0].s;
@@ -2191,7 +2484,7 @@ const DebtID = (() => {
     }
     return out;
   }
-  // English (the currency stays the Brazilian real: "reais" and "centavos")
+  // English
   const EN_UN = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
   const EN_DZ = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
   const EN_ESC = ['', 'thousand', 'million', 'billion', 'trillion'];
@@ -2210,16 +2503,19 @@ const DebtID = (() => {
     }
     return partes.join(' ');
   }
-  function extenso(centavos) {
-    const r = Math.floor(centavos / 100), c = centavos % 100, partes = [];
+  /** Amount (smallest unit) in words, e.g. "duzentos e quarenta reais e trinta e cinco centavos". */
+  function extenso(v, m = BRL) {
+    const mult = 10 ** m.casas, r = Math.floor(v / mult), c = v - r * mult, partes = [];
+    const nome = m[idioma], sub = m.sub && m.sub[idioma];
+    if (c && !sub) return numMoeda(v, m.casas) + ' ' + nome.p; // currency unknown to this version: digits only
     if (idioma === 'en') {
-      if (r) partes.push(inteiroExtensoEn(r) + (r === 1 ? ' real' : ' reais'));
-      if (c) partes.push(inteiroExtensoEn(c) + (c === 1 ? ' centavo' : ' centavos'));
-      return partes.length ? partes.join(' and ') : 'zero reais';
+      if (r) partes.push(inteiroExtensoEn(r) + ' ' + (r === 1 ? nome.s : nome.p));
+      if (c) partes.push(inteiroExtensoEn(c) + ' ' + sub[c === 1 ? 0 : 1]);
+      return partes.length ? partes.join(' and ') : 'zero ' + nome.p;
     }
-    if (r) partes.push(inteiroExtenso(r) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? 'real' : 'reais'));
-    if (c) partes.push(inteiroExtenso(c) + (c === 1 ? ' centavo' : ' centavos'));
-    return partes.length ? partes.join(' e ') : 'zero real';
+    if (r) partes.push(inteiroExtenso(r, nome.fem) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? nome.s : nome.p));
+    if (c) partes.push(inteiroExtenso(c) + ' ' + sub[c === 1 ? 0 : 1]);
+    return partes.length ? partes.join(' e ') : 'zero ' + nome.p;
   }
 
   /* =================== typed numbers (lenient parsing) ===================
@@ -2245,6 +2541,7 @@ const DebtID = (() => {
 
   return {
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
+    MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     exportarBackup, importarBackup, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum }
@@ -2268,11 +2565,14 @@ const DebtID = (() => {
   const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const ico = n => `<svg class="ico" aria-hidden="true"><use href="#i-${n}"/></svg>`;
-  const rs = s => s.replace('R$ ', '<i>R$</i>');
+  const rs = s => s.replace(/^(\S+)\u00a0/, '<i>$1</i>'); // currency symbol in smaller type
+  // big number in a stat card: the font shrinks with the number of digits (₿ 0,00510000 has many)
+  // (--n ≈ the text width in em: digits are ~0.68em wide in the display font, plus the small symbol)
+  const valorStat = s => `<b style="--n:${(s.split('\u00a0').pop().length * 0.68 + 0.8).toFixed(2)}">${rs(s)}</b>`;
   const app = () => window.DebtIDApp || null; // Android app bridge (only exists inside the APK)
 
   /* ---------------- local storage ---------------- */
-  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma' };
+  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma', moeda: 'debtid.moeda' };
   const lerJSON = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
   const gravarJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const lerTexto = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -2294,8 +2594,11 @@ const DebtID = (() => {
   }
   const registroDe = (m, papel, status) => {
     const outro = papel === 'credor' ? m.devedor : m.credor;
-    return { id: m.idHex, papel, status, codigo: m.codigo, outro: outro.nome, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp, atualizadoEm: Date.now() };
+    return { id: m.idHex, papel, status, codigo: m.codigo, outro: outro.nome, moeda: m.dados.moeda, casas: m.dados.casas, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp, atualizadoEm: Date.now() };
   };
+  // currency of a loan model's data or of a stored record (old ones have none: reais)
+  const infoDe = d => D.infoMoeda(d.moeda || 'BRL', d.casas == null ? 2 : d.casas);
+  const dinheiro = (v, d) => fmt.dinheiro(v, infoDe(d));
   const hojeDia = () => { const h = new Date(); return Math.round(Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) / 86400000); };
 
   /* ---------------- look and theme ---------------- */
@@ -2417,6 +2720,35 @@ const DebtID = (() => {
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
+  const moedaPadrao = () => { const c = lerTexto(K.moeda); return c && D.MOEDAS[c] ? c : 'BTC'; };
+  let moedaForm = moedaPadrao();
+  const multiplo = codigo => 10 ** D.MOEDAS[codigo].casas;
+  // amount typed in the form → text in the current language, with the currency's decimals
+  const textoValor = (n, codigo) => {
+    const casas = D.MOEDAS[codigo].casas;
+    return fmt.numMoeda(Math.round(n * 10 ** casas), casas, Math.min(casas, 2));
+  };
+  function pintarBotaoMoeda(btn, codigo) {
+    const m = D.MOEDAS[codigo];
+    btn.querySelector('.mo-sim').textContent = m.simbolo;
+    btn.querySelector('.mo-nome').textContent = fmt.nomeMoeda(m);
+    btn.querySelector('.mo-cod').textContent = m.codigo;
+  }
+  function pintarMoedas() {
+    const m = D.MOEDAS[moedaForm];
+    pintarBotaoMoeda($('#btnMoeda'), moedaForm);
+    pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
+    $('#affixMoeda').textContent = m.simbolo;
+    campo('valor').placeholder = fmt.numMoeda(0, m.casas);
+  }
+  function definirMoedaForm(codigo) {
+    const v = D.lerNumero(campo('valor').value, true), x = v * multiplo(codigo);
+    moedaForm = codigo;
+    // rewrite the typed amount with the new decimals, unless that would drop digits (0,005 BTC → JPY)
+    if (v > 0 && Math.abs(x - Math.round(x)) < 1e-6) campo('valor').value = textoValor(v, codigo);
+    pintarMoedas();
+    atualizaDicas();
+  }
   function atualizaDicas() {
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
@@ -2432,12 +2764,14 @@ const DebtID = (() => {
     caixa.lastElementChild.textContent = ok ? t('form.prazo', { x: fmt.dias(dp - de) }) : t('form.prazoVazio');
     // live total preview while typing
     const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
-    const valor = Math.round(v * 100), taxa = Math.round(tx * 10000);
+    const valor = Math.round(v * multiplo(moedaForm)), taxa = Math.round(tx * 10000);
     const previa = $('#totalAoVivo');
-    const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    const pode = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    const total = pode ? D.calcular({ valor, taxa, modo, composto, de, dp }).total : NaN;
+    const temPrevia = Number.isSafeInteger(total);
     previa.classList.toggle('off', !temPrevia);
     previa.lastElementChild.textContent = temPrevia
-      ? t('form.totalPrevia', { x: fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total) })
+      ? t('form.totalPrevia', { x: fmt.dinheiro(total, D.MOEDAS[moedaForm]) })
       : t('form.totalVazio');
   }
   form.addEventListener('change', atualizaDicas);
@@ -2449,11 +2783,11 @@ const DebtID = (() => {
   atualizaDicas();
   campo('valor').addEventListener('blur', () => {
     const n = D.lerNumero(campo('valor').value, true);
-    if (n > 0) campo('valor').value = fmt.num2(Math.round(n * 100) / 100);
+    if (n > 0) campo('valor').value = textoValor(n, moedaForm);
   });
   campo('taxa').addEventListener('blur', () => {
     const n = D.lerNumero(campo('taxa').value, false);
-    if (n >= 0) campo('taxa').value = fmt.num(Math.round(n * 10000) / 10000);
+    if (n >= 0) campo('taxa').value = fmt.numEntrada(Math.round(n * 10000) / 10000);
   });
   const limparNome = s => String(s).normalize('NFC').replace(/\s+/g, ' ').trim();
 
@@ -2462,11 +2796,12 @@ const DebtID = (() => {
     const outro = limparNome(campo('outro').value);
     if (!outro) erros.outro = t(marcado('papel') === 'devedor' ? 'erro.outroCredor' : 'erro.outroDevedor');
     else if (outro.length > 80) erros.outro = t('erro.max80');
-    const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 100);
+    const info = D.MOEDAS[moedaForm];
+    const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 10 ** info.casas);
     if (!campo('valor').value.trim()) erros.valor = t('erro.valorVazio');
     else if (!Number.isFinite(v)) erros.valor = t('erro.valorInvalido');
     else if (valor < 1) erros.valor = t('erro.valorZero');
-    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax');
+    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax', { x: fmt.dinheiro(D.LIMITES.valor, info) });
     const tx = D.lerNumero(campo('taxa').value, false), taxa = Math.round(tx * 10000);
     if (!campo('taxa').value.trim()) erros.taxa = t('erro.taxaVazia');
     else if (!Number.isFinite(tx)) erros.taxa = t('erro.taxaInvalida');
@@ -2476,7 +2811,10 @@ const DebtID = (() => {
     if (dp == null) erros.dp = t('erro.dp');
     else if (de != null && dp < de) erros.dp = t('erro.dpAntes');
     else if (de != null && dp - de > D.LIMITES.dias) erros.dp = t('erro.prazoMax');
-    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
+    const modo = marcado('modo') || 'mes', composto = marcado('tipo') === 'compostos';
+    if (!erros.valor && !erros.taxa && !erros.de && !erros.dp &&
+        !Number.isSafeInteger(D.calcular({ valor, taxa, modo, composto, de, dp }).total)) erros.taxa = t('erro.totalAlto');
+    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, moeda: moedaForm, valor, taxa, modo, composto, de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
     alvo.querySelectorAll('.field[data-f]').forEach(f => {
@@ -2504,6 +2842,77 @@ const DebtID = (() => {
     } finally {
       btn.disabled = false;
     }
+  });
+
+  /* ---------------- currency picker ---------------- */
+  const semAcento = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  let escolhaMoeda = null, moedaMarcada = null;
+  const opcaoMoeda = c => {
+    const m = D.MOEDAS[c];
+    return `<button type="button" class="moeda-op" role="option" data-moeda="${c}" aria-selected="${c === moedaMarcada}"><span class="mo-sim">${esc(m.simbolo)}</span><span class="mo-nome">${esc(fmt.nomeMoeda(m))}</span><span class="mo-cod">${c}</span></button>`;
+  };
+  function renderMoedas() {
+    const q = semAcento($('#moedasBusca').value.trim());
+    const nome = c => fmt.nomeMoeda(D.MOEDAS[c]);
+    const ordem = (a, b) => nome(a).localeCompare(nome(b), DebtIDIdioma.atual() === 'en' ? 'en' : 'pt-BR');
+    let html;
+    if (q) {
+      const achadas = D.CODIGOS_MOEDAS.filter(c => {
+        const m = D.MOEDAS[c];
+        return [c, m.simbolo, m.pt.nome, m.en.nome, m.pt.p, m.en.p].some(x => semAcento(x).includes(q));
+      }).sort((a, b) => (semAcento(b) === q) - (semAcento(a) === q) || ordem(a, b));
+      html = achadas.length ? achadas.map(opcaoMoeda).join('') : `<p class="moedas-vazio">${t('moeda.nenhuma')}</p>`;
+    } else {
+      const pop = new Set(D.MOEDAS_POPULARES);
+      html = `<h4>${t('moeda.populares')}</h4>${D.MOEDAS_POPULARES.map(opcaoMoeda).join('')}` +
+             `<h4>${t('moeda.todas')}</h4>${D.CODIGOS_MOEDAS.filter(c => !pop.has(c)).sort(ordem).map(opcaoMoeda).join('')}`;
+    }
+    $('#moedasLista').innerHTML = html;
+  }
+  function escolherMoeda(atualCod, origem) {
+    return new Promise(res => {
+      moedaMarcada = atualCod;
+      $('#moedasBusca').value = '';
+      renderMoedas();
+      const caixa = $('#moedas');
+      caixa.hidden = false;
+      $('#moedasLista').scrollTop = 0;
+      const marcada = $('#moedasLista [aria-selected="true"]');
+      if (marcada) marcada.focus({ preventScroll: true });
+      const tecla = e => { if (e.key === 'Escape') fim(null); };
+      const fim = v => {
+        caixa.hidden = true; escolhaMoeda = null;
+        document.removeEventListener('keydown', tecla);
+        if (origem) origem.focus({ preventScroll: true });
+        res(v);
+      };
+      document.addEventListener('keydown', tecla);
+      escolhaMoeda = fim;
+    });
+  }
+  $('#moedasBusca').addEventListener('input', renderMoedas);
+  $('#moedasBusca').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const b = $('#moedasLista .moeda-op');
+    if (b && escolhaMoeda) escolhaMoeda(b.dataset.moeda);
+  });
+  $('#moedasLista').addEventListener('click', e => {
+    const b = e.target.closest('.moeda-op');
+    if (b && escolhaMoeda) escolhaMoeda(b.dataset.moeda);
+  });
+  $('#moedasFechar').addEventListener('click', () => { if (escolhaMoeda) escolhaMoeda(null); });
+  $('#moedas').addEventListener('click', e => { if (e.target.id === 'moedas' && escolhaMoeda) escolhaMoeda(null); });
+  $('#btnMoeda').addEventListener('click', async e => {
+    const c = await escolherMoeda(moedaForm, e.currentTarget);
+    if (c) definirMoedaForm(c);
+  });
+  $('#btnMoedaPadrao').addEventListener('click', async e => {
+    const c = await escolherMoeda(moedaPadrao(), e.currentTarget);
+    if (!c) return;
+    gravarTexto(K.moeda, c);
+    definirMoedaForm(c);
+    toast(t('toast.moedaPadrao', { x: fmt.nomeMoeda(D.MOEDAS[c]) }));
   });
 
   /* ---------------- check a code ---------------- */
@@ -2676,7 +3085,7 @@ const DebtID = (() => {
       cls = 'st-recebida'; icone = 'doc';
       titulo = t('st.recebidaT', { nome: esc(emissor.nome) });
       texto = t(souDevedor ? 'st.recebidaDevedor' : 'st.recebidaCredor',
-        { nome: esc(emissor.nome), valor: fmt.brl(d.valor), de: fmt.data(d.de), total: fmt.brl(c.total), dp: fmt.data(d.dp) });
+        { nome: esc(emissor.nome), valor: dinheiro(d.valor, d), de: fmt.data(d.de), total: dinheiro(c.total, d), dp: fmt.data(d.dp) });
       texto += ' ' + t('st.confira');
       botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}${t('st.confirmar')}</button>
                 <button class="btn" type="button" data-acao="recusar">${t('st.naoReconheco')}</button>`;
@@ -2730,23 +3139,23 @@ const DebtID = (() => {
     const c = m.calc, d = m.dados;
     const pct = fmt.num(d.valor ? Math.round(c.lucro / d.valor * 10000) / 100 : 0);
     return `<div class="summary">
-      <div class="stat s-1"><span>${t('res.total')}</span><b>${rs(fmt.brl(c.total))}</b><small>${t('res.totalNota')}</small></div>
-      <div class="stat s-2"><span>${t('res.lucro')}</span><b>${rs(fmt.brl(c.lucro))}</b><small>${t('res.lucroNota', { pct })}</small></div>
+      <div class="stat s-1"><span>${t('res.total')}</span>${valorStat(dinheiro(c.total, d))}<small>${t('res.totalNota')}</small></div>
+      <div class="stat s-2"><span>${t('res.lucro')}</span>${valorStat(dinheiro(c.lucro, d))}<small>${t('res.lucroNota', { pct })}</small></div>
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
-      <div class="stat s-4"><span>${t('res.juros')}</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>${t('res.jurosNota')}</small></div>
+      <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
   }
 
   function textoJuros(d, c) {
     if (d.taxa === 0) return t('juros.sem');
-    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: fmt.brl(c.lucro),
+    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: dinheiro(c.lucro, d),
                 base: t(d.modo === 'mes' ? 'juros.baseMes' : 'juros.baseAno') };
     if (d.composto) return t('juros.compostos', v);
     return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
   }
 
   function reciboHTML(m) {
-    const c = m.calc, d = m.dados;
+    const c = m.calc, d = m.dados, moeda = infoDe(d);
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
@@ -2775,23 +3184,24 @@ const DebtID = (() => {
       <div class="rc-body">
         <p class="kicker">${t('rc.kicker')}</p>
         <h3 class="rc-title">${t('rc.titulo')}</h3>
-        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: fmt.brl(d.valor), extenso: extenso(d.valor) })}</p>
-        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: fmt.brl(c.total), extenso: extenso(c.total), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
+        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: dinheiro(d.valor, d), extenso: extenso(d.valor, moeda) })}</p>
+        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: dinheiro(c.total, d), extenso: extenso(c.total, moeda), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
         <p class="rc-note">${situacao} ${t('rc.arred', { tipo: t(d.composto ? 'rc.tipoCompostos' : 'rc.tipoSimples') })}</p>
         <dl class="rc-grid">
           ${linha(t('rc.credor'), credor)}
           ${linha(t('rc.devedor'), devedor)}
-          ${linha(t('rc.valor'), fmt.brl(d.valor))}
+          ${linha(t('rc.moeda'), `${esc(fmt.nomeMoeda(moeda))} (${esc(moeda.codigo)})`)}
+          ${linha(t('rc.valor'), dinheiro(d.valor, d))}
           ${linha(t('rc.taxa'), taxa)}
           ${linha(t('rc.de'), fmt.data(d.de))}
           ${linha(t('rc.dp'), fmt.data(d.dp))}
           ${linha(t('rc.prazo'), fmt.dias(c.dias))}
-          ${linha(t('rc.juros'), fmt.brl4(c.jurosCentavos))}
-          ${linha(t('rc.lucro'), fmt.brl(c.lucro))}
+          ${linha(t('rc.juros'), fmt.dinheiro4(c.jurosCentavos, moeda))}
+          ${linha(t('rc.lucro'), dinheiro(c.lucro, d))}
           ${linha(t('rc.situacao'), situacaoCurta)}
           ${linha(t('rc.registrado'), fmt.momento(d.ts, d.tz))}
           ${linha(t('rc.confirmado'), confirmado)}
-          ${linha(t('rc.total'), fmt.brl(c.total), 'hl')}
+          ${linha(t('rc.total'), dinheiro(c.total, d), 'hl')}
         </dl>
         <div class="rc-sign">${assinatura(m.credor, t('rc.credor'))}${assinatura(m.devedor, t('rc.devedor'))}</div>
       </div>
@@ -2815,7 +3225,7 @@ const DebtID = (() => {
   function mensagemCompartilhar() {
     const { m, ctx } = atual;
     if (ctx === 'aguardando') {
-      return t('share.aguardando', { eu: perfil.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp), codigo: m.codigo });
+      return t('share.aguardando', { eu: perfil.nome, total: dinheiro(m.calc.total, m.dados), data: fmt.data(m.dados.dp), codigo: m.codigo });
     }
     if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) return t('share.confirmei', { codigo: m.codigo });
     return t('share.geral', { ref: m.ref, codigo: m.codigo });
@@ -2828,7 +3238,7 @@ const DebtID = (() => {
     const ok = await perguntar({
       titulo: t('modal.assinarT'),
       texto: t(meuPapel === 'devedor' ? 'modal.assinarDevedor' : 'modal.assinarCredor',
-        { valor: fmt.brl(m.dados.valor), nome: outro.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp) }),
+        { valor: dinheiro(m.dados.valor, m.dados), nome: outro.nome, total: dinheiro(m.calc.total, m.dados), data: fmt.data(m.dados.dp) }),
       ok: t('modal.assinarOk')
     });
     if (!ok) return;
@@ -2880,10 +3290,20 @@ const DebtID = (() => {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
     const validos = registros.filter(r => r.status === 'validado');
-    const soma = papel => validos.filter(r => r.papel === papel).reduce((s, r) => s + r.total, 0);
+    // one line per currency: amounts in different currencies are never added together
+    const somas = papel => {
+      const grupos = new Map();
+      for (const r of validos.filter(x => x.papel === papel)) {
+        const m = infoDe(r), k = m.codigo + '|' + m.casas;
+        grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + r.total });
+      }
+      const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
+      return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
+                           : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
+    };
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>${t('reg.receber')}</span><b>${rs(fmt.brl(soma('credor')))}</b><small>${t('reg.totaisNota')}</small></div>` +
-      `<div class="stat s-3"><span>${t('reg.pagar')}</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>${t('reg.totaisNota')}</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somas('credor')}<small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somas('devedor')}<small>${t('reg.totaisNota')}</small></div>`;
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
@@ -2899,7 +3319,7 @@ const DebtID = (() => {
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
         <span class="reg-main"><b>${esc(r.outro)}</b><small>${t(recebe ? 'reg.emprestou' : 'reg.deve')} · ${quando}</small></span>
-        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
+        <span class="reg-side"><b>${dinheiro(r.total, r)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
       </button>`;
     }).join('');
   }
@@ -2921,6 +3341,7 @@ const DebtID = (() => {
     $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
     $$('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
   }
   $('#formNome').addEventListener('submit', e => {
     e.preventDefault();
@@ -2947,7 +3368,7 @@ const DebtID = (() => {
     if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
     const btn = e.submitter || $('#formBackup button'); btn.disabled = true;
     try {
-      const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema) }, s1);
+      const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema), moeda: lerTexto(K.moeda) }, s1);
       $('#codigoBackup').textContent = codigo;
       mostrar('#formBackup', false); mostrar('#saidaBackup', true); $('#msgBackup').innerHTML = '';
       $('#f-bk1').value = $('#f-bk2').value = '';
@@ -2980,6 +3401,7 @@ const DebtID = (() => {
       salvarRegistros();
       if (obj.ui) aplicarUI(obj.ui);
       if (obj.tema === 'dark' || obj.tema === 'light') { gravarTexto(K.tema, obj.tema); aplicarTema(); }
+      if (obj.moeda && D.MOEDAS[obj.moeda]) { gravarTexto(K.moeda, obj.moeda); definirMoedaForm(obj.moeda); }
       msgEl.innerHTML = '';
       toast(t('toast.backupRestaurado'));
       irPara('registros');
@@ -3056,11 +3478,12 @@ const DebtID = (() => {
     D.definirIdioma(lang);
     if (salvar) gravarTexto(K.idioma, lang);
     $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
-    if (v > 0) campo('valor').value = fmt.num2(Math.round(v * 100) / 100);
-    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.num(Math.round(tx * 10000) / 10000);
+    if (v > 0) campo('valor').value = textoValor(v, moedaForm);
+    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.numEntrada(Math.round(tx * 10000) / 10000);
     $$('.field.invalid').forEach(f => { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; });
     ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
     aplicarTema();
+    pintarMoedas();
     atualizaDicas();
     const v2 = location.hash.slice(1);
     if (v2 === 'registros') renderRegistros();

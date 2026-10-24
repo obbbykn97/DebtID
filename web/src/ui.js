@@ -13,11 +13,14 @@
   const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const ico = n => `<svg class="ico" aria-hidden="true"><use href="#i-${n}"/></svg>`;
-  const rs = s => s.replace('R$ ', '<i>R$</i>');
+  const rs = s => s.replace(/^(\S+)\u00a0/, '<i>$1</i>'); // currency symbol in smaller type
+  // big number in a stat card: the font shrinks with the number of digits (₿ 0,00510000 has many)
+  // (--n ≈ the text width in em: digits are ~0.68em wide in the display font, plus the small symbol)
+  const valorStat = s => `<b style="--n:${(s.split('\u00a0').pop().length * 0.68 + 0.8).toFixed(2)}">${rs(s)}</b>`;
   const app = () => window.DebtIDApp || null; // Android app bridge (only exists inside the APK)
 
   /* ---------------- local storage ---------------- */
-  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma' };
+  const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema', idioma: 'debtid.idioma', moeda: 'debtid.moeda' };
   const lerJSON = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
   const gravarJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const lerTexto = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -39,8 +42,11 @@
   }
   const registroDe = (m, papel, status) => {
     const outro = papel === 'credor' ? m.devedor : m.credor;
-    return { id: m.idHex, papel, status, codigo: m.codigo, outro: outro.nome, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp, atualizadoEm: Date.now() };
+    return { id: m.idHex, papel, status, codigo: m.codigo, outro: outro.nome, moeda: m.dados.moeda, casas: m.dados.casas, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp, atualizadoEm: Date.now() };
   };
+  // currency of a loan model's data or of a stored record (old ones have none: reais)
+  const infoDe = d => D.infoMoeda(d.moeda || 'BRL', d.casas == null ? 2 : d.casas);
+  const dinheiro = (v, d) => fmt.dinheiro(v, infoDe(d));
   const hojeDia = () => { const h = new Date(); return Math.round(Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) / 86400000); };
 
   /* ---------------- look and theme ---------------- */
@@ -162,6 +168,35 @@
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
+  const moedaPadrao = () => { const c = lerTexto(K.moeda); return c && D.MOEDAS[c] ? c : 'BTC'; };
+  let moedaForm = moedaPadrao();
+  const multiplo = codigo => 10 ** D.MOEDAS[codigo].casas;
+  // amount typed in the form → text in the current language, with the currency's decimals
+  const textoValor = (n, codigo) => {
+    const casas = D.MOEDAS[codigo].casas;
+    return fmt.numMoeda(Math.round(n * 10 ** casas), casas, Math.min(casas, 2));
+  };
+  function pintarBotaoMoeda(btn, codigo) {
+    const m = D.MOEDAS[codigo];
+    btn.querySelector('.mo-sim').textContent = m.simbolo;
+    btn.querySelector('.mo-nome').textContent = fmt.nomeMoeda(m);
+    btn.querySelector('.mo-cod').textContent = m.codigo;
+  }
+  function pintarMoedas() {
+    const m = D.MOEDAS[moedaForm];
+    pintarBotaoMoeda($('#btnMoeda'), moedaForm);
+    pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
+    $('#affixMoeda').textContent = m.simbolo;
+    campo('valor').placeholder = fmt.numMoeda(0, m.casas);
+  }
+  function definirMoedaForm(codigo) {
+    const v = D.lerNumero(campo('valor').value, true), x = v * multiplo(codigo);
+    moedaForm = codigo;
+    // rewrite the typed amount with the new decimals, unless that would drop digits (0,005 BTC → JPY)
+    if (v > 0 && Math.abs(x - Math.round(x)) < 1e-6) campo('valor').value = textoValor(v, codigo);
+    pintarMoedas();
+    atualizaDicas();
+  }
   function atualizaDicas() {
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
@@ -177,12 +212,14 @@
     caixa.lastElementChild.textContent = ok ? t('form.prazo', { x: fmt.dias(dp - de) }) : t('form.prazoVazio');
     // live total preview while typing
     const v = D.lerNumero(campo('valor').value, true), tx = D.lerNumero(campo('taxa').value, false);
-    const valor = Math.round(v * 100), taxa = Math.round(tx * 10000);
+    const valor = Math.round(v * multiplo(moedaForm)), taxa = Math.round(tx * 10000);
     const previa = $('#totalAoVivo');
-    const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    const pode = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    const total = pode ? D.calcular({ valor, taxa, modo, composto, de, dp }).total : NaN;
+    const temPrevia = Number.isSafeInteger(total);
     previa.classList.toggle('off', !temPrevia);
     previa.lastElementChild.textContent = temPrevia
-      ? t('form.totalPrevia', { x: fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total) })
+      ? t('form.totalPrevia', { x: fmt.dinheiro(total, D.MOEDAS[moedaForm]) })
       : t('form.totalVazio');
   }
   form.addEventListener('change', atualizaDicas);
@@ -194,11 +231,11 @@
   atualizaDicas();
   campo('valor').addEventListener('blur', () => {
     const n = D.lerNumero(campo('valor').value, true);
-    if (n > 0) campo('valor').value = fmt.num2(Math.round(n * 100) / 100);
+    if (n > 0) campo('valor').value = textoValor(n, moedaForm);
   });
   campo('taxa').addEventListener('blur', () => {
     const n = D.lerNumero(campo('taxa').value, false);
-    if (n >= 0) campo('taxa').value = fmt.num(Math.round(n * 10000) / 10000);
+    if (n >= 0) campo('taxa').value = fmt.numEntrada(Math.round(n * 10000) / 10000);
   });
   const limparNome = s => String(s).normalize('NFC').replace(/\s+/g, ' ').trim();
 
@@ -207,11 +244,12 @@
     const outro = limparNome(campo('outro').value);
     if (!outro) erros.outro = t(marcado('papel') === 'devedor' ? 'erro.outroCredor' : 'erro.outroDevedor');
     else if (outro.length > 80) erros.outro = t('erro.max80');
-    const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 100);
+    const info = D.MOEDAS[moedaForm];
+    const v = D.lerNumero(campo('valor').value, true), valor = Math.round(v * 10 ** info.casas);
     if (!campo('valor').value.trim()) erros.valor = t('erro.valorVazio');
     else if (!Number.isFinite(v)) erros.valor = t('erro.valorInvalido');
     else if (valor < 1) erros.valor = t('erro.valorZero');
-    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax');
+    else if (valor > D.LIMITES.valor) erros.valor = t('erro.valorMax', { x: fmt.dinheiro(D.LIMITES.valor, info) });
     const tx = D.lerNumero(campo('taxa').value, false), taxa = Math.round(tx * 10000);
     if (!campo('taxa').value.trim()) erros.taxa = t('erro.taxaVazia');
     else if (!Number.isFinite(tx)) erros.taxa = t('erro.taxaInvalida');
@@ -221,7 +259,10 @@
     if (dp == null) erros.dp = t('erro.dp');
     else if (de != null && dp < de) erros.dp = t('erro.dpAntes');
     else if (de != null && dp - de > D.LIMITES.dias) erros.dp = t('erro.prazoMax');
-    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
+    const modo = marcado('modo') || 'mes', composto = marcado('tipo') === 'compostos';
+    if (!erros.valor && !erros.taxa && !erros.de && !erros.dp &&
+        !Number.isSafeInteger(D.calcular({ valor, taxa, modo, composto, de, dp }).total)) erros.taxa = t('erro.totalAlto');
+    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, moeda: moedaForm, valor, taxa, modo, composto, de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
     alvo.querySelectorAll('.field[data-f]').forEach(f => {
@@ -249,6 +290,77 @@
     } finally {
       btn.disabled = false;
     }
+  });
+
+  /* ---------------- currency picker ---------------- */
+  const semAcento = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  let escolhaMoeda = null, moedaMarcada = null;
+  const opcaoMoeda = c => {
+    const m = D.MOEDAS[c];
+    return `<button type="button" class="moeda-op" role="option" data-moeda="${c}" aria-selected="${c === moedaMarcada}"><span class="mo-sim">${esc(m.simbolo)}</span><span class="mo-nome">${esc(fmt.nomeMoeda(m))}</span><span class="mo-cod">${c}</span></button>`;
+  };
+  function renderMoedas() {
+    const q = semAcento($('#moedasBusca').value.trim());
+    const nome = c => fmt.nomeMoeda(D.MOEDAS[c]);
+    const ordem = (a, b) => nome(a).localeCompare(nome(b), DebtIDIdioma.atual() === 'en' ? 'en' : 'pt-BR');
+    let html;
+    if (q) {
+      const achadas = D.CODIGOS_MOEDAS.filter(c => {
+        const m = D.MOEDAS[c];
+        return [c, m.simbolo, m.pt.nome, m.en.nome, m.pt.p, m.en.p].some(x => semAcento(x).includes(q));
+      }).sort((a, b) => (semAcento(b) === q) - (semAcento(a) === q) || ordem(a, b));
+      html = achadas.length ? achadas.map(opcaoMoeda).join('') : `<p class="moedas-vazio">${t('moeda.nenhuma')}</p>`;
+    } else {
+      const pop = new Set(D.MOEDAS_POPULARES);
+      html = `<h4>${t('moeda.populares')}</h4>${D.MOEDAS_POPULARES.map(opcaoMoeda).join('')}` +
+             `<h4>${t('moeda.todas')}</h4>${D.CODIGOS_MOEDAS.filter(c => !pop.has(c)).sort(ordem).map(opcaoMoeda).join('')}`;
+    }
+    $('#moedasLista').innerHTML = html;
+  }
+  function escolherMoeda(atualCod, origem) {
+    return new Promise(res => {
+      moedaMarcada = atualCod;
+      $('#moedasBusca').value = '';
+      renderMoedas();
+      const caixa = $('#moedas');
+      caixa.hidden = false;
+      $('#moedasLista').scrollTop = 0;
+      const marcada = $('#moedasLista [aria-selected="true"]');
+      if (marcada) marcada.focus({ preventScroll: true });
+      const tecla = e => { if (e.key === 'Escape') fim(null); };
+      const fim = v => {
+        caixa.hidden = true; escolhaMoeda = null;
+        document.removeEventListener('keydown', tecla);
+        if (origem) origem.focus({ preventScroll: true });
+        res(v);
+      };
+      document.addEventListener('keydown', tecla);
+      escolhaMoeda = fim;
+    });
+  }
+  $('#moedasBusca').addEventListener('input', renderMoedas);
+  $('#moedasBusca').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const b = $('#moedasLista .moeda-op');
+    if (b && escolhaMoeda) escolhaMoeda(b.dataset.moeda);
+  });
+  $('#moedasLista').addEventListener('click', e => {
+    const b = e.target.closest('.moeda-op');
+    if (b && escolhaMoeda) escolhaMoeda(b.dataset.moeda);
+  });
+  $('#moedasFechar').addEventListener('click', () => { if (escolhaMoeda) escolhaMoeda(null); });
+  $('#moedas').addEventListener('click', e => { if (e.target.id === 'moedas' && escolhaMoeda) escolhaMoeda(null); });
+  $('#btnMoeda').addEventListener('click', async e => {
+    const c = await escolherMoeda(moedaForm, e.currentTarget);
+    if (c) definirMoedaForm(c);
+  });
+  $('#btnMoedaPadrao').addEventListener('click', async e => {
+    const c = await escolherMoeda(moedaPadrao(), e.currentTarget);
+    if (!c) return;
+    gravarTexto(K.moeda, c);
+    definirMoedaForm(c);
+    toast(t('toast.moedaPadrao', { x: fmt.nomeMoeda(D.MOEDAS[c]) }));
   });
 
   /* ---------------- check a code ---------------- */
@@ -421,7 +533,7 @@
       cls = 'st-recebida'; icone = 'doc';
       titulo = t('st.recebidaT', { nome: esc(emissor.nome) });
       texto = t(souDevedor ? 'st.recebidaDevedor' : 'st.recebidaCredor',
-        { nome: esc(emissor.nome), valor: fmt.brl(d.valor), de: fmt.data(d.de), total: fmt.brl(c.total), dp: fmt.data(d.dp) });
+        { nome: esc(emissor.nome), valor: dinheiro(d.valor, d), de: fmt.data(d.de), total: dinheiro(c.total, d), dp: fmt.data(d.dp) });
       texto += ' ' + t('st.confira');
       botoes = `<button class="btn btn-primary" type="button" data-acao="confirmar">${ico('chave')}${t('st.confirmar')}</button>
                 <button class="btn" type="button" data-acao="recusar">${t('st.naoReconheco')}</button>`;
@@ -475,23 +587,23 @@
     const c = m.calc, d = m.dados;
     const pct = fmt.num(d.valor ? Math.round(c.lucro / d.valor * 10000) / 100 : 0);
     return `<div class="summary">
-      <div class="stat s-1"><span>${t('res.total')}</span><b>${rs(fmt.brl(c.total))}</b><small>${t('res.totalNota')}</small></div>
-      <div class="stat s-2"><span>${t('res.lucro')}</span><b>${rs(fmt.brl(c.lucro))}</b><small>${t('res.lucroNota', { pct })}</small></div>
+      <div class="stat s-1"><span>${t('res.total')}</span>${valorStat(dinheiro(c.total, d))}<small>${t('res.totalNota')}</small></div>
+      <div class="stat s-2"><span>${t('res.lucro')}</span>${valorStat(dinheiro(c.lucro, d))}<small>${t('res.lucroNota', { pct })}</small></div>
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
-      <div class="stat s-4"><span>${t('res.juros')}</span><b>${rs(fmt.brl4(c.jurosCentavos))}</b><small>${t('res.jurosNota')}</small></div>
+      <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
   }
 
   function textoJuros(d, c) {
     if (d.taxa === 0) return t('juros.sem');
-    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: fmt.brl(c.lucro),
+    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: dinheiro(c.lucro, d),
                 base: t(d.modo === 'mes' ? 'juros.baseMes' : 'juros.baseAno') };
     if (d.composto) return t('juros.compostos', v);
     return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
   }
 
   function reciboHTML(m) {
-    const c = m.calc, d = m.dados;
+    const c = m.calc, d = m.dados, moeda = infoDe(d);
     const credor = esc(m.credor.nome), devedor = esc(m.devedor.nome);
     const linha = (rot, val, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${rot}</dt><dd>${val}</dd></div>`;
     const assinatura = (parte, papel) => parte.assinou
@@ -520,23 +632,24 @@
       <div class="rc-body">
         <p class="kicker">${t('rc.kicker')}</p>
         <h3 class="rc-title">${t('rc.titulo')}</h3>
-        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: fmt.brl(d.valor), extenso: extenso(d.valor) })}</p>
-        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: fmt.brl(c.total), extenso: extenso(c.total), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
+        <p class="rc-text">${t('rc.p1', { devedor, credor, data: fmt.dataExtenso(d.de), valor: dinheiro(d.valor, d), extenso: extenso(d.valor, moeda) })}</p>
+        <p class="rc-text">${t('rc.p2', { juros: textoJuros(d, c), credor, total: dinheiro(c.total, d), extenso: extenso(c.total, moeda), data: fmt.dataExtenso(d.dp), dias: fmt.dias(c.dias) })}</p>
         <p class="rc-note">${situacao} ${t('rc.arred', { tipo: t(d.composto ? 'rc.tipoCompostos' : 'rc.tipoSimples') })}</p>
         <dl class="rc-grid">
           ${linha(t('rc.credor'), credor)}
           ${linha(t('rc.devedor'), devedor)}
-          ${linha(t('rc.valor'), fmt.brl(d.valor))}
+          ${linha(t('rc.moeda'), `${esc(fmt.nomeMoeda(moeda))} (${esc(moeda.codigo)})`)}
+          ${linha(t('rc.valor'), dinheiro(d.valor, d))}
           ${linha(t('rc.taxa'), taxa)}
           ${linha(t('rc.de'), fmt.data(d.de))}
           ${linha(t('rc.dp'), fmt.data(d.dp))}
           ${linha(t('rc.prazo'), fmt.dias(c.dias))}
-          ${linha(t('rc.juros'), fmt.brl4(c.jurosCentavos))}
-          ${linha(t('rc.lucro'), fmt.brl(c.lucro))}
+          ${linha(t('rc.juros'), fmt.dinheiro4(c.jurosCentavos, moeda))}
+          ${linha(t('rc.lucro'), dinheiro(c.lucro, d))}
           ${linha(t('rc.situacao'), situacaoCurta)}
           ${linha(t('rc.registrado'), fmt.momento(d.ts, d.tz))}
           ${linha(t('rc.confirmado'), confirmado)}
-          ${linha(t('rc.total'), fmt.brl(c.total), 'hl')}
+          ${linha(t('rc.total'), dinheiro(c.total, d), 'hl')}
         </dl>
         <div class="rc-sign">${assinatura(m.credor, t('rc.credor'))}${assinatura(m.devedor, t('rc.devedor'))}</div>
       </div>
@@ -560,7 +673,7 @@
   function mensagemCompartilhar() {
     const { m, ctx } = atual;
     if (ctx === 'aguardando') {
-      return t('share.aguardando', { eu: perfil.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp), codigo: m.codigo });
+      return t('share.aguardando', { eu: perfil.nome, total: dinheiro(m.calc.total, m.dados), data: fmt.data(m.dados.dp), codigo: m.codigo });
     }
     if (m.tipo === 'validado' && parteEmissora(m).id !== perfil.id && papelDe(m)) return t('share.confirmei', { codigo: m.codigo });
     return t('share.geral', { ref: m.ref, codigo: m.codigo });
@@ -573,7 +686,7 @@
     const ok = await perguntar({
       titulo: t('modal.assinarT'),
       texto: t(meuPapel === 'devedor' ? 'modal.assinarDevedor' : 'modal.assinarCredor',
-        { valor: fmt.brl(m.dados.valor), nome: outro.nome, total: fmt.brl(m.calc.total), data: fmt.data(m.dados.dp) }),
+        { valor: dinheiro(m.dados.valor, m.dados), nome: outro.nome, total: dinheiro(m.calc.total, m.dados), data: fmt.data(m.dados.dp) }),
       ok: t('modal.assinarOk')
     });
     if (!ok) return;
@@ -625,10 +738,20 @@
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     const dia = hojeDia();
     const validos = registros.filter(r => r.status === 'validado');
-    const soma = papel => validos.filter(r => r.papel === papel).reduce((s, r) => s + r.total, 0);
+    // one line per currency: amounts in different currencies are never added together
+    const somas = papel => {
+      const grupos = new Map();
+      for (const r of validos.filter(x => x.papel === papel)) {
+        const m = infoDe(r), k = m.codigo + '|' + m.casas;
+        grupos.set(k, { m, v: (grupos.has(k) ? grupos.get(k).v : 0) + r.total });
+      }
+      const linhas = [...grupos.values()].sort((a, b) => a.m.codigo.localeCompare(b.m.codigo));
+      return linhas.length ? linhas.map(g => valorStat(fmt.dinheiro(g.v, g.m))).join('')
+                           : valorStat(fmt.dinheiro(0, D.MOEDAS[moedaPadrao()]));
+    };
     $('#totais').innerHTML =
-      `<div class="stat s-2"><span>${t('reg.receber')}</span><b>${rs(fmt.brl(soma('credor')))}</b><small>${t('reg.totaisNota')}</small></div>` +
-      `<div class="stat s-3"><span>${t('reg.pagar')}</span><b>${rs(fmt.brl(soma('devedor')))}</b><small>${t('reg.totaisNota')}</small></div>`;
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somas('credor')}<small>${t('reg.totaisNota')}</small></div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somas('devedor')}<small>${t('reg.totaisNota')}</small></div>`;
     const lista = registros.filter(r => filtro === 'todos' || r.status === filtro)
       .sort((a, b) => (b.atualizadoEm || 0) - (a.atualizadoEm || 0));
     const el = $('#lista');
@@ -644,7 +767,7 @@
       return `<button class="reg" type="button" data-reg="${esc(r.id)}">
         <span class="reg-ico ${recebe ? 'rec' : 'pag'}">${ico(recebe ? 'baixo' : 'cima')}</span>
         <span class="reg-main"><b>${esc(r.outro)}</b><small>${t(recebe ? 'reg.emprestou' : 'reg.deve')} · ${quando}</small></span>
-        <span class="reg-side"><b>${fmt.brl(r.total)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
+        <span class="reg-side"><b>${dinheiro(r.total, r)}</b><span class="chip ${vencido ? 'vencido' : r.status}">${t('rotulo.' + (vencido ? 'vencido' : r.status))}</span></span>
       </button>`;
     }).join('');
   }
@@ -666,6 +789,7 @@
     $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
     $$('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
   }
   $('#formNome').addEventListener('submit', e => {
     e.preventDefault();
@@ -692,7 +816,7 @@
     if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
     const btn = e.submitter || $('#formBackup button'); btn.disabled = true;
     try {
-      const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema) }, s1);
+      const codigo = await D.exportarBackup({ tipo: 'debtid-backup', v: 1, perfil, registros, ui: raiz.dataset.ui, tema: lerTexto(K.tema), moeda: lerTexto(K.moeda) }, s1);
       $('#codigoBackup').textContent = codigo;
       mostrar('#formBackup', false); mostrar('#saidaBackup', true); $('#msgBackup').innerHTML = '';
       $('#f-bk1').value = $('#f-bk2').value = '';
@@ -725,6 +849,7 @@
       salvarRegistros();
       if (obj.ui) aplicarUI(obj.ui);
       if (obj.tema === 'dark' || obj.tema === 'light') { gravarTexto(K.tema, obj.tema); aplicarTema(); }
+      if (obj.moeda && D.MOEDAS[obj.moeda]) { gravarTexto(K.moeda, obj.moeda); definirMoedaForm(obj.moeda); }
       msgEl.innerHTML = '';
       toast(t('toast.backupRestaurado'));
       irPara('registros');
@@ -801,11 +926,12 @@
     D.definirIdioma(lang);
     if (salvar) gravarTexto(K.idioma, lang);
     $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
-    if (v > 0) campo('valor').value = fmt.num2(Math.round(v * 100) / 100);
-    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.num(Math.round(tx * 10000) / 10000);
+    if (v > 0) campo('valor').value = textoValor(v, moedaForm);
+    if (tx >= 0 && campo('taxa').value.trim()) campo('taxa').value = fmt.numEntrada(Math.round(tx * 10000) / 10000);
     $$('.field.invalid').forEach(f => { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; });
     ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
     aplicarTema();
+    pintarMoedas();
     atualizaDicas();
     const v2 = location.hash.slice(1);
     if (v2 === 'registros') renderRegistros();

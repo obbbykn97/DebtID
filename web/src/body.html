@@ -89,8 +89,8 @@
               <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
               <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
               <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
-              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">R$</text>
-              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">264,39</text>
+              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">₿</text>
+              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">0,0026</text>
               <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
               <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
@@ -164,9 +164,13 @@
                   <div class="control"><input id="f-outro" name="outro" type="text" maxlength="80" placeholder="Ex.: Bruno Lima" data-i18n-ph="form.outroPh" autocomplete="off"></div>
                   <div class="err" id="e-outro"></div>
                 </div>
+                <div class="field span2">
+                  <span class="label" id="l-moeda" data-i18n="form.moeda">Moeda</span>
+                  <button class="moeda-btn" type="button" id="btnMoeda" aria-labelledby="l-moeda btnMoeda" aria-haspopup="dialog"><span class="mo-sim">₿</span><span class="mo-nome">Bitcoin</span><span class="mo-cod">BTC</span><svg class="ico" aria-hidden="true"><use href="#i-baixo"/></svg></button>
+                </div>
                 <div class="field" data-f="valor">
                   <label for="f-valor" data-i18n="form.valor">Valor emprestado</label>
-                  <div class="control"><span class="affix">R$</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00" data-i18n-ph="form.valorPh"></div>
+                  <div class="control"><span class="affix" id="affixMoeda">₿</span><input id="f-valor" name="valor" type="text" inputmode="decimal" placeholder="0,00000000"></div>
                   <div class="err" id="e-valor"></div>
                 </div>
                 <div class="field" data-f="taxa">
@@ -293,6 +297,11 @@
                 <input type="radio" name="idioma" id="id-pt" value="pt"><label for="id-pt" lang="pt-BR">Português</label>
                 <input type="radio" name="idioma" id="id-en" value="en"><label for="id-en" lang="en">English</label>
               </div>
+            </div>
+            <div class="ajuste">
+              <h3 id="t-moeda" data-i18n="aj.moeda">Moeda padrão</h3>
+              <button class="moeda-btn" type="button" id="btnMoedaPadrao" aria-labelledby="t-moeda btnMoedaPadrao" aria-haspopup="dialog"><span class="mo-sim">₿</span><span class="mo-nome">Bitcoin</span><span class="mo-cod">BTC</span><svg class="ico" aria-hidden="true"><use href="#i-baixo"/></svg></button>
+              <p class="hint" data-i18n="aj.moedaHint">Usada nos novos registros. Em cada empréstimo dá para escolher outra.</p>
             </div>
             <div class="ajuste">
               <h3 id="t-aparencia" data-i18n="aj.aparencia">Aparência</h3>
@@ -449,6 +458,17 @@
       <button class="btn btn-primary" type="button" id="modalOk"></button>
       <button class="btn" type="button" id="modalCancelar" data-i18n="modal.cancelar">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="moedas" hidden role="dialog" aria-modal="true" aria-labelledby="moedasTitulo">
+  <div class="modal-box moedas-box">
+    <div class="moedas-topo">
+      <h3 id="moedasTitulo" data-i18n="moeda.escolher">Escolha a moeda</h3>
+      <button class="btn btn-ghost" type="button" id="moedasFechar" data-i18n="scan.fechar">Fechar</button>
+    </div>
+    <div class="control"><input id="moedasBusca" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Buscar por nome ou código" data-i18n-ph="moeda.buscar"></div>
+    <div class="moedas-lista" id="moedasLista" role="listbox" aria-labelledby="moedasTitulo"></div>
   </div>
 </div>
 
