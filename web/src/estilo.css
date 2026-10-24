@@ -182,10 +182,14 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .seg label:hover{color:var(--ink)}
 .seg input:checked+label{background:var(--ink);color:var(--card)}
 .seg input:focus-visible+label{outline:3px solid var(--peri);outline-offset:1px}
+.seg input:disabled+label{opacity:.35;cursor:not-allowed}
 .prazo{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;padding:6px 12px;background:var(--rose);border:2px solid var(--line);border-radius:999px;box-shadow:2px 2px 0 var(--line);color:var(--on)}
 .prazo.off{background:var(--field);color:var(--muted)}
 .prazo .ico{width:16px;height:16px}
 .form-foot{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:24px}
+#totalAoVivo{background:var(--lime)}
+#totalAoVivo.off{background:var(--field)}
+[data-ui="pro"] #totalAoVivo{background:transparent}
 .ou{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .ou::before,.ou::after{content:"";flex:1;border-top:2px dashed var(--dash)}
 

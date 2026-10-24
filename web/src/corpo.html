@@ -70,7 +70,7 @@
             <h1>Quem empresta, registra.</h1>
             <p class="lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
             <ul class="chips">
-              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples</li>
+              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples e compostos</li>
               <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg>Assinado pelos dois</li>
               <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg>QR code</li>
             </ul>
@@ -175,6 +175,13 @@
                   <div class="err" id="e-taxa"></div>
                 </div>
                 <div class="field span2">
+                  <span class="label" id="l-tipo">Tipo de juros</span>
+                  <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-tipo">
+                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples">Simples</label>
+                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos">Compostos</label>
+                  </div>
+                </div>
+                <div class="field span2">
                   <span class="label" id="l-modo">A taxa vale…</span>
                   <div class="seg" role="radiogroup" aria-labelledby="l-modo">
                     <input type="radio" name="modo" id="m-total" value="total"><label for="m-total">no total</label>
@@ -197,6 +204,7 @@
               <div class="form-foot">
                 <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg>Registrar e assinar</button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
+                <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
               <p class="hint">Você assina como <b id="assinaComo">—</b>. Depois, a outra pessoa confirma no DebtID dela.</p>
             </form>

@@ -168,23 +168,43 @@
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
   const DICAS = {
-    total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
-    mes: 'Juros simples proporcionais aos dias do prazo (mês comercial de 30 dias).',
-    ano: 'Juros simples proporcionais aos dias do prazo (ano de 365 dias).'
+    simples: {
+      total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
+      mes: 'Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).',
+      ano: 'Juros simples: proporcionais aos dias do prazo (ano de 365 dias).'
+    },
+    compostos: {
+      mes: 'Juros sobre juros: a cada mês, a taxa incide sobre o valor já corrigido (mês comercial de 30 dias).',
+      ano: 'Juros sobre juros: a cada ano, a taxa incide sobre o valor já corrigido (ano de 365 dias).'
+    }
   };
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
   function atualizaDicas() {
-    $('#hintModo').textContent = DICAS[marcado('modo') || 'mes'];
+    const composto = marcado('tipo') === 'compostos';
+    const opTotal = $('#m-total');
+    opTotal.disabled = composto; // juros compostos precisam de um período (mês ou ano)
+    if (composto && opTotal.checked) $('#m-mes').checked = true;
+    const modo = marcado('modo') || 'mes';
+    $('#hintModo').textContent = DICAS[composto ? 'compostos' : 'simples'][modo];
     const credor = marcado('papel') !== 'devedor';
     $('#l-outro').textContent = credor ? 'Nome de quem pega emprestado' : 'Nome de quem empresta';
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
     const caixa = $('#prazoAoVivo'), ok = de != null && dp != null && dp >= de;
     caixa.classList.toggle('off', !ok);
     caixa.lastElementChild.textContent = ok ? 'Prazo: ' + fmt.dias(dp - de) : 'Prazo: —';
+    // prévia do total enquanto a pessoa digita
+    const v = D.lerNumero(campo('valor').value, true), t = D.lerNumero(campo('taxa').value, false);
+    const valor = Math.round(v * 100), taxa = Math.round(t * 10000);
+    const previa = $('#totalAoVivo');
+    const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    previa.classList.toggle('off', !temPrevia);
+    previa.lastElementChild.textContent = temPrevia
+      ? 'Total: ' + fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total)
+      : 'Total: —';
   }
   form.addEventListener('change', atualizaDicas);
   form.addEventListener('input', e => {
-    if (e.target.type === 'date') atualizaDicas();
+    atualizaDicas();
     const f = e.target.closest('.field');
     if (f && f.classList.contains('invalid')) { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; }
   });
@@ -220,7 +240,7 @@
     if (dp == null) erros.dp = 'Escolha a data de pagamento.';
     else if (de != null && dp < de) erros.dp = 'O pagamento não pode ser antes do empréstimo.';
     else if (de != null && dp - de > D.LIMITES.dias) erros.dp = 'Prazo máximo: 100 anos.';
-    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', de, dp } };
+    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
     alvo.querySelectorAll('.field[data-f]').forEach(f => {
@@ -483,8 +503,12 @@
 
   function textoJuros(d, c) {
     if (d.taxa === 0) return 'O empréstimo é feito <b>sem juros</b>.';
+    const base = d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias';
+    if (d.composto) {
+      return `Sobre esse valor incidem juros compostos de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, capitalizados ao longo dos ${fmt.dias(c.dias)} de prazo (${base}), o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
+    }
     const prop = d.modo === 'total' ? 'aplicados uma única vez sobre o valor emprestado'
-      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias'})`;
+      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${base})`;
     return `Sobre esse valor incidem juros simples de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, ${prop}, o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
   }
 
@@ -517,12 +541,12 @@
         <h3 class="rc-title">Recibo de empréstimo</h3>
         <p class="rc-text">Eu, <b>${devedor}</b>, declaro que recebi de <b>${credor}</b>, em ${fmt.dataExtenso(d.de)}, a quantia de <b>${fmt.brl(d.valor)}</b> (${extenso(d.valor)}), a título de empréstimo.</p>
         <p class="rc-text">${textoJuros(d, c)} Comprometo-me a pagar a ${credor} o total de <b>${fmt.brl(c.total)}</b> (${extenso(c.total)}) até <b>${fmt.dataExtenso(d.dp)}</b>, no prazo de <b>${fmt.dias(c.dias)}</b> contados da data do empréstimo.</p>
-        <p class="rc-note">${situacao} Juros simples, com o total arredondado para cima no centavo.</p>
+        <p class="rc-note">${situacao} ${d.composto ? 'Juros compostos (juros sobre juros)' : 'Juros simples'}, com o total arredondado para cima no centavo.</p>
         <dl class="rc-grid">
           ${linha('Credor', credor)}
           ${linha('Devedor', devedor)}
           ${linha('Valor emprestado', fmt.brl(d.valor))}
-          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`)}
+          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : d.composto ? ', compostos' : ', simples'}`)}
           ${linha('Data do empréstimo', fmt.data(d.de))}
           ${linha('Data de pagamento', fmt.data(d.dp))}
           ${linha('Prazo', fmt.dias(c.dias))}

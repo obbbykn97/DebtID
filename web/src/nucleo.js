@@ -29,14 +29,32 @@ const DebtID = (() => {
   const ceilCentavos = x => Math.ceil(Number(x.toFixed(4)));
 
   // d.valor: centavos · d.taxa: % × 10.000 · d.de/d.dp: dias desde 1970
+  // Simples:   J = C · i · n
+  // Compostos: M = C · (1 + i)^n  (n pode ser fracionário: convenção exponencial)
+  // n = dias/30 (ao mês, mês comercial) ou dias/365 (ao ano); "no total" aplica uma vez só.
   function calcular(d) {
     const dias = d.dp - d.de;
-    let num = d.valor * d.taxa, den = 1e6;
-    if (d.modo === 'mes') { num *= dias; den *= 30; }
-    if (d.modo === 'ano') { num *= dias; den *= 365; }
-    const jurosCentavos = Number((num / den).toFixed(4));
-    const total = ceilCentavos(d.valor + num / den);
-    return { dias, jurosCentavos, total, lucro: total - d.valor };
+    const periodos = d.modo === 'mes' ? dias / 30 : d.modo === 'ano' ? dias / 365 : 1;
+    let juros;
+    if (d.composto && d.modo !== 'total') {
+      juros = d.valor * (Math.pow(1 + d.taxa / 1e6, periodos) - 1);
+    } else {
+      let num = d.valor * d.taxa, den = 1e6;
+      if (d.modo === 'mes') { num *= dias; den *= 30; }
+      if (d.modo === 'ano') { num *= dias; den *= 365; }
+      juros = num / den;
+    }
+    const jurosCentavos = Number(juros.toFixed(4));
+    const total = ceilCentavos(d.valor + juros);
+    return { dias, periodos, jurosCentavos, total, lucro: total - d.valor };
+  }
+  // Em juros compostos, aceita 1 centavo de diferença no recálculo (potência pode variar
+  // no último dígito entre navegadores). O total que vale é o assinado.
+  function conferirTotal(d, total) {
+    const c = calcular(d);
+    if (c.total === total) return c;
+    if (d.composto && Math.abs(c.total - total) <= 1) return { ...c, total, lucro: total - d.valor };
+    throw new ChaveErro('INCONSISTENTE');
   }
 
   /* =================== bytes =================== */
@@ -272,7 +290,7 @@ const DebtID = (() => {
   function escreverP(d) {
     const e = new Escritor();
     e.bytes(d.id);
-    e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2));
+    e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2) | (d.composto ? 8 : 0));
     e.num(d.valor); e.num(d.taxa); e.num(d.de); e.num(d.dp - d.de);
     e.num(d.ts); e.num(d.tz + 64); e.num(d.total);
     e.texto(d.nomeEmissor); e.texto(d.nomeOutro);
@@ -283,15 +301,15 @@ const DebtID = (() => {
     const ini = L.i;
     const id = L.bytes(6);
     const f = L.byte();
-    const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1];
-    if (!modo || f > 7) throw new ChaveErro('CORROMPIDA');
+    const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1], composto = !!(f & 8);
+    if (!modo || f > 15) throw new ChaveErro('CORROMPIDA');
     const valor = L.num(), taxa = L.num(), de = L.num(), dias = L.num();
     const ts = L.num(), tz = L.num() - 64, total = L.num();
     const nomeEmissor = L.texto(), nomeOutro = L.texto();
     const pubEmissor = L.bytes(33);
-    const d = { id, modo, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
+    const d = { id, modo, composto, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
     validarDados(d);
-    if (calcular(d).total !== total) throw new ChaveErro('INCONSISTENTE');
+    conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
   }
   function escreverC(c) {
@@ -315,7 +333,8 @@ const DebtID = (() => {
     const { ts, tz } = agora();
     const d = {
       id: crypto.getRandomValues(new Uint8Array(6)),
-      modo: dados.modo, papel: dados.papel, valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
+      modo: dados.modo, composto: !!dados.composto && dados.modo !== 'total', papel: dados.papel,
+      valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: pubDoPerfil(perfil)
     };
     d.total = calcular(d).total;
@@ -369,11 +388,11 @@ const DebtID = (() => {
     const parteOutra = c
       ? { nome: c.nome, id: await idDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
       : { nome: d.nomeOutro, assinou: false };
-    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
+    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
     const idHex = hex(d.id).toUpperCase();
     return {
       tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
-      dados: dadosExibir, calc: calcular(d), emissor: d.papel,
+      dados: dadosExibir, calc: conferirTotal(d, d.total), emissor: d.papel,
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
       devedor: d.papel === 'devedor' ? parteEmissor : parteOutra,
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,

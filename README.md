@@ -2,7 +2,7 @@
 
 # DebtID
 
-Registro de empréstimos assinado pelos dois lados. Calcula juros simples, gera recibo em PDF e um QR code que qualquer pessoa confere em segundos. Tudo roda no aparelho, sem servidor e sem conta online.
+Registro de empréstimos assinado pelos dois lados. Calcula juros simples ou compostos, gera recibo em PDF e um QR code que qualquer pessoa confere em segundos. Tudo roda no aparelho, sem servidor e sem conta online.
 
 ## Como funciona
 
@@ -14,7 +14,7 @@ Funciona nos dois sentidos: tanto quem empresta quanto quem pega emprestado pode
 
 ## Recursos
 
-- Juros simples (no total, ao mês ou ao ano), com o total sempre arredondado para cima no centavo.
+- Juros simples (no total, ao mês ou ao ano) ou compostos (ao mês ou ao ano), com prévia do total enquanto você digita e o total sempre arredondado para cima no centavo.
 - Recibo com valores por extenso, assinaturas digitais e QR code, pronto para imprimir ou salvar em PDF.
 - Histórico com status (aguardando, validado, quitado, vencido) e totais a receber e a pagar.
 - Duas aparências, **Profissional** e **Soft**, cada uma com tema claro e escuro.

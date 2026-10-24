@@ -201,10 +201,14 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .seg label:hover{color:var(--ink)}
 .seg input:checked+label{background:var(--ink);color:var(--card)}
 .seg input:focus-visible+label{outline:3px solid var(--peri);outline-offset:1px}
+.seg input:disabled+label{opacity:.35;cursor:not-allowed}
 .prazo{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;padding:6px 12px;background:var(--rose);border:2px solid var(--line);border-radius:999px;box-shadow:2px 2px 0 var(--line);color:var(--on)}
 .prazo.off{background:var(--field);color:var(--muted)}
 .prazo .ico{width:16px;height:16px}
 .form-foot{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:24px}
+#totalAoVivo{background:var(--lime)}
+#totalAoVivo.off{background:var(--field)}
+[data-ui="pro"] #totalAoVivo{background:transparent}
 .ou{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .ou::before,.ou::after{content:"";flex:1;border-top:2px dashed var(--dash)}
 
@@ -662,7 +666,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
             <h1>Quem empresta, registra.</h1>
             <p class="lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
             <ul class="chips">
-              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples</li>
+              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg>Juros simples e compostos</li>
               <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg>Assinado pelos dois</li>
               <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg>QR code</li>
             </ul>
@@ -767,6 +771,13 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
                   <div class="err" id="e-taxa"></div>
                 </div>
                 <div class="field span2">
+                  <span class="label" id="l-tipo">Tipo de juros</span>
+                  <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="l-tipo">
+                    <input type="radio" name="tipo" id="t-simples" value="simples" checked><label for="t-simples">Simples</label>
+                    <input type="radio" name="tipo" id="t-compostos" value="compostos"><label for="t-compostos">Compostos</label>
+                  </div>
+                </div>
+                <div class="field span2">
                   <span class="label" id="l-modo">A taxa vale…</span>
                   <div class="seg" role="radiogroup" aria-labelledby="l-modo">
                     <input type="radio" name="modo" id="m-total" value="total"><label for="m-total">no total</label>
@@ -789,6 +800,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
               <div class="form-foot">
                 <button class="btn btn-primary" type="submit" id="btnRegistrar"><svg class="ico"><use href="#i-chave"/></svg>Registrar e assinar</button>
                 <span class="prazo off" id="prazoAoVivo"><svg class="ico"><use href="#i-calendario"/></svg><span>Prazo: —</span></span>
+                <span class="prazo off" id="totalAoVivo"><svg class="ico"><use href="#i-calc"/></svg><span>Total: —</span></span>
               </div>
               <p class="hint">Você assina como <b id="assinaComo">—</b>. Depois, a outra pessoa confirma no DebtID dela.</p>
             </form>
@@ -1051,14 +1063,32 @@ const DebtID = (() => {
   const ceilCentavos = x => Math.ceil(Number(x.toFixed(4)));
 
   // d.valor: centavos · d.taxa: % × 10.000 · d.de/d.dp: dias desde 1970
+  // Simples:   J = C · i · n
+  // Compostos: M = C · (1 + i)^n  (n pode ser fracionário: convenção exponencial)
+  // n = dias/30 (ao mês, mês comercial) ou dias/365 (ao ano); "no total" aplica uma vez só.
   function calcular(d) {
     const dias = d.dp - d.de;
-    let num = d.valor * d.taxa, den = 1e6;
-    if (d.modo === 'mes') { num *= dias; den *= 30; }
-    if (d.modo === 'ano') { num *= dias; den *= 365; }
-    const jurosCentavos = Number((num / den).toFixed(4));
-    const total = ceilCentavos(d.valor + num / den);
-    return { dias, jurosCentavos, total, lucro: total - d.valor };
+    const periodos = d.modo === 'mes' ? dias / 30 : d.modo === 'ano' ? dias / 365 : 1;
+    let juros;
+    if (d.composto && d.modo !== 'total') {
+      juros = d.valor * (Math.pow(1 + d.taxa / 1e6, periodos) - 1);
+    } else {
+      let num = d.valor * d.taxa, den = 1e6;
+      if (d.modo === 'mes') { num *= dias; den *= 30; }
+      if (d.modo === 'ano') { num *= dias; den *= 365; }
+      juros = num / den;
+    }
+    const jurosCentavos = Number(juros.toFixed(4));
+    const total = ceilCentavos(d.valor + juros);
+    return { dias, periodos, jurosCentavos, total, lucro: total - d.valor };
+  }
+  // Em juros compostos, aceita 1 centavo de diferença no recálculo (potência pode variar
+  // no último dígito entre navegadores). O total que vale é o assinado.
+  function conferirTotal(d, total) {
+    const c = calcular(d);
+    if (c.total === total) return c;
+    if (d.composto && Math.abs(c.total - total) <= 1) return { ...c, total, lucro: total - d.valor };
+    throw new ChaveErro('INCONSISTENTE');
   }
 
   /* =================== bytes =================== */
@@ -1294,7 +1324,7 @@ const DebtID = (() => {
   function escreverP(d) {
     const e = new Escritor();
     e.bytes(d.id);
-    e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2));
+    e.byte(MODOS.indexOf(d.modo) | (PAPEIS.indexOf(d.papel) << 2) | (d.composto ? 8 : 0));
     e.num(d.valor); e.num(d.taxa); e.num(d.de); e.num(d.dp - d.de);
     e.num(d.ts); e.num(d.tz + 64); e.num(d.total);
     e.texto(d.nomeEmissor); e.texto(d.nomeOutro);
@@ -1305,15 +1335,15 @@ const DebtID = (() => {
     const ini = L.i;
     const id = L.bytes(6);
     const f = L.byte();
-    const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1];
-    if (!modo || f > 7) throw new ChaveErro('CORROMPIDA');
+    const modo = MODOS[f & 3], papel = PAPEIS[(f >> 2) & 1], composto = !!(f & 8);
+    if (!modo || f > 15) throw new ChaveErro('CORROMPIDA');
     const valor = L.num(), taxa = L.num(), de = L.num(), dias = L.num();
     const ts = L.num(), tz = L.num() - 64, total = L.num();
     const nomeEmissor = L.texto(), nomeOutro = L.texto();
     const pubEmissor = L.bytes(33);
-    const d = { id, modo, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
+    const d = { id, modo, composto, papel, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
     validarDados(d);
-    if (calcular(d).total !== total) throw new ChaveErro('INCONSISTENTE');
+    conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
   }
   function escreverC(c) {
@@ -1337,7 +1367,8 @@ const DebtID = (() => {
     const { ts, tz } = agora();
     const d = {
       id: crypto.getRandomValues(new Uint8Array(6)),
-      modo: dados.modo, papel: dados.papel, valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
+      modo: dados.modo, composto: !!dados.composto && dados.modo !== 'total', papel: dados.papel,
+      valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: pubDoPerfil(perfil)
     };
     d.total = calcular(d).total;
@@ -1391,11 +1422,11 @@ const DebtID = (() => {
     const parteOutra = c
       ? { nome: c.nome, id: await idDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
       : { nome: d.nomeOutro, assinou: false };
-    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
+    const dadosExibir = { valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
     const idHex = hex(d.id).toUpperCase();
     return {
       tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
-      dados: dadosExibir, calc: calcular(d), emissor: d.papel,
+      dados: dadosExibir, calc: conferirTotal(d, d.total), emissor: d.papel,
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
       devedor: d.papel === 'devedor' ? parteEmissor : parteOutra,
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,
@@ -1902,23 +1933,43 @@ const DebtID = (() => {
   campo('de').value = isoLocal(hoje);
   campo('dp').value = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30));
   const DICAS = {
-    total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
-    mes: 'Juros simples proporcionais aos dias do prazo (mês comercial de 30 dias).',
-    ano: 'Juros simples proporcionais aos dias do prazo (ano de 365 dias).'
+    simples: {
+      total: 'Aplicada uma única vez sobre o valor, qualquer que seja o prazo.',
+      mes: 'Juros simples: proporcionais aos dias do prazo (mês comercial de 30 dias).',
+      ano: 'Juros simples: proporcionais aos dias do prazo (ano de 365 dias).'
+    },
+    compostos: {
+      mes: 'Juros sobre juros: a cada mês, a taxa incide sobre o valor já corrigido (mês comercial de 30 dias).',
+      ano: 'Juros sobre juros: a cada ano, a taxa incide sobre o valor já corrigido (ano de 365 dias).'
+    }
   };
   const marcado = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value;
   function atualizaDicas() {
-    $('#hintModo').textContent = DICAS[marcado('modo') || 'mes'];
+    const composto = marcado('tipo') === 'compostos';
+    const opTotal = $('#m-total');
+    opTotal.disabled = composto; // juros compostos precisam de um período (mês ou ano)
+    if (composto && opTotal.checked) $('#m-mes').checked = true;
+    const modo = marcado('modo') || 'mes';
+    $('#hintModo').textContent = DICAS[composto ? 'compostos' : 'simples'][modo];
     const credor = marcado('papel') !== 'devedor';
     $('#l-outro').textContent = credor ? 'Nome de quem pega emprestado' : 'Nome de quem empresta';
     const de = diaDeISO(campo('de').value), dp = diaDeISO(campo('dp').value);
     const caixa = $('#prazoAoVivo'), ok = de != null && dp != null && dp >= de;
     caixa.classList.toggle('off', !ok);
     caixa.lastElementChild.textContent = ok ? 'Prazo: ' + fmt.dias(dp - de) : 'Prazo: —';
+    // prévia do total enquanto a pessoa digita
+    const v = D.lerNumero(campo('valor').value, true), t = D.lerNumero(campo('taxa').value, false);
+    const valor = Math.round(v * 100), taxa = Math.round(t * 10000);
+    const previa = $('#totalAoVivo');
+    const temPrevia = ok && valor >= 1 && valor <= D.LIMITES.valor && taxa >= 0 && taxa <= D.LIMITES.taxa && dp - de <= D.LIMITES.dias;
+    previa.classList.toggle('off', !temPrevia);
+    previa.lastElementChild.textContent = temPrevia
+      ? 'Total: ' + fmt.brl(D.calcular({ valor, taxa, modo, composto, de, dp }).total)
+      : 'Total: —';
   }
   form.addEventListener('change', atualizaDicas);
   form.addEventListener('input', e => {
-    if (e.target.type === 'date') atualizaDicas();
+    atualizaDicas();
     const f = e.target.closest('.field');
     if (f && f.classList.contains('invalid')) { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; }
   });
@@ -1954,7 +2005,7 @@ const DebtID = (() => {
     if (dp == null) erros.dp = 'Escolha a data de pagamento.';
     else if (de != null && dp < de) erros.dp = 'O pagamento não pode ser antes do empréstimo.';
     else if (de != null && dp - de > D.LIMITES.dias) erros.dp = 'Prazo máximo: 100 anos.';
-    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', de, dp } };
+    return { erros, dados: { papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, valor, taxa, modo: marcado('modo') || 'mes', composto: marcado('tipo') === 'compostos', de, dp } };
   }
   function mostrarErros(erros, alvo = form) {
     alvo.querySelectorAll('.field[data-f]').forEach(f => {
@@ -2217,8 +2268,12 @@ const DebtID = (() => {
 
   function textoJuros(d, c) {
     if (d.taxa === 0) return 'O empréstimo é feito <b>sem juros</b>.';
+    const base = d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias';
+    if (d.composto) {
+      return `Sobre esse valor incidem juros compostos de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, capitalizados ao longo dos ${fmt.dias(c.dias)} de prazo (${base}), o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
+    }
     const prop = d.modo === 'total' ? 'aplicados uma única vez sobre o valor emprestado'
-      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${d.modo === 'mes' ? 'mês comercial de 30 dias' : 'ano de 365 dias'})`;
+      : `proporcionais aos ${fmt.dias(c.dias)} de prazo (${base})`;
     return `Sobre esse valor incidem juros simples de <b>${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}</b>, ${prop}, o que soma <b>${fmt.brl(c.lucro)}</b> de juros.`;
   }
 
@@ -2251,12 +2306,12 @@ const DebtID = (() => {
         <h3 class="rc-title">Recibo de empréstimo</h3>
         <p class="rc-text">Eu, <b>${devedor}</b>, declaro que recebi de <b>${credor}</b>, em ${fmt.dataExtenso(d.de)}, a quantia de <b>${fmt.brl(d.valor)}</b> (${extenso(d.valor)}), a título de empréstimo.</p>
         <p class="rc-text">${textoJuros(d, c)} Comprometo-me a pagar a ${credor} o total de <b>${fmt.brl(c.total)}</b> (${extenso(c.total)}) até <b>${fmt.dataExtenso(d.dp)}</b>, no prazo de <b>${fmt.dias(c.dias)}</b> contados da data do empréstimo.</p>
-        <p class="rc-note">${situacao} Juros simples, com o total arredondado para cima no centavo.</p>
+        <p class="rc-note">${situacao} ${d.composto ? 'Juros compostos (juros sobre juros)' : 'Juros simples'}, com o total arredondado para cima no centavo.</p>
         <dl class="rc-grid">
           ${linha('Credor', credor)}
           ${linha('Devedor', devedor)}
           ${linha('Valor emprestado', fmt.brl(d.valor))}
-          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`)}
+          ${linha('Taxa de juros', d.taxa === 0 ? 'sem juros' : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : d.composto ? ', compostos' : ', simples'}`)}
           ${linha('Data do empréstimo', fmt.data(d.de))}
           ${linha('Data de pagamento', fmt.data(d.dp))}
           ${linha('Prazo', fmt.dias(c.dias))}
