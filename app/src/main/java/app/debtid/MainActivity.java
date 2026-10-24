@@ -29,38 +29,38 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 import org.json.JSONObject;
 
 /**
- * DebtID: um WebView que abre a página local (assets/index.html).
- * O app não pede permissão de internet; tudo roda no aparelho.
- * A página conversa com o Android pela ponte window.DebtIDApp.
+ * DebtID is a WebView that loads the bundled page (assets/index.html).
+ * The app requests no network permission: everything runs on the device.
+ * The page talks to Android through the window.DebtIDApp bridge.
  */
 public class MainActivity extends Activity {
-    private static final String PAGINA = "file:///android_asset/index.html";
+    private static final String PAGE = "file:///android_asset/index.html";
 
-    private WebView web;
-    private boolean paginaPronta = false;
-    private String textoPendente = null;
+    private WebView webView;
+    private boolean pageReady = false;
+    private String pendingText = null;
 
     @Override
-    protected void onCreate(Bundle estado) {
-        super.onCreate(estado);
-        web = new WebView(this);
-        boolean noturno = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+        webView = new WebView(this);
+        boolean night = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
                 == Configuration.UI_MODE_NIGHT_YES;
-        web.setBackgroundColor(noturno ? 0xFF0D0D0D : 0xFFFFFFFF);
+        webView.setBackgroundColor(night ? 0xFF0D0D0D : 0xFFFFFFFF);
 
-        WebSettings ajustes = web.getSettings();
-        ajustes.setJavaScriptEnabled(true);
-        ajustes.setDomStorageEnabled(true);   // perfil e registros ficam no localStorage do app
-        ajustes.setAllowFileAccess(false);    // a pasta assets continua acessível
-        ajustes.setAllowContentAccess(false);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);   // the profile and records live in the app's localStorage
+        settings.setAllowFileAccess(false);    // the assets folder stays reachable
+        settings.setAllowContentAccess(false);
 
-        web.setWebViewClient(new Navegador());
-        web.addJavascriptInterface(new Ponte(), "DebtIDApp");
-        setContentView(web);
+        webView.setWebViewClient(new Client());
+        webView.addJavascriptInterface(new Bridge(), "DebtIDApp");
+        setContentView(webView);
 
-        receber(getIntent());
-        if (estado == null || web.restoreState(estado) == null) {
-            web.loadUrl(PAGINA);
+        handleIntent(getIntent());
+        if (savedState == null || webView.restoreState(savedState) == null) {
+            webView.loadUrl(PAGE);
         }
     }
 
@@ -68,36 +68,36 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        receber(intent);
+        handleIntent(intent);
     }
 
-    /** Texto compartilhado de outro app (ex.: WhatsApp → Compartilhar → DebtID). */
-    private void receber(Intent intent) {
+    /** Text shared from another app (e.g. WhatsApp → Share → DebtID). */
+    private void handleIntent(Intent intent) {
         if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return;
-        String texto = intent.getStringExtra(Intent.EXTRA_TEXT);
-        if (texto == null || texto.trim().isEmpty()) return;
-        textoPendente = texto;
-        entregarPendente();
+        String text = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (text == null || text.trim().isEmpty()) return;
+        pendingText = text;
+        deliverPending();
     }
 
-    private void entregarPendente() {
-        if (!paginaPronta || textoPendente == null || web == null) return;
-        String js = "window.DebtIDAbrir && window.DebtIDAbrir(" + JSONObject.quote(textoPendente) + ")";
-        textoPendente = null;
-        web.evaluateJavascript(js, null);
+    private void deliverPending() {
+        if (!pageReady || pendingText == null || webView == null) return;
+        String js = "window.DebtIDOpen && window.DebtIDOpen(" + JSONObject.quote(pendingText) + ")";
+        pendingText = null;
+        webView.evaluateJavascript(js, null);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle saida) {
-        super.onSaveInstanceState(saida);
-        if (web != null) web.saveState(saida);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (webView != null) webView.saveState(outState);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
-        if (web != null && web.canGoBack()) {
-            web.goBack();
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
         } else {
             super.onBackPressed();
         }
@@ -105,127 +105,127 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (web != null) {
-            web.removeJavascriptInterface("DebtIDApp");
-            web.destroy();
-            web = null;
+        if (webView != null) {
+            webView.removeJavascriptInterface("DebtIDApp");
+            webView.destroy();
+            webView = null;
         }
         super.onDestroy();
     }
 
-    /** Links externos abrem no navegador; a página local fica no app. */
-    private class Navegador extends WebViewClient {
+    /** External links open in the browser; the bundled page stays in the app. */
+    private class Client extends WebViewClient {
         @Override
-        public boolean shouldOverrideUrlLoading(WebView vista, WebResourceRequest pedido) {
-            Uri endereco = pedido.getUrl();
-            if ("file".equals(endereco.getScheme())) return false;
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            Uri url = request.getUrl();
+            if ("file".equals(url.getScheme())) return false;
             try {
-                startActivity(new Intent(Intent.ACTION_VIEW, endereco));
+                startActivity(new Intent(Intent.ACTION_VIEW, url));
             } catch (Exception e) {
-                // nenhum app para abrir o link
+                // no app can open this link
             }
             return true;
         }
 
         @Override
-        public void onPageFinished(WebView vista, String url) {
-            paginaPronta = true;
-            entregarPendente();
+        public void onPageFinished(WebView view, String url) {
+            pageReady = true;
+            deliverPending();
         }
     }
 
-    /** Funções que a página chama como window.DebtIDApp.* */
-    private class Ponte {
+    /** Methods the page calls as window.DebtIDApp.* */
+    private class Bridge {
         @JavascriptInterface
-        public boolean copiar(String texto) {
-            ClipboardManager area = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (area == null) return false;
-            area.setPrimaryClip(ClipData.newPlainText("DebtID", texto));
+        public boolean copy(String text) {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard == null) return false;
+            clipboard.setPrimaryClip(ClipData.newPlainText("DebtID", text));
             return true;
         }
 
         @JavascriptInterface
-        public void compartilhar(final String texto) {
+        public void share(final String text) {
             runOnUiThread(() -> {
-                Intent envio = new Intent(Intent.ACTION_SEND);
-                envio.setType("text/plain");
-                envio.putExtra(Intent.EXTRA_TEXT, texto);
+                Intent send = new Intent(Intent.ACTION_SEND);
+                send.setType("text/plain");
+                send.putExtra(Intent.EXTRA_TEXT, text);
                 try {
-                    startActivity(Intent.createChooser(envio, "Enviar código"));
+                    startActivity(Intent.createChooser(send, "Enviar código"));
                 } catch (Exception e) {
-                    // nenhum app para compartilhar
+                    // no app can share text
                 }
             });
         }
 
         @JavascriptInterface
-        public void imprimir(final String titulo) {
+        public void print(final String title) {
             runOnUiThread(() -> {
-                if (web == null) return;
-                PrintManager impressao = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-                if (impressao == null) return;
-                String nome = (titulo == null || titulo.trim().isEmpty()) ? "Recibo DebtID" : titulo;
-                PrintDocumentAdapter adaptador = web.createPrintDocumentAdapter(nome);
-                PrintAttributes atributos = new PrintAttributes.Builder()
+                if (webView == null) return;
+                PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+                if (printManager == null) return;
+                String name = (title == null || title.trim().isEmpty()) ? "Recibo DebtID" : title;
+                PrintDocumentAdapter adapter = webView.createPrintDocumentAdapter(name);
+                PrintAttributes attributes = new PrintAttributes.Builder()
                         .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
                         .build();
-                impressao.print(nome, adaptador, atributos);
+                printManager.print(name, adapter, attributes);
             });
         }
 
-        /** Leitor de QR do Google Play Services: não precisa de permissão de câmera. */
+        /** Google Play services code scanner: the app needs no camera permission. */
         @JavascriptInterface
-        public void lerQR() {
+        public void scanQR() {
             runOnUiThread(() -> {
-                GmsBarcodeScannerOptions opcoes = new GmsBarcodeScannerOptions.Builder()
+                GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
                         .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                         .build();
-                GmsBarcodeScanner leitor = GmsBarcodeScanning.getClient(MainActivity.this, opcoes);
-                leitor.startScan()
-                        .addOnSuccessListener(codigo -> devolverQR(codigo.getRawValue(), null))
-                        .addOnCanceledListener(() -> devolverQR(null, null))
-                        .addOnFailureListener(erro -> devolverQR(null,
+                GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(MainActivity.this, options);
+                scanner.startScan()
+                        .addOnSuccessListener(barcode -> returnQr(barcode.getRawValue(), null))
+                        .addOnCanceledListener(() -> returnQr(null, null))
+                        .addOnFailureListener(error -> returnQr(null,
                                 "Não deu para abrir o leitor de QR. Cole o código."));
             });
         }
 
-        /** Pinta as barras do sistema conforme a aparência e o tema da página. */
+        /** Colors the status and navigation bars to match the page's look and theme. */
         @JavascriptInterface
-        public void barras(final String topo, final boolean iconesEscurosTopo,
-                           final String base, final boolean iconesEscurosBase) {
-            runOnUiThread(() -> aplicarBarras(topo, iconesEscurosTopo, base, iconesEscurosBase));
+        public void systemBars(final String top, final boolean darkIconsTop,
+                               final String bottom, final boolean darkIconsBottom) {
+            runOnUiThread(() -> applySystemBars(top, darkIconsTop, bottom, darkIconsBottom));
         }
     }
 
-    private void devolverQR(String texto, String erro) {
-        if (web == null) return;
+    private void returnQr(String text, String error) {
+        if (webView == null) return;
         String js = "window.__debtidQR && window.__debtidQR("
-                + (texto == null ? "null" : JSONObject.quote(texto)) + ", "
-                + (erro == null ? "null" : JSONObject.quote(erro)) + ")";
-        web.evaluateJavascript(js, null);
+                + (text == null ? "null" : JSONObject.quote(text)) + ", "
+                + (error == null ? "null" : JSONObject.quote(error)) + ")";
+        webView.evaluateJavascript(js, null);
     }
 
     @SuppressWarnings("deprecation")
-    private void aplicarBarras(String topo, boolean escurosTopo, String base, boolean escurosBase) {
-        int corTopo, corBase;
+    private void applySystemBars(String top, boolean darkIconsTop, String bottom, boolean darkIconsBottom) {
+        int topColor, bottomColor;
         try {
-            corTopo = Color.parseColor(topo.trim());
-            corBase = Color.parseColor(base.trim());
+            topColor = Color.parseColor(top.trim());
+            bottomColor = Color.parseColor(bottom.trim());
         } catch (Exception e) {
             return;
         }
-        Window janela = getWindow();
-        janela.setStatusBarColor(corTopo);
-        janela.setNavigationBarColor(corBase);
-        View decor = janela.getDecorView();
+        Window window = getWindow();
+        window.setStatusBarColor(topColor);
+        window.setNavigationBarColor(bottomColor);
+        View decor = window.getDecorView();
         int flags = decor.getSystemUiVisibility();
-        flags = escurosTopo ? (flags | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        flags = darkIconsTop ? (flags | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
                 : (flags & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         if (Build.VERSION.SDK_INT >= 26) {
-            flags = escurosBase ? (flags | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            flags = darkIconsBottom ? (flags | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
                     : (flags & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
         decor.setSystemUiVisibility(flags);
-        if (web != null) web.setBackgroundColor(corTopo);
+        if (webView != null) webView.setBackgroundColor(topColor);
     }
 }

@@ -1,5 +1,5 @@
 /* =====================================================================
-   DebtID — interface
+   DebtID — user interface (the app text itself is in Portuguese)
    ===================================================================== */
 (() => {
   'use strict';
@@ -12,14 +12,14 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const ico = n => `<svg class="ico" aria-hidden="true"><use href="#i-${n}"/></svg>`;
   const rs = s => s.replace('R$ ', '<i>R$</i>');
-  const app = () => window.DebtIDApp || null; // ponte do app Android (só existe no APK)
+  const app = () => window.DebtIDApp || null; // Android app bridge (only exists inside the APK)
 
-  /* ---------------- armazenamento local ---------------- */
+  /* ---------------- local storage ---------------- */
   const K = { perfil: 'debtid.perfil', regs: 'debtid.registros', ui: 'debtid.ui', tema: 'debtid.tema' };
   const lerJSON = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
   const gravarJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const lerTexto = k => { try { return localStorage.getItem(k); } catch { return null; } };
-  const gravarTexto = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* sem armazenamento */ } };
+  const gravarTexto = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* no storage */ } };
 
   let perfil = lerJSON(K.perfil, null);
   if (perfil && (!perfil.jwk || !perfil.pub || !perfil.id)) perfil = null;
@@ -41,7 +41,7 @@
   };
   const hojeDia = () => { const h = new Date(); return Math.round(Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) / 86400000); };
 
-  /* ---------------- aparência e tema ---------------- */
+  /* ---------------- look and theme ---------------- */
   const prefEscuro = matchMedia('(prefers-color-scheme: dark)');
   const temaPref = () => { const t = lerTexto(K.tema); return t === 'dark' || t === 'light' ? t : 'sistema'; };
   function corDasBarras() {
@@ -51,7 +51,7 @@
     const base = cs.getPropertyValue(pro ? '--band' : '--card').trim();
     $('meta[name="theme-color"]').setAttribute('content', topo);
     const a = app();
-    if (a && a.barras) { try { a.barras(topo, !pro && !escuro, base, !pro && !escuro); } catch { /* ignora */ } }
+    if (a && a.systemBars) { try { a.systemBars(topo, !pro && !escuro, base, !pro && !escuro); } catch { /* ignore */ } }
   }
   function aplicarTema() {
     const pref = temaPref();
@@ -81,7 +81,7 @@
     if (e.target.name === 'filtro') renderRegistros();
   });
 
-  /* ---------------- avisos ---------------- */
+  /* ---------------- toasts and dialogs ---------------- */
   let timerToast;
   function toast(t) {
     const x = $('#toast'); x.textContent = t; x.classList.add('show');
@@ -118,7 +118,7 @@
   const alertaHTML = (titulo, texto, ok = false) =>
     `<div class="alert${ok ? ' ok' : ''}"><i>${ico(ok ? 'check' : 'alerta')}</i><div><b>${esc(titulo)}</b><p>${esc(texto)}</p></div></div>`;
 
-  /* ---------------- navegação ---------------- */
+  /* ---------------- navigation ---------------- */
   const VIEWS = ['inicio', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
   let atual = null;
   function rota() {
@@ -151,7 +151,7 @@
     setTimeout(() => alvo.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 30);
   });
 
-  /* ---------------- formulário ---------------- */
+  /* ---------------- loan form ---------------- */
   const form = $('#form');
   const campo = n => form.elements.namedItem(n);
   const diaDeISO = v => {
@@ -182,7 +182,7 @@
   function atualizaDicas() {
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
-    opTotal.disabled = composto; // juros compostos precisam de um período (mês ou ano)
+    opTotal.disabled = composto; // compound interest needs a period (month or year)
     if (composto && opTotal.checked) $('#m-mes').checked = true;
     const modo = marcado('modo') || 'mes';
     $('#hintModo').textContent = DICAS[composto ? 'compostos' : 'simples'][modo];
@@ -192,7 +192,7 @@
     const caixa = $('#prazoAoVivo'), ok = de != null && dp != null && dp >= de;
     caixa.classList.toggle('off', !ok);
     caixa.lastElementChild.textContent = ok ? 'Prazo: ' + fmt.dias(dp - de) : 'Prazo: —';
-    // prévia do total enquanto a pessoa digita
+    // live total preview while typing
     const v = D.lerNumero(campo('valor').value, true), t = D.lerNumero(campo('taxa').value, false);
     const valor = Math.round(v * 100), taxa = Math.round(t * 10000);
     const previa = $('#totalAoVivo');
@@ -270,7 +270,7 @@
     }
   });
 
-  /* ---------------- conferir ---------------- */
+  /* ---------------- check a code ---------------- */
   async function abrirTexto(txt) {
     if (!perfil) { toast('Crie seu perfil primeiro.'); return; }
     try {
@@ -288,13 +288,13 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); abrirTexto($('#f-codigo').value); }
   });
   $('#limparConf').addEventListener('click', () => { $('#f-codigo').value = ''; $('#msgConf').innerHTML = ''; $('#f-codigo').focus(); });
-  window.DebtIDAbrir = abrirTexto; // usado pelo app ao receber um código compartilhado
+  window.DebtIDOpen = abrirTexto; // used by the app when it receives a shared code
 
-  /* ---------------- leitor de QR ---------------- */
+  /* ---------------- QR scanner ---------------- */
   async function verificarLeitor() {
     let pode = false;
     const a = app();
-    if (a && a.lerQR) pode = true;
+    if (a && a.scanQR) pode = true;
     else if ('BarcodeDetector' in window && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try { pode = (await BarcodeDetector.getSupportedFormats()).includes('qr_code'); } catch { pode = false; }
     }
@@ -302,10 +302,10 @@
   }
   function lerQR() {
     const a = app();
-    if (a && a.lerQR) {
+    if (a && a.scanQR) {
       return new Promise(res => {
         window.__debtidQR = (texto, erro) => { window.__debtidQR = null; if (erro) toast(erro); res(texto ? String(texto) : null); };
-        try { a.lerQR(); } catch { window.__debtidQR = null; res(null); }
+        try { a.scanQR(); } catch { window.__debtidQR = null; res(null); }
       });
     }
     return lerQRCamera();
@@ -321,7 +321,7 @@
     }
     const detector = new BarcodeDetector({ formats: ['qr_code'] });
     tela.hidden = false; video.srcObject = stream;
-    try { await video.play(); } catch { /* segue */ }
+    try { await video.play(); } catch { /* fall through */ }
     return new Promise(res => {
       let ativo = true;
       const fim = txt => {
@@ -339,7 +339,7 @@
             const r = await detector.detect(video);
             if (r && r.length && r[0].rawValue) return fim(r[0].rawValue);
           }
-        } catch { /* tenta de novo */ }
+        } catch { /* try again */ }
         setTimeout(procurar, 180);
       };
       procurar();
@@ -350,13 +350,13 @@
     if (txt) abrirTexto(txt);
   }
 
-  /* ---------------- copiar, compartilhar, imprimir ---------------- */
+  /* ---------------- copy, share, print ---------------- */
   async function copiar(texto) {
     const a = app();
-    if (a && a.copiar) { try { if (a.copiar(texto)) return true; } catch { /* segue */ } }
+    if (a && a.copy) { try { if (a.copy(texto)) return true; } catch { /* fall through */ } }
     try {
       if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(texto); return true; }
-    } catch { /* plano B */ }
+    } catch { /* fallback */ }
     const ta = document.createElement('textarea');
     ta.value = texto; ta.setAttribute('readonly', '');
     ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
@@ -368,7 +368,7 @@
   }
   async function compartilhar(texto) {
     const a = app();
-    if (a && a.compartilhar) { try { a.compartilhar(texto); return; } catch { /* segue */ } }
+    if (a && a.share) { try { a.share(texto); return; } catch { /* fall through */ } }
     if (navigator.share) {
       try { await navigator.share({ text: texto }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
     }
@@ -378,14 +378,14 @@
     const m = atual.m;
     const nome = `Recibo DebtID - ${m.devedor.nome} - ${fmt.data(m.dados.de).replace(/\//g, '-')}`;
     const a = app();
-    if (a && a.imprimir) { try { a.imprimir(nome); return; } catch { /* segue */ } }
+    if (a && a.print) { try { a.print(nome); return; } catch { /* fall through */ } }
     document.title = nome;
     const fim = () => { document.title = TITULO; window.removeEventListener('afterprint', fim); };
     window.addEventListener('afterprint', fim);
     window.print();
   }
 
-  /* ---------------- detalhe de um registro ---------------- */
+  /* ---------------- record details ---------------- */
   const papelDe = m => (m.credor.id === perfil.id ? 'credor' : m.devedor.id === perfil.id ? 'devedor' : null);
   const parteEmissora = m => (m.emissor === 'credor' ? m.credor : m.devedor);
   const parteOutra = m => (m.emissor === 'credor' ? m.devedor : m.credor);
@@ -644,7 +644,7 @@
     }
   });
 
-  /* ---------------- registros ---------------- */
+  /* ---------------- records list ---------------- */
   const ROTULO = { aguardando: 'Aguardando', validado: 'Validado', quitado: 'Quitado' };
   function renderRegistros() {
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
@@ -681,7 +681,7 @@
     try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [t, x] = msgDe(err); toast(`${t}: ${x}`); }
   });
 
-  /* ---------------- ajustes ---------------- */
+  /* ---------------- settings ---------------- */
   function renderAjustes() {
     if (!perfil) return;
     $('#perfilNome').textContent = perfil.nome;
@@ -767,12 +767,12 @@
       ok: 'Apagar tudo', perigo: true
     });
     if (!ok) return;
-    try { [K.perfil, K.regs].forEach(k => localStorage.removeItem(k)); } catch { /* ignora */ }
+    try { [K.perfil, K.regs].forEach(k => localStorage.removeItem(k)); } catch { /* ignore */ }
     perfil = null; registros = []; atual = null;
     irPara('boas-vindas');
   });
 
-  /* ---------------- boas-vindas ---------------- */
+  /* ---------------- onboarding ---------------- */
   function prepararBoasVindas() {
     $$('input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     mostrar('#bv1', true); mostrar('#bv2', false); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
@@ -808,7 +808,7 @@
     } finally { btn.disabled = false; }
   });
 
-  /* ---------------- início ---------------- */
+  /* ---------------- startup ---------------- */
   aplicarUI(raiz.dataset.ui);
   aplicarTema();
   verificarLeitor();

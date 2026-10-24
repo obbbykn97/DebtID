@@ -1,12 +1,12 @@
 /* =====================================================================
-   DebtID — núcleo (sem DOM): cálculo, formatação, QR code,
-   assinaturas digitais (ECDSA P-256), códigos de verificação e backup.
+   DebtID — core (no DOM): interest math, formatting, QR codes,
+   digital signatures (ECDSA P-256), verification codes and backups.
    ===================================================================== */
 const DebtID = (() => {
   'use strict';
 
-  // Segredo do embaralhamento visual. Mantido do Fiado para abrir códigos antigos (v1).
-  // Não é proteção: a segurança dos códigos v2 vem das assinaturas digitais.
+  // Secret for the visual scrambling. Kept from "Fiado" so old (v1) codes still open.
+  // It is not protection: v2 codes are secured by the digital signatures.
   const SEGREDO = 'fiado·v1·7c2e91d4-b83f-4a6e-9f15-2d0ac4e8b6f3';
   const MODOS = ['total', 'mes', 'ano'];
   const PAPEIS = ['credor', 'devedor'];
@@ -23,15 +23,15 @@ const DebtID = (() => {
     constructor(codigo) { super(codigo); this.codigo = codigo; }
   }
 
-  /* =================== cálculo =================== */
-  // x em centavos (pode ter fração). toFixed(4) remove o ruído binário
-  // (ex.: 26438.000000000004) antes de arredondar SEMPRE para cima.
+  /* =================== interest math =================== */
+  // x in cents (may be fractional). toFixed(4) strips binary noise
+  // (e.g. 26438.000000000004) before ALWAYS rounding up.
   const ceilCentavos = x => Math.ceil(Number(x.toFixed(4)));
 
-  // d.valor: centavos · d.taxa: % × 10.000 · d.de/d.dp: dias desde 1970
-  // Simples:   J = C · i · n
-  // Compostos: M = C · (1 + i)^n  (n pode ser fracionário: convenção exponencial)
-  // n = dias/30 (ao mês, mês comercial) ou dias/365 (ao ano); "no total" aplica uma vez só.
+  // d.valor: cents · d.taxa: percent × 10,000 · d.de/d.dp: days since 1970
+  // Simple:   I = P · i · n
+  // Compound: A = P · (1 + i)^n  (n may be fractional: exponential convention)
+  // n = days/30 (monthly, 30-day month) or days/365 (yearly); "total" applies the rate once.
   function calcular(d) {
     const dias = d.dp - d.de;
     const periodos = d.modo === 'mes' ? dias / 30 : d.modo === 'ano' ? dias / 365 : 1;
@@ -48,8 +48,8 @@ const DebtID = (() => {
     const total = ceilCentavos(d.valor + juros);
     return { dias, periodos, jurosCentavos, total, lucro: total - d.valor };
   }
-  // Em juros compostos, aceita 1 centavo de diferença no recálculo (potência pode variar
-  // no último dígito entre navegadores). O total que vale é o assinado.
+  // For compound interest, accept a 1-cent difference on recalculation (Math.pow may differ
+  // in the last digit across browsers). The signed total is authoritative.
   function conferirTotal(d, total) {
     const c = calcular(d);
     if (c.total === total) return c;
@@ -74,7 +74,7 @@ const DebtID = (() => {
     constructor() { this.a = []; }
     byte(n) { this.a.push(n & 255); }
     bytes(b) { for (const x of b) this.a.push(x); }
-    num(n) { // varint sem sinal (LEB128), seguro até 2^53
+    num(n) { // unsigned varint (LEB128), safe up to 2^53
       if (!Number.isSafeInteger(n) || n < 0) throw new RangeError('número fora do intervalo');
       while (n >= 128) { this.a.push((n % 128) + 128); n = Math.floor(n / 128); }
       this.a.push(n);
@@ -108,8 +108,8 @@ const DebtID = (() => {
     acabou() { return this.i === this.b.length; }
   }
 
-  /* =================== embalagem do código =================== */
-  // base64url( [sal ⊕ fluxo(segredo)] + [dados ⊕ fluxo(segredo+sal)] ) + "-" + checksum
+  /* =================== code wrapping =================== */
+  // base64url( [salt ⊕ stream(secret)] + [data ⊕ stream(secret+salt)] ) + "-" + checksum
   function fnv1a(bytes, h = 0x811c9dc5) {
     for (let i = 0; i < bytes.length; i++) { h ^= bytes[i]; h = Math.imul(h, 0x01000193) >>> 0; }
     return h >>> 0;
@@ -155,7 +155,7 @@ const DebtID = (() => {
     const corpo = b64url(bruto);
     return corpo + '-' + checksum(corpo);
   }
-  // Candidatos a código dentro de um texto colado (mensagem de WhatsApp, PDF com quebras etc.)
+  // Code candidates inside pasted text (a WhatsApp message, a PDF with line breaks, etc.)
   const PADRAO_CODIGO = /[A-Za-z0-9_-]{24,}-[0-9A-Za-z]{4}(?![A-Za-z0-9_-])/g;
   function candidatos(txt) {
     const s = String(txt || '');
@@ -193,7 +193,7 @@ const DebtID = (() => {
     return { dados: xor(resto, fluxo(sementeDados(sal), resto.length)), codigo: corpo + '-' + soma };
   }
 
-  /* =================== códigos antigos (v1, sem assinatura) =================== */
+  /* =================== legacy codes (v1, unsigned) =================== */
   function lerV1(buf) {
     const L = new Leitor(buf);
     if (L.byte() !== 1) throw new ChaveErro('VERSAO');
@@ -214,7 +214,7 @@ const DebtID = (() => {
         d.de > 120000 || d.ts > 8e9 || d.tz < -60 || d.tz > 60) throw new ChaveErro('CORROMPIDA');
   }
 
-  /* =================== chaves de assinatura (ECDSA P-256) =================== */
+  /* =================== signing keys (ECDSA P-256) =================== */
   const P = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffffn;
   const B = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604bn;
   const ALG = { name: 'ECDSA', namedCurve: 'P-256' };
@@ -281,8 +281,8 @@ const DebtID = (() => {
     }
   }
 
-  /* =================== códigos v2 (assinados) =================== */
-  // [2][tipo] + P (empréstimo) + assinatura do emissor (+ C (confirmação) + assinatura do confirmador)
+  /* =================== v2 codes (signed) =================== */
+  // [2][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
   const VERSAO = 2, PROPOSTA = 1, VALIDADO = 2;
   const TAG_PROPOSTA = enc.encode('DebtID/v2/proposta');
   const TAG_CONFIRMA = enc.encode('DebtID/v2/confirma');
@@ -328,7 +328,7 @@ const DebtID = (() => {
     return { ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) };
   };
 
-  // dados: { papel ('credor'|'devedor' — o papel de quem registra), nomeOutro, valor, taxa, modo, de, dp }
+  // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, valor, taxa, modo, composto, de, dp }
   async function criarProposta(perfil, dados) {
     const { ts, tz } = agora();
     const d = {
@@ -343,7 +343,7 @@ const DebtID = (() => {
     return embalar(juntar([VERSAO, PROPOSTA], p, sig));
   }
 
-  // Confirma uma proposta de outra pessoa e devolve o código validado pelos dois.
+  // Confirms someone else's proposal and returns the code validated by both sides.
   async function confirmarProposta(perfil, codigoProposta) {
     const m = await lerCodigo(codigoProposta);
     if (m.tipo !== 'proposta') throw new ChaveErro('NAO_E_PROPOSTA');
@@ -355,7 +355,7 @@ const DebtID = (() => {
     return embalar(juntar([VERSAO, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
   }
 
-  // Lê qualquer código (v1 ou v2), confere as assinaturas e monta um modelo para exibir.
+  // Reads any code (v1 or v2), checks the signatures and builds a model for display.
   async function lerCodigo(txt) {
     const { dados, codigo } = desembalar(txt);
     if (dados[0] === 1) {
@@ -400,7 +400,7 @@ const DebtID = (() => {
     };
   }
 
-  /* =================== backup protegido por senha =================== */
+  /* =================== password-protected backup =================== */
   const MAGICO = enc.encode('DIDB');
   async function chaveDaSenha(senha, sal) {
     const base = await subtle().importKey('raw', enc.encode(senha), 'PBKDF2', false, ['deriveKey']);
@@ -432,9 +432,9 @@ const DebtID = (() => {
     return JSON.parse(texto);
   }
 
-  /* =================== QR code (modo byte, níveis L/M/Q/H) =================== */
+  /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
   const QR = (() => {
-    const NIVEL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] }; // [índice nas tabelas, bits de formato]
+    const NIVEL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] }; // [table index, format bits]
     const ECC = [
       [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
       [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
@@ -458,7 +458,7 @@ const DebtID = (() => {
       return r;
     }
     const palavrasDados = (v, e) => Math.floor(modulosBrutos(v) / 8) - ECC[e][v] * BLOCOS[e][v];
-    function mult(x, y) { // GF(256), polinômio 0x11D
+    function mult(x, y) { // GF(256), polynomial 0x11D
       let z = 0;
       for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; }
       return z;
@@ -513,7 +513,7 @@ const DebtID = (() => {
         for (let k = 0; k < 8; k++) b = (b << 1) | bits[i + k];
         palavras.push(b);
       }
-      // blocos + correção de erros, intercalados
+      // blocks + error correction, interleaved
       const nBlocos = BLOCOS[e][v], eccLen = ECC[e][v], brutas = Math.floor(modulosBrutos(v) / 8);
       const nCurtos = nBlocos - (brutas % nBlocos), lenCurto = Math.floor(brutas / nBlocos);
       const div = divisor(eccLen), blocos = [];
@@ -528,7 +528,7 @@ const DebtID = (() => {
       for (let i = 0; i < blocos[0].length; i++) {
         blocos.forEach((bl, j) => { if (i !== lenCurto - eccLen || j >= nCurtos) final.push(bl[i]); });
       }
-      // matriz
+      // matrix
       const tam = v * 4 + 17;
       const m = Array.from({ length: tam }, () => new Array(tam).fill(false));
       const fn = Array.from({ length: tam }, () => new Array(tam).fill(false));
@@ -568,7 +568,7 @@ const DebtID = (() => {
           fixa(a, c, bit(b, i)); fixa(c, a, bit(b, i));
         }
       }
-      // dados em zigue-zague
+      // data in zigzag order
       let i = 0;
       for (let dir = tam - 1; dir >= 1; dir -= 2) {
         if (dir === 6) dir = 5;
@@ -585,7 +585,7 @@ const DebtID = (() => {
       const aplica = k => {
         for (let y = 0; y < tam; y++) for (let x = 0; x < tam; x++) if (!fn[y][x] && MASCARAS[k](x, y)) m[y][x] = !m[y][x];
       };
-      const penalidade = () => { // regras 1, 2 e 4 da norma (suficiente para escolher a máscara)
+      const penalidade = () => { // rules 1, 2 and 4 of the spec (enough to pick a mask)
         let p = 0, escuros = 0;
         for (let a = 0; a < tam; a++) {
           let h = 1, v = 1;
@@ -634,7 +634,7 @@ const DebtID = (() => {
     return { gerar, svg };
   })();
 
-  /* =================== formatação =================== */
+  /* =================== formatting (pt-BR) =================== */
   const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const nf4 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
   const nfT = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
@@ -658,7 +658,7 @@ const DebtID = (() => {
     }
   };
 
-  /* =================== valor por extenso =================== */
+  /* =================== amounts in words (pt-BR) =================== */
   const UN = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
   const DZ = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const CT = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
@@ -699,7 +699,7 @@ const DebtID = (() => {
     return partes.length ? partes.join(' e ') : 'zero real';
   }
 
-  /* =================== números digitados (pt-BR tolerante) =================== */
+  /* =================== typed numbers (lenient pt-BR parsing) =================== */
   function lerNumero(bruto, milhar) {
     let s = String(bruto).replace(/[R$\s% ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Base.Tema" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/fundo</item>
-        <item name="android:statusBarColor">@color/barra</item>
-        <item name="android:navigationBarColor">@color/barra</item>
+    <style name="Base.Theme.DebtID" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@color/system_bars</item>
+        <item name="android:navigationBarColor">@color/system_bars</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

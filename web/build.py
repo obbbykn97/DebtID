@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Junta src/ (CSS, HTML e JS) em um único index.html, sem dependências externas."""
+"""Bundles web/src (HTML, CSS and JS) into a single self-contained index.html with no external dependencies.
+
+Usage: python3 web/build.py [output path]   (default: web/dist/index.html)
+"""
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent
-SRC = RAIZ / 'src'
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / 'src'
 
-CABECA = '''<!doctype html>
+HEAD = '''<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -15,7 +18,7 @@ CABECA = '''<!doctype html>
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%230E0E0E'/%3E%3Cg transform='translate(54 54) scale(1.1) translate(-54 -54)'%3E%3Cpath d='M41 37H50A17 17 0 0 1 50 71H41Z' fill='none' stroke='%23fff' stroke-width='8'/%3E%3Ccircle cx='52.5' cy='54' r='4.6' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
-(function () { // aparência e tema antes da primeira pintura
+(function () { // apply look and theme before the first paint (no flash)
   var d = document.documentElement, u, t;
   try { u = localStorage.getItem('debtid.ui'); t = localStorage.getItem('debtid.tema'); } catch (e) {}
   d.setAttribute('data-ui', u === 'soft' || u === 'pro' ? u : 'pro');
@@ -26,19 +29,19 @@ CABECA = '''<!doctype html>
 '''
 
 
-def montar(destino: Path) -> Path:
-    css = (SRC / 'estilo.css').read_text(encoding='utf-8')
-    corpo = (SRC / 'corpo.html').read_text(encoding='utf-8')
-    nucleo = (SRC / 'nucleo.js').read_text(encoding='utf-8')
+def build(target: Path) -> Path:
+    css = (SRC / 'styles.css').read_text(encoding='utf-8')
+    body = (SRC / 'body.html').read_text(encoding='utf-8')
+    core = (SRC / 'core.js').read_text(encoding='utf-8')
     ui = (SRC / 'ui.js').read_text(encoding='utf-8')
-    html = (CABECA + '<style>\n' + css + '</style>\n</head>\n<body>\n' + corpo +
-            '\n<script>\n/*<nucleo>*/\n' + nucleo + '/*</nucleo>*/\n</script>\n<script>\n' + ui + '</script>\n</body>\n</html>\n')
-    destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_text(html, encoding='utf-8')
-    return destino
+    html = (HEAD + '<style>\n' + css + '</style>\n</head>\n<body>\n' + body +
+            '\n<script>\n/*<core>*/\n' + core + '/*</core>*/\n</script>\n<script>\n' + ui + '</script>\n</body>\n</html>\n')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(html, encoding='utf-8')
+    return target
 
 
 if __name__ == '__main__':
     import sys
-    alvo = Path(sys.argv[1]) if len(sys.argv) > 1 else RAIZ / 'dist' / 'index.html'
-    print(montar(alvo), f'{alvo.stat().st_size / 1024:.1f} KB')
+    out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'dist' / 'index.html'
+    print(build(out), f'{out.stat().st_size / 1024:.1f} KB')

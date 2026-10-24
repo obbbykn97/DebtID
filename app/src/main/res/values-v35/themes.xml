@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 15: mantém as barras do sistema fora da página (sem edge-to-edge forçado) -->
-    <style name="Tema" parent="Base.Tema">
+    <!-- Android 15: keep the system bars outside the page (no forced edge-to-edge) -->
+    <style name="Theme.DebtID" parent="Base.Theme.DebtID">
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>

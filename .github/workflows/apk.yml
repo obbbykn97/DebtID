@@ -1,4 +1,4 @@
-name: Gerar APK
+name: Build APK
 
 on:
   push:
@@ -21,31 +21,25 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      # Sem chave de produção, a chave de teste fica guardada em cache
-      # para que as atualizações instalem por cima da versão anterior.
-      - uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: debtid-debug-keystore
+      - name: Build the web page (web/src -> web/dist/index.html)
+        run: python3 web/build.py web/dist/index.html
 
-      - name: Montar a página (web/src -> web/dist/index.html)
-        run: python3 web/montar.py web/dist/index.html
-
-      - name: Chave de assinatura
+      - name: Signing key
         env:
           KEYSTORE_B64: ${{ secrets.DEBTID_KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.DEBTID_KEYSTORE_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/debtid.jks"
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/debtid.jks"
             echo "DEBTID_KEYSTORE=$RUNNER_TEMP/debtid.jks" >> "$GITHUB_ENV"
             echo "DEBTID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "Assinando com a chave de produção."
+            echo "SIGNED_RELEASE=true" >> "$GITHUB_ENV"
+            echo "Signing with the release key."
           else
-            echo "::warning::Sem o segredo DEBTID_KEYSTORE_B64: o APK sai com a chave de teste. Veja o README."
+            echo "::warning::DEBTID_KEYSTORE_B64 / DEBTID_KEYSTORE_PASSWORD are not set: building a test APK (artifact only, no release). See the README."
           fi
 
-      - name: Compilar
+      - name: Build
         env:
           DEBTID_VERSION_CODE: ${{ github.run_number }}
         run: |
@@ -58,11 +52,13 @@ jobs:
           name: DebtID-APK
           path: DebtID.apk
 
-      - name: Publicar em Releases
+      # Only APKs signed with the permanent key are published, so updates always install over the previous version.
+      - name: Publish release
+        if: env.SIGNED_RELEASE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "v1.${{ github.run_number }}" DebtID.apk \
             --title "DebtID 1.${{ github.run_number }}" \
-            --notes "Baixe o DebtID.apk e instale no Android." \
-            --latest || echo "::warning::Não consegui criar a release; o APK está em Artifacts."
+            --notes "Download DebtID.apk on your Android phone and open it to install." \
+            --latest || echo "::warning::Could not create the release; the APK is available under Artifacts."

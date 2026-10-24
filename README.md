@@ -1,61 +1,74 @@
-<p align="center"><img src="docs/logo.png" width="120" alt="Logo do DebtID"></p>
+<p align="center"><img src="docs/logo.png" width="120" alt="DebtID logo"></p>
 
-# DebtID
+<h1 align="center">DebtID</h1>
 
-Registro de empréstimos assinado pelos dois lados. Calcula juros simples ou compostos, gera recibo em PDF e um QR code que qualquer pessoa confere em segundos. Tudo roda no aparelho, sem servidor e sem conta online.
+<p align="center">A loan calculator and IOU that both sides sign — with a QR code anyone can verify in seconds.<br>
+Everything runs on the device: no server, no account, no network access.</p>
 
-## Como funciona
+---
 
-1. **Quem registra** preenche o empréstimo (valor, taxa, datas) e o DebtID gera um código assinado, com QR code.
-2. **A outra pessoa** lê o QR no DebtID dela, confere os valores e confirma com a própria assinatura.
-3. **Quem registrou** lê o QR de confirmação. Pronto: o registro fica **validado pelos dois**, nos dois celulares.
+## How it works
 
-Funciona nos dois sentidos: tanto quem empresta quanto quem pega emprestado pode registrar primeiro.
+1. **The person who records the loan** enters the amount, rate and dates. DebtID creates a signed code, shown as a QR code.
+2. **The other person** scans the QR code in their own DebtID, checks the numbers and confirms with their own signature.
+3. **The first person** scans the confirmation QR code back. Done: the loan is **validated by both sides**, on both phones.
 
-## Recursos
+Either side can start: the lender or the borrower.
 
-- Juros simples (no total, ao mês ou ao ano) ou compostos (ao mês ou ao ano), com prévia do total enquanto você digita e o total sempre arredondado para cima no centavo.
-- Recibo com valores por extenso, assinaturas digitais e QR code, pronto para imprimir ou salvar em PDF.
-- Histórico com status (aguardando, validado, quitado, vencido) e totais a receber e a pagar.
-- Duas aparências, **Profissional** e **Soft**, cada uma com tema claro e escuro.
-- Backup do perfil e dos registros protegido por senha.
-- No Android: leitor de QR do Google Play Services (sem permissão de câmera) e receber códigos pelo menu *Compartilhar* de outros apps.
+## Features
 
-## Segurança, sem exagero
+- **Simple or compound interest** — applied once over the whole loan, per month (30-day months) or per year, with a live total preview. Totals always round up to the next cent.
+- **Receipt** with amounts spelled out, both digital signatures and the QR code, ready to print or save as PDF.
+- **Records** with status (pending, validated, paid, overdue) and running totals of what you are owed and what you owe.
+- **Two looks**, *Professional* and *Soft*, each with light and dark themes.
+- **Password-protected backup** of your profile and records, so you can move to a new phone and keep the same ID.
+- **Android app**: QR scanning through Google Play services (no camera permission), and codes can be received straight from another app's *Share* menu.
 
-- Cada perfil tem um par de chaves **ECDSA P-256** criado no aparelho com a Web Crypto API. A chave privada não sai do aparelho, a não ser no backup cifrado (PBKDF2 + AES-256-GCM).
-- O **ID do perfil** (ex.: `7EB1-744C-3B50`) é derivado da chave pública. Confira o ID da outra pessoa uma vez; depois é ele que aparece nos recibos.
-- O código de um registro leva os dados do empréstimo e as assinaturas. Qualquer alteração invalida a assinatura; um checksum de 4 caracteres pega erros de digitação.
-- Assinatura não é sigilo: quem tem o código consegue ler os dados do empréstimo.
-- Não é uma assinatura com certificado oficial (ICP-Brasil). Serve como registro e prova informal do que foi combinado.
+The app itself is in Brazilian Portuguese, the language of its first users.
 
-## Estrutura
+## Security, without the hype
+
+- Each profile has an **ECDSA P-256** key pair created on the device with the Web Crypto API. The private key never leaves the device, except inside the encrypted backup (PBKDF2 + AES-256-GCM).
+- The **profile ID** (e.g. `7EB1-744C-3B50`) is derived from the public key. Check the other person's ID once; from then on it is what appears on receipts.
+- A loan code carries the loan data and the signatures. Any change invalidates the signature, and a 4-character checksum catches typos.
+- Signing is not secrecy: anyone holding a code can read the loan details.
+- This is not a certified, legally recognized e-signature. It is an informal record and proof of what both people agreed to.
+
+## Project layout
 
 ```
-web/src/        fonte da página (HTML, CSS e JS, sem dependências)
-web/montar.py   junta tudo em um único arquivo
-web/dist/       index.html pronto: abre direto no navegador
-app/            app Android (WebView que carrega web/dist/index.html)
+web/src/        page source (HTML, CSS and JS, no dependencies)
+web/build.py    bundles everything into one file
+web/dist/       the built index.html — opens directly in a browser
+app/            Android app (a WebView that loads web/dist/index.html)
+docs/           logo
 ```
 
-## Como rodar
+## Running it
 
-- **Navegador:** abra `web/dist/index.html`.
-- **Depois de editar `web/src`:** `python3 web/montar.py`
-- **Android:** `./gradlew assembleRelease` (JDK 17 e Android SDK).
-- **GitHub Actions:** cada push na `main` gera o `DebtID.apk` e publica em **Releases**.
+- **In a browser:** open `web/dist/index.html`.
+- **After editing `web/src`:** `python3 web/build.py`
+- **Android:** `./gradlew assembleRelease` (needs JDK 17 and the Android SDK).
+- **GitHub Actions:** every push to `main` builds `DebtID.apk` and, when the signing key is configured, publishes it under **Releases**.
 
-## Assinatura do APK
+## Signing the APK
 
-Sem configuração, o Actions assina com uma chave de teste guardada em cache. Para uma chave fixa de produção:
+Android only installs an update over an existing app when both are signed with the same key. The workflow reads that key from two repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `DEBTID_KEYSTORE_B64` | the keystore file, base64-encoded |
+| `DEBTID_KEYSTORE_PASSWORD` | the keystore password |
+
+To create your own key (for a fork, for example):
 
 ```bash
-keytool -genkeypair -keystore debtid.jks -alias debtid -keyalg RSA -keysize 2048 -validity 10950
-base64 -w0 debtid.jks   # cole a saída no segredo DEBTID_KEYSTORE_B64
+keytool -genkeypair -keystore debtid.jks -alias debtid -keyalg EC -groupname secp256r1 -validity 10950
+base64 -w0 debtid.jks   # paste the output into DEBTID_KEYSTORE_B64
 ```
 
-Em *Settings → Secrets and variables → Actions*, crie `DEBTID_KEYSTORE_B64` e `DEBTID_KEYSTORE_PASSWORD`. Nunca coloque o `.jks` no repositório.
+Add both under *Settings → Secrets and variables → Actions*. Never commit the `.jks` file. Without the secrets, the workflow still builds a test APK (available under *Artifacts*) but does not publish a release.
 
-## Licença
+## License
 
-MIT. Veja [LICENSE](LICENSE).
+[MIT](LICENSE)

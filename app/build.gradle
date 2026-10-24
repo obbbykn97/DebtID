@@ -2,10 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
-// Assinatura de produção: vem de variáveis de ambiente (no GitHub, dos segredos do repositório).
-// Sem elas, o APK de release sai com a chave de teste (debug).
-def chaveArquivo = System.getenv('DEBTID_KEYSTORE')
-def versao = (System.getenv('DEBTID_VERSION_CODE') ?: '1') as Integer
+// Release signing comes from environment variables (on GitHub, from the repository secrets).
+// Without them, the release APK is signed with the local debug key.
+def keystorePath = System.getenv('DEBTID_KEYSTORE')
+def buildNumber = (System.getenv('DEBTID_VERSION_CODE') ?: '1') as Integer
 
 android {
     namespace 'app.debtid'
@@ -15,14 +15,14 @@ android {
         applicationId 'app.debtid'
         minSdk 24
         targetSdk 35
-        versionCode versao
-        versionName "1.${versao}"
+        versionCode buildNumber
+        versionName "1.${buildNumber}"
     }
 
     signingConfigs {
         release {
-            if (chaveArquivo) {
-                storeFile file(chaveArquivo)
+            if (keystorePath) {
+                storeFile file(keystorePath)
                 storePassword System.getenv('DEBTID_KEYSTORE_PASSWORD')
                 keyAlias System.getenv('DEBTID_KEY_ALIAS') ?: 'debtid'
                 keyPassword System.getenv('DEBTID_KEY_PASSWORD') ?: System.getenv('DEBTID_KEYSTORE_PASSWORD')
@@ -32,9 +32,9 @@ android {
 
     buildTypes {
         release {
-            // sem minificação: a ponte JavaScript (@JavascriptInterface) precisa manter os nomes
+            // No minification: the JavaScript bridge (@JavascriptInterface) must keep its method names
             minifyEnabled false
-            signingConfig chaveArquivo ? signingConfigs.release : signingConfigs.debug
+            signingConfig keystorePath ? signingConfigs.release : signingConfigs.debug
         }
     }
 
@@ -43,7 +43,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    // A página do app é o mesmo index.html da versão web, gerado em web/dist
+    // The app page is the same index.html as the web version, built into web/dist
     sourceSets {
         main {
             assets.srcDir "${rootDir}/web/dist"
@@ -52,6 +52,6 @@ android {
 }
 
 dependencies {
-    // Leitor de QR do Google Play Services (não pede permissão de câmera ao app)
+    // Google Play services code scanner (the app itself needs no camera permission)
     implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
 }

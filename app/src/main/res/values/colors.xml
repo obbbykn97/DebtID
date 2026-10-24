@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="fundo">#FFFFFF</color>
-    <color name="barra">#141414</color>
-    <color name="icone_fundo">#0E0E0E</color>
+    <color name="window_background">#FFFFFF</color>
+    <color name="system_bars">#141414</color>
+    <color name="icon_background">#0E0E0E</color>
 </resources>

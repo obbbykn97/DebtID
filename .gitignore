@@ -8,7 +8,7 @@ captures/
 .externalNativeBuild/
 .cxx/
 
-# Chaves de assinatura nunca vão para o repositório
+# Signing keys never go into the repository
 *.jks
 *.keystore
 *.p12
