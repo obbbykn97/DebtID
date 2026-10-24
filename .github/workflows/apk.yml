@@ -3,6 +3,8 @@ name: Build APK
 on:
   push:
     branches: [main]
+    # documentation changes do not need a new APK
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   workflow_dispatch:
 
 permissions:

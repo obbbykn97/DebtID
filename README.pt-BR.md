@@ -22,7 +22,9 @@ Qualquer um dos lados pode começar: quem empresta ou quem pega emprestado.
 - **Qualquer moeda**: mais de 150 moedas do mundo, além de Bitcoin (o padrão), Ether e Tether, com busca por nome ou código. A moeda padrão fica em *Ajustes* e dá para trocar em cada empréstimo. A moeda faz parte do código assinado, o total arredonda para cima na menor fração da moeda (centavo, satoshi…) e valores em moedas diferentes nunca são somados. Não há conversão entre moedas: o app funciona sem internet.
 - **Juros simples ou compostos**: aplicados uma vez sobre o empréstimo todo, ao mês (mês comercial de 30 dias) ou ao ano, com prévia do total enquanto você digita. O total é sempre arredondado para cima.
 - **Recibo** com os valores por extenso, as duas assinaturas digitais e o QR code, pronto para imprimir ou salvar em PDF.
-- **Registros** com situação (aguardando, validado, quitado, vencido) e o total do que você tem a receber e a pagar.
+- **Registros** com situação (aguardando, validado, só registro, quitado, vencido) e o total do que você tem a receber e a pagar.
+- **Lucro por período**: lucro recebido (empréstimos quitados, pela data do pagamento) e lucro a receber (em aberto, pela data de vencimento), neste mês, neste ano, desde o começo ou entre datas escolhidas. Quem deve vê também os juros pagos e a pagar.
+- **Opção "Só registrar"**: guarda o empréstimo para o seu controle sem pedir a confirmação da outra pessoa, e dá para pedir a confirmação depois.
 - **Dois idiomas**, português e inglês. O app pergunta na primeira vez que você abre e dá para trocar quando quiser em *Ajustes*.
 - **Duas aparências**, *Profissional* e *Soft*, cada uma com tema claro e escuro.
 - **Backup protegido por senha** do perfil e dos registros, para trocar de celular e manter o mesmo ID.

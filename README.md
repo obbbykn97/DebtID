@@ -22,7 +22,9 @@ Either side can start: the lender or the borrower.
 - **Any currency**: 150+ world currencies plus Bitcoin (the default), Ether and Tether, with search by name or code. Pick a default in *Settings* and change it for any loan. The currency is part of the signed code, totals round up to the currency's smallest unit (cents, satoshis…) and amounts in different currencies are never added together. There is no conversion between currencies: the app works offline.
 - **Simple or compound interest** — applied once over the whole loan, per month (30-day months) or per year, with a live total preview. Totals always round up.
 - **Receipt** with amounts spelled out, both digital signatures and the QR code, ready to print or save as PDF.
-- **Records** with status (pending, validated, paid, overdue) and running totals of what you are owed and what you owe.
+- **Records** with status (pending, validated, record only, paid, overdue) and running totals of what you are owed and what you owe.
+- **Profit by period**: profit received (paid loans, by payment date) and profit to receive (open loans, by due date) for this month, this year, all time or chosen dates. Borrowers also see interest paid and to pay.
+- **Just record** option: save a loan for your own control without asking the other person to confirm, and ask for confirmation later if you want.
 - **Two languages**, English and Brazilian Portuguese. The app asks on first launch and you can switch any time in *Settings*.
 - **Two looks**, *Professional* and *Soft*, each with light and dark themes.
 - **Password-protected backup** of your profile and records, so you can move to a new phone and keep the same ID.
