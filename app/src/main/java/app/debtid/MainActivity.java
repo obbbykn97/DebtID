@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,6 +52,10 @@ public class MainActivity extends Activity {
     private static final String ASSETS = "file:///android_asset/";
     private static final int REQ_NOTIFICACOES = 1;
     private static final int REQ_ARQUIVO = 2;
+    /** App icons: the key the page uses → the launcher entry (activity-alias) in the manifest. */
+    private static final String[][] ICONES = {
+            {"a", ".IconeA"}, {"a-cores", ".IconeACores"}, {"c", ".IconeC"}, {"c-cores", ".IconeCCores"}
+    };
     /** A shared text longer than this is not a DebtID code (codes have a few hundred characters). */
     private static final int MAX_TEXTO = 20000;
 
@@ -287,6 +292,41 @@ public class MainActivity extends Activity {
             runOnUiThread(MainActivity.this::pedirPermissaoNotificacoes);
         }
 
+        /** The app icon in use: "a" (default), "a-cores", "c" or "c-cores". */
+        @JavascriptInterface
+        public String icone() {
+            PackageManager pm = getPackageManager();
+            for (String[] i : ICONES) {
+                int estado = pm.getComponentEnabledSetting(componente(i[1]));
+                if (estado == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) return i[0];
+            }
+            return "a"; // nothing changed yet: the manifest default
+        }
+
+        /**
+         * Switches the app icon: turns on the chosen launcher entry first, then turns the others off,
+         * so there is always one. The launcher may take a few seconds to show the new icon.
+         */
+        @JavascriptInterface
+        public boolean trocarIcone(String chave) {
+            String escolhido = null;
+            for (String[] i : ICONES) if (i[0].equals(chave)) escolhido = i[1];
+            if (escolhido == null) return false;
+            PackageManager pm = getPackageManager();
+            try {
+                pm.setComponentEnabledSetting(componente(escolhido),
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                for (String[] i : ICONES) {
+                    if (i[1].equals(escolhido)) continue;
+                    pm.setComponentEnabledSetting(componente(i[1]),
+                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
         /** Lets the person choose where to save a file (CSV); the result goes to window.__debtidArquivo. */
         @JavascriptInterface
         public void salvarArquivo(final String nome, final String tipo, final String texto) {
@@ -305,6 +345,11 @@ public class MainActivity extends Activity {
                 }
             });
         }
+    }
+
+    /** A launcher entry of this app (class names follow the code's package, even in a fork with another app id). */
+    private ComponentName componente(String alias) {
+        return new ComponentName(this, MainActivity.class.getPackage().getName() + alias);
     }
 
     private void pedirPermissaoNotificacoes() {

@@ -232,6 +232,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Lembretes de vencimento",
     "aj.lembretesIntro": "Uma notificação antes de cada vencimento e outra no dia, mesmo com o app fechado.",
     "aj.texto": "Tamanho do texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
+    "aj.icone": "Ícone do app", "aj.iconeHint": "O novo ícone pode levar alguns segundos para aparecer. Em alguns celulares, o app fecha ao trocar; é só abrir de novo.",
+    "icone.a": "Padrão", "icone.a-cores": "Colorido", "icone.c": "Etiqueta", "icone.c-cores": "Etiqueta colorida",
+    "icone.trocado": "Ícone trocado. Pode levar alguns segundos para aparecer.", "icone.erro": "Não deu para trocar o ícone.",
 
     "form.contatos": "Contatos", "form.fixado": "Só {nome} (ID {id}) vai poder confirmar.", "form.fixadoTirar": "Tirar o contato escolhido",
     "form.mais": "Mais opções", "form.maisDica": "parcelas, multa por atraso, observação",
@@ -623,6 +626,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Due-date reminders",
     "aj.lembretesIntro": "A notification before each due date and another on the day, even with the app closed.",
     "aj.texto": "Text size", "aj.textoNormal": "Normal", "aj.textoGrande": "Large",
+    "aj.icone": "App icon", "aj.iconeHint": "The new icon may take a few seconds to show up. On some phones the app closes when you switch; just open it again.",
+    "icone.a": "Default", "icone.a-cores": "Colorful", "icone.c": "Tag", "icone.c-cores": "Colorful tag",
+    "icone.trocado": "Icon changed. It may take a few seconds to show up.", "icone.erro": "Couldn't change the icon.",
 
     "form.contatos": "Contacts", "form.fixado": "Only {nome} (ID {id}) will be able to confirm.", "form.fixadoTirar": "Remove the chosen contact",
     "form.mais": "More options", "form.maisDica": "installments, late fee, note",
@@ -1015,6 +1021,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Recordatorios de vencimiento",
     "aj.lembretesIntro": "Una notificación antes de cada vencimiento y otra el mismo día, incluso con la app cerrada.",
     "aj.texto": "Tamaño del texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
+    "aj.icone": "Icono de la app", "aj.iconeHint": "El nuevo icono puede tardar unos segundos en aparecer. En algunos teléfonos la app se cierra al cambiarlo; solo vuelve a abrirla.",
+    "icone.a": "Predeterminado", "icone.a-cores": "Colorido", "icone.c": "Etiqueta", "icone.c-cores": "Etiqueta colorida",
+    "icone.trocado": "Icono cambiado. Puede tardar unos segundos en aparecer.", "icone.erro": "No se pudo cambiar el icono.",
 
     "form.contatos": "Contactos", "form.fixado": "Solo {nome} (ID {id}) podrá confirmar.", "form.fixadoTirar": "Quitar el contacto elegido",
     "form.mais": "Más opciones", "form.maisDica": "cuotas, recargo por atraso, nota",

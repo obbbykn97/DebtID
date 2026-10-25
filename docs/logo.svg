@@ -1,8 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 18 72 72" width="1024" height="1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
   <title>DebtID</title>
-  <rect x="18" y="18" width="72" height="72" fill="#0E0E0E"/>
-  <g transform="translate(54 54) scale(1.1) translate(-54 -54)">
-    <path d="M41 37H50A17 17 0 0 1 50 71H41Z" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linejoin="miter"/>
-    <circle cx="52.5" cy="54" r="4.6" fill="#9DBF3E"/>
+  <!-- Logo A: the stem of the I and the bowl of the D are two pieces, one for each person;
+       the dot where they meet is the seal of the agreement. -->
+  <rect width="256" height="256" rx="56" fill="#0E0E0E"/>
+  <g transform="translate(19.2 19.2) scale(.85)">
+    <rect x="64" y="52" width="36" height="152" rx="6" fill="#FFFFFF"/>
+    <path d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z" fill="#FFFFFF"/>
+    <circle cx="133" cy="128" r="13" fill="#9DBF3E"/>
   </g>
 </svg>

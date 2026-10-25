@@ -225,6 +225,7 @@
     if (n === 'periodo') { gravarTexto(K.periodo, e.target.value); renderLucro(); }
     if (n === 'idioma' || n === 'idioma-bv') aplicarIdioma(e.target.value, true);
     if (n === 'travaTempo' && trava) { trava = { ...trava, tempo: +e.target.value }; gravarJSON(K.trava, trava); }
+    if (n === 'icone') trocarIcone(e.target.value);
     if (n === 'lembreteDias') { gravarJSON(K.lembretes, { ...cfgLembretes(), dias: +e.target.value }); agendarLembretes(); }
   });
 
@@ -1248,7 +1249,7 @@
         `</ul><p class="rc-note">${reg.status === 'cancelado' ? t('rc.canceladoNota', { nome: credor }) : t('rc.saldoNota', { saldo: dinheiro(reg.status === 'quitado' ? 0 : s.saldo, d) })}</p></div>`;
     }
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
+      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
       <div class="rc-body">
         <p class="kicker">${t('rc.kicker')}</p>
         <h3 class="rc-title">${t('rc.titulo')}</h3>
@@ -1292,7 +1293,7 @@
     const valor = r.valor ? fmt.dinheiro(r.valor, info) : '—';
     const linha = (rot, val) => `<div><dt>${rot}</dt><dd>${val}</dd></div>`;
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(mr.ref)}</span></header>
+      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(mr.ref)}</span></header>
       <div class="rc-body">
         <p class="kicker">${t('rc.kickerRecibo')}</p>
         <h3 class="rc-title">${esc(nomeTipoRecibo(r.tipo))}</h3>
@@ -1829,6 +1830,7 @@
     $$('input[name="texto"]').forEach(i => { i.checked = i.value === (raiz.dataset.texto || 'normal'); });
     pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
     renderTravaAjustes();
+    renderIcones();
     renderLembretesAjustes();
     renderContatos();
     const ultimo = +lerTexto(K.backupEm) || 0;
@@ -1914,6 +1916,33 @@
       contatos = contatos.filter(x => x.pub !== pub);
     }
     salvarContatos(); renderContatos();
+  }
+
+  /* ---------------- app icon (Android app): logo A is the default, C is the alternative ---------------- */
+  const ICONES = [
+    { k: 'a', fundo: '#0E0E0E', tinta: '#FFFFFF', ponto: '#9DBF3E', forma: 'A' },
+    { k: 'a-cores', fundo: '#F8CB47', tinta: '#1C1B1F', ponto: '#EC4C86', forma: 'A' },
+    { k: 'c', fundo: '#0E0E0E', tinta: '#FFFFFF', forma: 'C' },
+    { k: 'c-cores', fundo: '#DFF45C', tinta: '#1C1B1F', forma: 'C' }
+  ];
+  const svgIcone = i => `<svg viewBox="0 0 256 256" aria-hidden="true"><rect width="256" height="256" fill="${i.fundo}"/><g transform="translate(19.2 19.2) scale(.85)">${i.forma === 'A'
+    ? `<rect x="64" y="52" width="36" height="152" rx="6" fill="${i.tinta}"/><path d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z" fill="${i.tinta}"/><circle cx="133" cy="128" r="13" fill="${i.ponto}"/>`
+    : `<path fill="${i.tinta}" fill-rule="evenodd" d="M82 76H166A52 52 0 0 1 166 180H82L38 136V120ZM66 128A14 14 0 1 0 94 128A14 14 0 1 0 66 128Z"/>`}</g></svg>`;
+  function renderIcones() {
+    const a = app(), pode = !!(a && a.trocarIcone);
+    $('#ajusteIcone').hidden = !pode;
+    if (!pode) return;
+    let atualIcone = 'a';
+    try { atualIcone = a.icone ? a.icone() : 'a'; } catch { atualIcone = 'a'; }
+    $('#icones').innerHTML = ICONES.map(i =>
+      `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('icone.' + i.k)}</span></label>`).join('');
+  }
+  function trocarIcone(k) {
+    const a = app();
+    let ok = false;
+    try { ok = !!(a && a.trocarIcone && a.trocarIcone(k)); } catch { ok = false; }
+    toast(t(ok ? 'icone.trocado' : 'icone.erro'));
+    if (!ok) renderIcones();
   }
 
   /* ---------------- due-date reminders (Android app) ---------------- */

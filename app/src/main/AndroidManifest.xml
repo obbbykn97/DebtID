@@ -32,10 +32,6 @@
             android:launchMode="singleTask"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <!-- Receive a code shared from another app (WhatsApp, email…) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -43,6 +39,57 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+
+        <!-- App icons the person can choose in Settings: exactly one of these launcher entries is
+             enabled at a time (A is the default). They all open MainActivity. -->
+        <activity-alias
+            android:name=".IconeA"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconeACores"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_a_cores"
+            android:roundIcon="@mipmap/ic_launcher_a_cores"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconeC"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_c"
+            android:roundIcon="@mipmap/ic_launcher_c"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconeCCores"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_c_cores"
+            android:roundIcon="@mipmap/ic_launcher_c_cores"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- The app's own reminder alarms: private, no other app can send to it -->
         <receiver android:name=".AlarmeReceiver" android:exported="false" />

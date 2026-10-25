@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-2sEODyfGy0TBhvdaF0rQ0k4cPLScI9kgMdOZNBwNZhY=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-akkTG6piwpriLCfLcvWbe5qBV4ia3+Oleahmzoj4FrM='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-3HW+LAcnG88nTwjTFW6URxyozfYZMZEmQeo60TIjc54=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-3NwB21UV/DOETxORB98YHybstU7MvMGSBWYVXt8kW1E='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%230E0E0E'/%3E%3Cg transform='translate(54 54) scale(1.1) translate(-54 -54)'%3E%3Cpath d='M41 37H50A17 17 0 0 1 50 71H41Z' fill='none' stroke='%23fff' stroke-width='8'/%3E%3Ccircle cx='52.5' cy='54' r='4.6' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
 (function () { // apply look, theme, text size and language before the first paint (no flash)
   var d = document.documentElement, u, t, l, x, n = navigator.language || '';
@@ -119,7 +119,7 @@ body:not(.pode-ler-qr) .so-qr{display:none !important}
 .brand{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:19px;text-decoration:none;letter-spacing:-.01em}
 .brand-mark{width:32px;height:32px;flex:none;border:2px solid var(--line);border-radius:9px;background:#0E0E0E;display:grid;place-items:center;box-shadow:2px 2px 0 var(--line);padding:4px}
 .brand-mark svg{width:100%;height:100%}
-.bm-d{fill:none;stroke:#fff;stroke-width:8;stroke-linejoin:miter}
+.bm-a{fill:#fff}
 .bm-p{fill:#9DBF3E}
 .top-r{display:flex;align-items:center;gap:6px}
 .nav{display:none;gap:2px}
@@ -437,7 +437,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .top-in{padding-top:22px;padding-bottom:22px}
 [data-ui="pro"] .brand{font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.01em}
 [data-ui="pro"] .brand-mark{width:26px;height:26px;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
-[data-ui="pro"] .brand-mark .bm-d{stroke:var(--band-ink)}
+[data-ui="pro"] .brand-mark .bm-a{fill:var(--band-ink)}
 [data-ui="pro"] .top-r{margin-right:0;gap:18px}
 [data-ui="pro"] .nav{gap:26px}
 [data-ui="pro"] .nav a{border:0;border-radius:0;padding:4px 0;font-size:14.5px;font-weight:500;text-transform:uppercase;letter-spacing:.02em;color:var(--band-muted);box-shadow:none;background:none}
@@ -757,6 +757,12 @@ html[data-texto="grande"] body{zoom:1.15}
 .trava-marca{width:56px;height:56px;margin:0 auto}
 body.travado{overflow:hidden}
 .relatorio{display:none}
+.icones{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+.icone-op{display:grid;justify-items:center;gap:6px;cursor:pointer;font-size:12.5px;font-weight:700;text-align:center;color:var(--ink)}
+.icone-op input{position:absolute;opacity:0;pointer-events:none}
+.icone-op svg{width:56px;height:56px;border-radius:14px;outline:3px solid transparent;outline-offset:3px}
+.icone-op input:checked+svg{outline-color:var(--ink)}
+.icone-op input:focus-visible+svg{outline-color:var(--peri)}
 
 /* Professional look */
 [data-ui="pro"] .ident{border:0;border-left:4px solid var(--line);border-radius:0;box-shadow:none;background:var(--info);color:var(--ink)}
@@ -897,7 +903,7 @@ body.travado{overflow:hidden}
 
     <header class="top">
       <div class="wrap top-in">
-        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</a>
+        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</a>
         <div class="top-r">
           <nav class="nav" aria-label="Seções" data-i18n-aria="nav.secoes">
             <a href="#inicio" data-nav="inicio" data-i18n="nav.novo">Novo</a>
@@ -1279,6 +1285,11 @@ body.travado{overflow:hidden}
                 <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro" data-i18n="aj.escuro">Escuro</label>
               </div>
             </div>
+            <div class="ajuste" id="ajusteIcone" hidden>
+              <h3 id="t-icone" data-i18n="aj.icone">Ícone do app</h3>
+              <div class="icones" id="icones" role="radiogroup" aria-labelledby="t-icone"></div>
+              <p class="hint" data-i18n="aj.iconeHint">O novo ícone pode levar alguns segundos para aparecer. Em alguns celulares, o app fecha ao trocar; é só abrir de novo.</p>
+            </div>
             <div class="ajuste">
               <h3 id="t-texto" data-i18n="aj.texto">Tamanho do texto</h3>
               <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-texto">
@@ -1474,7 +1485,7 @@ body.travado{overflow:hidden}
 
 <div class="trava" id="trava" hidden role="dialog" aria-modal="true" aria-labelledby="travaTitulo" aria-describedby="travaTexto">
   <div class="trava-box">
-    <span class="brand-mark trava-marca" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>
+    <span class="brand-mark trava-marca" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>
     <h2 id="travaTitulo">DebtID</h2>
     <p id="travaTexto"></p>
     <form id="formTrava" novalidate autocomplete="off">
@@ -1737,6 +1748,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Lembretes de vencimento",
     "aj.lembretesIntro": "Uma notificação antes de cada vencimento e outra no dia, mesmo com o app fechado.",
     "aj.texto": "Tamanho do texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
+    "aj.icone": "Ícone do app", "aj.iconeHint": "O novo ícone pode levar alguns segundos para aparecer. Em alguns celulares, o app fecha ao trocar; é só abrir de novo.",
+    "icone.a": "Padrão", "icone.a-cores": "Colorido", "icone.c": "Etiqueta", "icone.c-cores": "Etiqueta colorida",
+    "icone.trocado": "Ícone trocado. Pode levar alguns segundos para aparecer.", "icone.erro": "Não deu para trocar o ícone.",
 
     "form.contatos": "Contatos", "form.fixado": "Só {nome} (ID {id}) vai poder confirmar.", "form.fixadoTirar": "Tirar o contato escolhido",
     "form.mais": "Mais opções", "form.maisDica": "parcelas, multa por atraso, observação",
@@ -2128,6 +2142,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Due-date reminders",
     "aj.lembretesIntro": "A notification before each due date and another on the day, even with the app closed.",
     "aj.texto": "Text size", "aj.textoNormal": "Normal", "aj.textoGrande": "Large",
+    "aj.icone": "App icon", "aj.iconeHint": "The new icon may take a few seconds to show up. On some phones the app closes when you switch; just open it again.",
+    "icone.a": "Default", "icone.a-cores": "Colorful", "icone.c": "Tag", "icone.c-cores": "Colorful tag",
+    "icone.trocado": "Icon changed. It may take a few seconds to show up.", "icone.erro": "Couldn't change the icon.",
 
     "form.contatos": "Contacts", "form.fixado": "Only {nome} (ID {id}) will be able to confirm.", "form.fixadoTirar": "Remove the chosen contact",
     "form.mais": "More options", "form.maisDica": "installments, late fee, note",
@@ -2520,6 +2537,9 @@ const DebtIDTextos = {
     "aj.lembretes": "Recordatorios de vencimiento",
     "aj.lembretesIntro": "Una notificación antes de cada vencimiento y otra el mismo día, incluso con la app cerrada.",
     "aj.texto": "Tamaño del texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
+    "aj.icone": "Icono de la app", "aj.iconeHint": "El nuevo icono puede tardar unos segundos en aparecer. En algunos teléfonos la app se cierra al cambiarlo; solo vuelve a abrirla.",
+    "icone.a": "Predeterminado", "icone.a-cores": "Colorido", "icone.c": "Etiqueta", "icone.c-cores": "Etiqueta colorida",
+    "icone.trocado": "Icono cambiado. Puede tardar unos segundos en aparecer.", "icone.erro": "No se pudo cambiar el icono.",
 
     "form.contatos": "Contactos", "form.fixado": "Solo {nome} (ID {id}) podrá confirmar.", "form.fixadoTirar": "Quitar el contacto elegido",
     "form.mais": "Más opciones", "form.maisDica": "cuotas, recargo por atraso, nota",
@@ -4297,6 +4317,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (n === 'periodo') { gravarTexto(K.periodo, e.target.value); renderLucro(); }
     if (n === 'idioma' || n === 'idioma-bv') aplicarIdioma(e.target.value, true);
     if (n === 'travaTempo' && trava) { trava = { ...trava, tempo: +e.target.value }; gravarJSON(K.trava, trava); }
+    if (n === 'icone') trocarIcone(e.target.value);
     if (n === 'lembreteDias') { gravarJSON(K.lembretes, { ...cfgLembretes(), dias: +e.target.value }); agendarLembretes(); }
   });
 
@@ -5320,7 +5341,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         `</ul><p class="rc-note">${reg.status === 'cancelado' ? t('rc.canceladoNota', { nome: credor }) : t('rc.saldoNota', { saldo: dinheiro(reg.status === 'quitado' ? 0 : s.saldo, d) })}</p></div>`;
     }
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
+      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
       <div class="rc-body">
         <p class="kicker">${t('rc.kicker')}</p>
         <h3 class="rc-title">${t('rc.titulo')}</h3>
@@ -5364,7 +5385,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const valor = r.valor ? fmt.dinheiro(r.valor, info) : '—';
     const linha = (rot, val) => `<div><dt>${rot}</dt><dd>${val}</dd></div>`;
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(mr.ref)}</span></header>
+      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(mr.ref)}</span></header>
       <div class="rc-body">
         <p class="kicker">${t('rc.kickerRecibo')}</p>
         <h3 class="rc-title">${esc(nomeTipoRecibo(r.tipo))}</h3>
@@ -5901,6 +5922,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     $$('input[name="texto"]').forEach(i => { i.checked = i.value === (raiz.dataset.texto || 'normal'); });
     pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
     renderTravaAjustes();
+    renderIcones();
     renderLembretesAjustes();
     renderContatos();
     const ultimo = +lerTexto(K.backupEm) || 0;
@@ -5986,6 +6008,33 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       contatos = contatos.filter(x => x.pub !== pub);
     }
     salvarContatos(); renderContatos();
+  }
+
+  /* ---------------- app icon (Android app): logo A is the default, C is the alternative ---------------- */
+  const ICONES = [
+    { k: 'a', fundo: '#0E0E0E', tinta: '#FFFFFF', ponto: '#9DBF3E', forma: 'A' },
+    { k: 'a-cores', fundo: '#F8CB47', tinta: '#1C1B1F', ponto: '#EC4C86', forma: 'A' },
+    { k: 'c', fundo: '#0E0E0E', tinta: '#FFFFFF', forma: 'C' },
+    { k: 'c-cores', fundo: '#DFF45C', tinta: '#1C1B1F', forma: 'C' }
+  ];
+  const svgIcone = i => `<svg viewBox="0 0 256 256" aria-hidden="true"><rect width="256" height="256" fill="${i.fundo}"/><g transform="translate(19.2 19.2) scale(.85)">${i.forma === 'A'
+    ? `<rect x="64" y="52" width="36" height="152" rx="6" fill="${i.tinta}"/><path d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z" fill="${i.tinta}"/><circle cx="133" cy="128" r="13" fill="${i.ponto}"/>`
+    : `<path fill="${i.tinta}" fill-rule="evenodd" d="M82 76H166A52 52 0 0 1 166 180H82L38 136V120ZM66 128A14 14 0 1 0 94 128A14 14 0 1 0 66 128Z"/>`}</g></svg>`;
+  function renderIcones() {
+    const a = app(), pode = !!(a && a.trocarIcone);
+    $('#ajusteIcone').hidden = !pode;
+    if (!pode) return;
+    let atualIcone = 'a';
+    try { atualIcone = a.icone ? a.icone() : 'a'; } catch { atualIcone = 'a'; }
+    $('#icones').innerHTML = ICONES.map(i =>
+      `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('icone.' + i.k)}</span></label>`).join('');
+  }
+  function trocarIcone(k) {
+    const a = app();
+    let ok = false;
+    try { ok = !!(a && a.trocarIcone && a.trocarIcone(k)); } catch { ok = false; }
+    toast(t(ok ? 'icone.trocado' : 'icone.erro'));
+    if (!ok) renderIcones();
   }
 
   /* ---------------- due-date reminders (Android app) ---------------- */

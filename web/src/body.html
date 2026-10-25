@@ -50,7 +50,7 @@
 
     <header class="top">
       <div class="wrap top-in">
-        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>DebtID</a>
+        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</a>
         <div class="top-r">
           <nav class="nav" aria-label="Seções" data-i18n-aria="nav.secoes">
             <a href="#inicio" data-nav="inicio" data-i18n="nav.novo">Novo</a>
@@ -432,6 +432,11 @@
                 <input type="radio" name="tema" id="tm-escuro" value="dark"><label for="tm-escuro" data-i18n="aj.escuro">Escuro</label>
               </div>
             </div>
+            <div class="ajuste" id="ajusteIcone" hidden>
+              <h3 id="t-icone" data-i18n="aj.icone">Ícone do app</h3>
+              <div class="icones" id="icones" role="radiogroup" aria-labelledby="t-icone"></div>
+              <p class="hint" data-i18n="aj.iconeHint">O novo ícone pode levar alguns segundos para aparecer. Em alguns celulares, o app fecha ao trocar; é só abrir de novo.</p>
+            </div>
             <div class="ajuste">
               <h3 id="t-texto" data-i18n="aj.texto">Tamanho do texto</h3>
               <div class="seg" style="--n:2" role="radiogroup" aria-labelledby="t-texto">
@@ -627,7 +632,7 @@
 
 <div class="trava" id="trava" hidden role="dialog" aria-modal="true" aria-labelledby="travaTitulo" aria-describedby="travaTexto">
   <div class="trava-box">
-    <span class="brand-mark trava-marca" aria-hidden="true"><svg viewBox="28 28 52 52"><path class="bm-d" d="M41 37H50A17 17 0 0 1 50 71H41Z"/><circle class="bm-p" cx="52.5" cy="54" r="4.6"/></svg></span>
+    <span class="brand-mark trava-marca" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>
     <h2 id="travaTitulo">DebtID</h2>
     <p id="travaTexto"></p>
     <form id="formTrava" novalidate autocomplete="off">

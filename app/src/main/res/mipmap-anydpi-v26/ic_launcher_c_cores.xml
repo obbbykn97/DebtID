@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- C in colours: dark tag on lime -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/icone_c_cores_fundo" />
+    <foreground android:drawable="@drawable/icone_c_cores_frente" />
+    <monochrome android:drawable="@drawable/icone_c_mono" />
+</adaptive-icon>

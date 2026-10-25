@@ -3,4 +3,7 @@
     <color name="window_background">#FFFFFF</color>
     <color name="system_bars">#141414</color>
     <color name="icon_background">#0E0E0E</color>
+    <color name="icone_a_cores_fundo">#F8CB47</color>
+    <color name="icone_c_fundo">#0E0E0E</color>
+    <color name="icone_c_cores_fundo">#DFF45C</color>
 </resources>

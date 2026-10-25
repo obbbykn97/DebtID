@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Single-color version for Android 13+ themed icons -->
+<!-- A, single colour: Android 13+ themed icons and the notification icon -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <group android:pivotX="54" android:pivotY="54" android:scaleX="1.1" android:scaleY="1.1">
-        <path android:strokeColor="#FFFFFF" android:strokeWidth="8" android:strokeLineJoin="miter"
-            android:pathData="M41,37H50A17,17 0 0 1 50,71H41Z" />
-        <path android:fillColor="#FFFFFF"
-            android:pathData="M47.9,54a4.6,4.6 0 1,0 9.2,0a4.6,4.6 0 1,0 -9.2,0z" />
+    <!-- the logo is drawn on a 256-unit grid, scaled into the icon's safe zone -->
+    <group android:translateX="11.76" android:translateY="11.76" android:scaleX="0.33" android:scaleY="0.33">
+        <path android:fillColor="#FFFFFF" android:pathData="M70,52H94A6,6 0 0 1 100,58V198A6,6 0 0 1 94,204H70A6,6 0 0 1 64,198V58A6,6 0 0 1 70,52Z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M116,52A76,76 0 0 1 116,204V168A40,40 0 0 0 116,88Z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M120,128A13,13 0 1 0 146,128A13,13 0 1 0 120,128Z" />
     </group>
 </vector>
