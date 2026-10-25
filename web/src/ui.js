@@ -74,7 +74,12 @@
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
   const pagamentosDe = r => recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).map(x => ({ dia: x.dia, valor: x.valor }));
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
-  const hojeDia = () => { const h = new Date(); return Math.round(Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) / 86400000); };
+  // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
+  const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
+  const diaLocal = dt => diaUTC(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const hojeDia = () => diaLocal(new Date());
+  // a moment as codes store it: seconds since 1970 and the time zone in quarter hours
+  const momentoDe = dt => ({ ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) });
   const situacaoDe = (r, dia = hojeDia()) => D.situacao(dadosDe(r), r.total, pagamentosDe(r), dia);
   const emAberto = r => r.status === 'validado' || r.status === 'registrado';
   const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0;
@@ -92,8 +97,7 @@
   // payment day (older records only have the moment the button was pressed)
   const diaQuitado = r => {
     if (r.quitadoDia != null) return r.quitadoDia;
-    const q = new Date(r.quitadoEm || Date.now());
-    return Math.round(Date.UTC(q.getFullYear(), q.getMonth(), q.getDate()) / 86400000);
+    return diaLocal(new Date(r.quitadoEm || Date.now()));
   };
 
   // A signed receipt is kept with its loan (both sides keep it). Returns { reg, novo }.
@@ -264,7 +268,9 @@
       }
       $('#modalErro').textContent = '';
       m.hidden = false;
-      (campo ? campoTexto : valor ? campoValor : bOk).focus();
+      if (campo) campoTexto.focus();
+      else if (valor) campoValor.focus();
+      else bOk.focus();
       const tecla = e => { if (e.key === 'Escape') fim(false); };
       const fim = v => { m.hidden = true; bOk.onclick = bNao.onclick = m.onclick = null; document.removeEventListener('keydown', tecla); res(v); };
       const erro = (msg, el) => { $('#modalErro').textContent = msg; if (el) el.focus(); };
@@ -298,6 +304,15 @@
   };
   const alertaHTML = (titulo, texto, ok = false) =>
     `<div class="alert${ok ? ' ok' : ''}"><i>${ico(ok ? 'check' : 'alerta')}</i><div><b>${esc(titulo)}</b><p>${esc(texto)}</p></div></div>`;
+  function toastErro(err) {
+    const [titulo, texto] = msgDe(err);
+    toast(`${titulo}: ${texto}`);
+  }
+  function alertaErro(err) {
+    const [titulo, texto] = msgDe(err);
+    return alertaHTML(titulo, texto);
+  }
+  const inicial = nome => (nome.trim()[0] || '?').toUpperCase(); // the letter shown in an avatar
 
   /* ---------------- app lock (PIN, and fingerprint or face in the Android app) ----------------
      The lock covers the screen when the app opens and when it comes back after some time away.
@@ -309,9 +324,10 @@
   const bioDisponivel = () => { const a = app(); try { return !!(a && a.biometria && a.biometria() === 'ok'); } catch { return false; } };
   const errosTrava = () => { const e = lerJSON(K.travaErros, null); return e && typeof e.n === 'number' ? e : { n: 0, ate: 0 }; };
   const esperaTrava = () => Math.max(0, (errosTrava().ate || 0) - Date.now());
+  const zerarErrosTrava = () => gravarJSON(K.travaErros, { n: 0, ate: 0 });
   async function testarPin(pin) {
     if (esperaTrava() > 0) return { ok: false };
-    if (await D.conferirPin(pin, trava)) { gravarJSON(K.travaErros, { n: 0, ate: 0 }); return { ok: true }; }
+    if (await D.conferirPin(pin, trava)) { zerarErrosTrava(); return { ok: true }; }
     const e = errosTrava(); e.n++;
     // after 5 wrong PINs: wait 30 s, then twice as long after each new mistake (at most 15 min)
     if (e.n >= 5) e.ate = Date.now() + Math.min(900, 30 * 2 ** (e.n - 5)) * 1000;
@@ -375,7 +391,7 @@
     if (!a || !a.autenticar) return;
     window.__debtidBio = r => {
       window.__debtidBio = null;
-      if (r === 'ok' && fimTrava) { gravarJSON(K.travaErros, { n: 0, ate: 0 }); fimTrava(true); }
+      if (r === 'ok' && fimTrava) { zerarErrosTrava(); fimTrava(true); }
     };
     try { a.autenticar(t('trava.bioTitulo'), t('trava.bioSub'), t('trava.usarPin')); } catch { window.__debtidBio = null; }
   }
@@ -402,17 +418,21 @@
     if (fimTrava) fimTrava(true);
     irPara('boas-vindas');
   });
+  function aoEsconder() {
+    if (escondidoEm == null) escondidoEm = Date.now();
+    if (trava && tempoTrava() === 0) bloquear();
+  }
   function aoVoltar() {
     if (trava && escondidoEm != null && Date.now() - escondidoEm >= tempoTrava() * 1000) bloquear();
     escondidoEm = null;
   }
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { if (escondidoEm == null) escondidoEm = Date.now(); if (trava && tempoTrava() === 0) bloquear(); }
+    if (document.hidden) aoEsconder();
     else aoVoltar();
   });
   // the Android app tells the page when it goes to the background and comes back
   window.DebtIDSegundoPlano = fundo => {
-    if (fundo) { if (escondidoEm == null) escondidoEm = Date.now(); if (trava && tempoTrava() === 0) bloquear(); }
+    if (fundo) aoEsconder();
     else aoVoltar();
   };
 
@@ -545,7 +565,7 @@
     atualizaDicas();
     if (e.target.name === 'outro' && contatoForm && limparNome(e.target.value) !== nomeContato(contatoForm)) { contatoForm = null; pintarContatoForm(); }
     const f = e.target.closest('.field');
-    if (f && f.classList.contains('invalid')) { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; }
+    if (f && f.classList.contains('invalid')) limparErroCampo(f);
   });
   campo('valor').addEventListener('blur', () => {
     const n = D.lerNumero(campo('valor').value, true);
@@ -614,6 +634,11 @@
     if (primeiro) { const c = alvo.querySelector(`.field[data-f="${primeiro}"] input, .field[data-f="${primeiro}"] textarea`); if (c) c.focus(); }
     return !!primeiro;
   }
+  function limparErroCampo(f) {
+    f.classList.remove('invalid');
+    const er = f.querySelector('.err');
+    if (er) er.textContent = '';
+  }
   function limparFormulario() {
     ['outro', 'valor', 'taxa', 'obs', 'multa', 'mora'].forEach(n => { campo(n).value = ''; });
     campo('parcelas').value = '3';
@@ -635,7 +660,7 @@
       limparFormulario();
       await abrirModelo(m, { aviso: t(soRegistro ? 'toast.soRegistro' : 'toast.registrado') });
     } catch (err) {
-      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
+      toastErro(err);
     } finally {
       btn.disabled = false;
     }
@@ -742,7 +767,7 @@
     const lista = contatos.filter(c => !q || [c.nome, c.apelido || '', c.id, ...(c.nomes || [])].some(x => normNome(x).includes(q)))
       .sort((a, b) => nomeContato(a).localeCompare(nomeContato(b), locale()));
     $('#contatosLista').innerHTML = lista.length
-      ? lista.map(c => `<button type="button" class="moeda-op contato-op" role="option" data-pub="${esc(c.pub)}"><span class="mo-sim">${esc((nomeContato(c).trim()[0] || '?').toUpperCase())}</span><span class="mo-nome">${esc(nomeContato(c))}</span><span class="mo-cod">${esc(c.id)}</span></button>`).join('')
+      ? lista.map(c => `<button type="button" class="moeda-op contato-op" role="option" data-pub="${esc(c.pub)}"><span class="mo-sim">${esc(inicial(nomeContato(c)))}</span><span class="mo-nome">${esc(nomeContato(c))}</span><span class="mo-cod">${esc(c.id)}</span></button>`).join('')
       : `<p class="moedas-vazio">${t(contatos.length ? 'contatos.nenhumAchado' : 'contatos.vazio')}</p>`;
   }
   $('#btnContatos').addEventListener('click', e => {
@@ -779,8 +804,7 @@
       if (m.tipo === 'recibo') await abrirRecibo(m);
       else await abrirModelo(m);
     } catch (err) {
-      const [ti, x] = msgDe(err);
-      $('#msgConf').innerHTML = alertaHTML(ti, x);
+      $('#msgConf').innerHTML = alertaErro(err);
       if (location.hash !== '#conferir') irPara('conferir');
     }
   }
@@ -915,7 +939,11 @@
   }
 
   /* ---------------- record details ---------------- */
-  const papelDe = m => (m.credor.id && m.credor.id === perfil.id ? 'credor' : m.devedor.id && m.devedor.id === perfil.id ? 'devedor' : null);
+  const papelDe = m => {
+    if (m.credor.id && m.credor.id === perfil.id) return 'credor';
+    if (m.devedor.id && m.devedor.id === perfil.id) return 'devedor';
+    return null;
+  };
   const parteEmissora = m => (m.emissor === 'credor' ? m.credor : m.devedor);
   const parteOutra = m => (m.emissor === 'credor' ? m.devedor : m.credor);
   const parteNaoEu = m => {
@@ -1110,8 +1138,17 @@
     }
     const aguardando = ctx === 'aguardando', pessoal = m.tipo === 'proposta' && !aguardando;
     const nomeOutra = m.emissor ? esc(parteOutra(m).nome) : '';
-    const legenda = aguardando ? t('qr.paraConfirmar', { nome: nomeOutra }) : pessoal ? t('qr.pessoal') : t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
-    const dica = aguardando ? t('qr.dicaAg') : pessoal ? (ctx === 'pessoal' ? t('qr.dicaPessoal', { nome: nomeOutra }) : '') : t('qr.dica');
+    let legenda, dica;
+    if (aguardando) {
+      legenda = t('qr.paraConfirmar', { nome: nomeOutra });
+      dica = t('qr.dicaAg');
+    } else if (pessoal) {
+      legenda = t('qr.pessoal');
+      dica = ctx === 'pessoal' ? t('qr.dicaPessoal', { nome: nomeOutra }) : '';
+    } else {
+      legenda = t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
+      dica = t('qr.dica');
+    }
     return antes + qrBloco({ codigo: m.codigo, legenda, dica, imprimir: !aguardando });
   }
 
@@ -1187,8 +1224,7 @@
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
     }
     if (reg && reg.status === 'quitado' && !reg.quitadoAssinado && reg.quitadoEm) {
-      const q = new Date(reg.quitadoEm);
-      ev.push({ ts: Math.floor(q.getTime() / 1000), tz: Math.round(-q.getTimezoneOffset() / 15), texto: t('tl.quitadoLocal', { data: fmt.data(diaQuitado(reg)) }) });
+      ev.push({ ...momentoDe(new Date(reg.quitadoEm)), texto: t('tl.quitadoLocal', { data: fmt.data(diaQuitado(reg)) }) });
     }
     if (ev.length < 2) return '';
     ev.sort((a, b) => a.ts - b.ts);
@@ -1203,6 +1239,17 @@
     if (d.composto) return t('juros.compostos', v);
     return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
   }
+
+  // top and bottom of a printed receipt (a loan's or a payment's): the brand, then the QR code and the code
+  const cabecalhoRecibo = ref => `<header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(ref)}</span></header>`;
+  const codigoRecibo = (codigo, nota) => `<div class="rc-key">
+        <div class="rc-qr">${D.QR.svg(codigo, { nivel: 'M', margem: 2, rotulo: esc(t('qr.rotulo')) })}</div>
+        <div>
+          <p class="rc-key-label">${t('rc.codigo')}</p>
+          <code>${esc(codigo)}</code>
+          <p class="rc-key-note">${ico('cadeado')}<span>${nota}</span></p>
+        </div>
+      </div>`;
 
   function reciboHTML(m, reg) {
     if (m.tipo === 'recibo') return reciboAvulsoHTML(m);
@@ -1249,7 +1296,7 @@
         `</ul><p class="rc-note">${reg.status === 'cancelado' ? t('rc.canceladoNota', { nome: credor }) : t('rc.saldoNota', { saldo: dinheiro(reg.status === 'quitado' ? 0 : s.saldo, d) })}</p></div>`;
     }
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(m.ref)}</span></header>
+      ${cabecalhoRecibo(m.ref)}
       <div class="rc-body">
         <p class="kicker">${t('rc.kicker')}</p>
         <h3 class="rc-title">${t('rc.titulo')}</h3>
@@ -1278,14 +1325,7 @@
         ${pagos}
         <div class="rc-sign">${assinatura(m.credor, t('rc.credor'))}${assinatura(m.devedor, t('rc.devedor'))}</div>
       </div>
-      <div class="rc-key">
-        <div class="rc-qr">${D.QR.svg(m.codigo, { nivel: 'M', margem: 2, rotulo: esc(t('qr.rotulo')) })}</div>
-        <div>
-          <p class="rc-key-label">${t('rc.codigo')}</p>
-          <code>${esc(m.codigo)}</code>
-          <p class="rc-key-note">${ico('cadeado')}<span>${nota}</span></p>
-        </div>
-      </div>`;
+      ${codigoRecibo(m.codigo, nota)}`;
   }
 
   function reciboAvulsoHTML(mr) {
@@ -1293,7 +1333,7 @@
     const valor = r.valor ? fmt.dinheiro(r.valor, info) : '—';
     const linha = (rot, val) => `<div><dt>${rot}</dt><dd>${val}</dd></div>`;
     return `
-      <header class="rc-head"><div class="rc-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</div><span class="rc-ref">Ref. ${esc(mr.ref)}</span></header>
+      ${cabecalhoRecibo(mr.ref)}
       <div class="rc-body">
         <p class="kicker">${t('rc.kickerRecibo')}</p>
         <h3 class="rc-title">${esc(nomeTipoRecibo(r.tipo))}</h3>
@@ -1307,14 +1347,7 @@
           ${linha(t('rc.emprestimo'), 'Ref. ' + esc(mr.ref))}
         </dl>
       </div>
-      <div class="rc-key">
-        <div class="rc-qr">${D.QR.svg(mr.codigo, { nivel: 'M', margem: 2, rotulo: esc(t('qr.rotulo')) })}</div>
-        <div>
-          <p class="rc-key-label">${t('rc.codigo')}</p>
-          <code>${esc(mr.codigo)}</code>
-          <p class="rc-key-note">${ico('cadeado')}<span>${t('rc.notaRecibo')}</span></p>
-        </div>
-      </div>`;
+      ${codigoRecibo(mr.codigo, t('rc.notaRecibo'))}`;
   }
 
   function renderDetalhe() {
@@ -1363,7 +1396,7 @@
       if (conf !== 'homonimo') salvarContato(outro); // you looked at the ID before signing
       await abrirModelo(mv, { recemConfirmado: true, aviso: t('toast.assinado') });
     } catch (err) {
-      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
+      toastErro(err);
       if (botao) botao.disabled = false;
     }
   }
@@ -1401,7 +1434,7 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       toast(t('toast.recibo.' + tipo, { nome: m.devedor.nome }));
     } catch (err) {
-      const [ti, x] = msgDe(err); toast(`${ti}: ${x}`);
+      toastErro(err);
     }
   }
 
@@ -1414,7 +1447,7 @@
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
     if (acao === 'abrir-reg') {
       const r = registros.find(x => x.k === b.dataset.k);
-      if (r) { try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { const [ti, x] = msgDe(err); toast(`${ti}: ${x}`); } }
+      if (r) { try { await abrirModelo(await D.lerCodigo(r.codigo)); } catch (err) { toastErro(err); } }
       return;
     }
     if (acao === 'pessoa') { filtroPessoa = b.dataset.chave; definirVisao('lista'); return; }
@@ -1604,7 +1637,7 @@
       if (receber.length) linhas.push(`<span class="pessoa-soma rec"><small>${t('pes.receber')}</small>${somasPorMoeda(receber, saldoAberto)}</span>`);
       if (pagar.length) linhas.push(`<span class="pessoa-soma pag"><small>${t('pes.pagar')}</small>${somasPorMoeda(pagar, saldoAberto)}</span>`);
       return `<button class="reg pessoa" type="button" data-acao="pessoa" data-chave="${esc(g.k)}">
-        <span class="reg-ico">${esc((g.nome.trim()[0] || '?').toUpperCase())}</span>
+        <span class="reg-ico">${esc(inicial(g.nome))}</span>
         <span class="reg-main"><b>${esc(g.nome)}</b><small>${t('pes.n', { n: g.regs.length, abertos: abertos.length })}${g.id ? ' · ID ' + esc(g.id) : ''}${c ? ' · ' + t('pes.contato') : ''}</small></span>
         <span class="reg-side">${linhas.join('') || `<span class="chip quitado">${t('pes.nadaAberto')}</span>`}</span>
       </button>`;
@@ -1645,11 +1678,12 @@
 
   /* ---------------- profit by period ---------------- */
   const PERIODOS = ['mes', 'ano', 'tudo', 'datas'];
+  const periodoMarcado = () => ($('input[name="periodo"]:checked') || {}).value || 'tudo';
   function intervalo() {
-    const p = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
-    const h = new Date(), y = h.getFullYear(), mo = h.getMonth(), dia = x => Math.round(x / 86400000);
-    if (p === 'mes') return [dia(Date.UTC(y, mo, 1)), dia(Date.UTC(y, mo + 1, 0))];
-    if (p === 'ano') return [dia(Date.UTC(y, 0, 1)), dia(Date.UTC(y, 11, 31))];
+    const p = periodoMarcado();
+    const h = new Date(), y = h.getFullYear(), mo = h.getMonth();
+    if (p === 'mes') return [diaUTC(y, mo, 1), diaUTC(y, mo + 1, 0)];
+    if (p === 'ano') return [diaUTC(y, 0, 1), diaUTC(y, 11, 31)];
     if (p === 'datas') return [diaDeISO($('#pe-de').value) ?? -Infinity, diaDeISO($('#pe-ate').value) ?? Infinity];
     return [-Infinity, Infinity];
   }
@@ -1677,8 +1711,7 @@
     return (r.total ? s.principal * (r.total - r.valor) / r.total : 0) + Math.max(0, s.encargos - s.encargosPagos);
   };
   function renderLucro() {
-    const periodo = ($('input[name="periodo"]:checked') || {}).value || 'tudo';
-    $('#lucroDatas').hidden = periodo !== 'datas';
+    $('#lucroDatas').hidden = periodoMarcado() !== 'datas';
     const [ini, fim] = intervalo(), dentro = d => d >= ini && d <= fim;
     const recebidoEm = r => eventosLucro(r).filter(e => dentro(e.dia)).reduce((s, e) => s + e.lucro, 0);
     const comLucro = papel => registros.filter(r => r.papel === papel && eventosLucro(r).some(e => dentro(e.dia)));
@@ -1705,20 +1738,21 @@
   function dadosGrafico() {
     const h = new Date(), meses = [];
     for (let i = 11; i >= 0; i--) {
-      const x = new Date(h.getFullYear(), h.getMonth() - i, 1);
-      meses.push({ y: x.getFullYear(), m: x.getMonth(), ini: Math.round(Date.UTC(x.getFullYear(), x.getMonth(), 1) / 864e5), fim: Math.round(Date.UTC(x.getFullYear(), x.getMonth() + 1, 0) / 864e5), v: 0 });
+      const x = new Date(h.getFullYear(), h.getMonth() - i, 1), y = x.getFullYear(), m = x.getMonth();
+      meses.push({ y, m, ini: diaUTC(y, m, 1), fim: diaUTC(y, m + 1, 0), v: 0 });
     }
+    const chaveMoeda = r => (r.moeda || 'BRL') + '|' + (r.casas == null ? 2 : r.casas);
     const credor = registros.filter(r => r.papel === 'credor');
-    const moedas = [...new Set(credor.map(r => (r.moeda || 'BRL') + '|' + (r.casas == null ? 2 : r.casas)))];
+    const moedas = [...new Set(credor.map(chaveMoeda))];
     let escolhida = lerTexto(K.grafico);
     if (!moedas.includes(escolhida)) {
       // the currency with the most profit received
-      const soma = k => credor.filter(r => (r.moeda || 'BRL') + '|' + (r.casas == null ? 2 : r.casas) === k).reduce((s, r) => s + eventosLucro(r).reduce((a, e) => a + e.lucro, 0), 0);
+      const soma = k => credor.filter(r => chaveMoeda(r) === k).reduce((s, r) => s + eventosLucro(r).reduce((a, e) => a + e.lucro, 0), 0);
       escolhida = moedas.sort((a, b) => soma(b) - soma(a))[0] || null;
     }
     if (escolhida) {
       for (const r of credor) {
-        if ((r.moeda || 'BRL') + '|' + (r.casas == null ? 2 : r.casas) !== escolhida) continue;
+        if (chaveMoeda(r) !== escolhida) continue;
         for (const e of eventosLucro(r)) { const mes = meses.find(x => e.dia >= x.ini && e.dia <= x.fim); if (mes) mes.v += e.lucro; }
       }
     }
@@ -1801,14 +1835,16 @@
     const [ini, fim] = intervalo(), dentro = d => d >= ini && d <= fim;
     const ativos = registros.filter(r => dentro(r.de) || dentro(r.dp) || recibosDe(r).some(x => dentro(x.dia)) || (r.status === 'quitado' && dentro(diaQuitado(r))))
       .sort((a, b) => a.de - b.de);
-    const nomePeriodo = $('input[name="periodo"]:checked + label') ? $('input[name="periodo"]:checked + label').textContent : '';
+    const rotuloPeriodo = $('input[name="periodo"]:checked + label');
+    const nomePeriodo = rotuloPeriodo ? rotuloPeriodo.textContent : '';
     const faixa = Number.isFinite(ini) ? ` (${fmt.data(ini)} – ${fmt.data(Number.isFinite(fim) ? fim : hojeDia())})` : '';
     const linhas = ativos.map(r => {
       const s = situacaoDe(r);
       return `<tr><td>${fmt.data(r.de)}</td><td>${esc(nomePessoa(r))}</td><td>${t(r.papel === 'credor' ? 'csv.credor' : 'csv.devedor')}</td><td class="num">${dinheiro(r.valor, r)}</td><td class="num">${dinheiro(r.total, r)}</td><td class="num">${dinheiro(s.pago, r)}</td><td class="num">${dinheiro(emAberto(r) ? s.saldo : 0, r)}</td><td>${fmt.data(r.dp)}</td><td>${esc(estadoTexto(r))}</td></tr>`;
     }).join('');
+    const gerado = momentoDe(new Date());
     $('#relatorio').innerHTML = `<header class="rel-topo"><b>DebtID</b><span>${t('rel.titulo')}</span></header>
-      <p class="rel-meta">${t('rel.meta', { periodo: esc(nomePeriodo), faixa, nome: esc(perfil.nome), id: esc(perfil.id), gerado: fmt.momento(Math.floor(Date.now() / 1000), Math.round(-new Date().getTimezoneOffset() / 15)) })}</p>
+      <p class="rel-meta">${t('rel.meta', { periodo: esc(nomePeriodo), faixa, nome: esc(perfil.nome), id: esc(perfil.id), gerado: fmt.momento(gerado.ts, gerado.tz) })}</p>
       <div class="summary">${$('#lucroCards').innerHTML}</div>
       <h3>${t('rel.registros', { n: ativos.length })}</h3>
       ${ativos.length ? `<table class="rel-tabela"><thead><tr><th>${t('csv.de')}</th><th>${t('csv.pessoa')}</th><th>${t('csv.papel')}</th><th>${t('csv.valor')}</th><th>${t('csv.total')}</th><th>${t('csv.pago')}</th><th>${t('csv.saldo')}</th><th>${t('csv.dp')}</th><th>${t('csv.situacao')}</th></tr></thead><tbody>${linhas}</tbody></table>` : `<p>${t('rel.vazio')}</p>`}
@@ -1822,7 +1858,7 @@
     $('#perfilNome').textContent = perfil.nome;
     $('#perfilId').textContent = perfil.id;
     D.idLongoDe(D._interno.deB64url(perfil.pub)).then(x => { $('#perfilIdLongo').textContent = x; });
-    $('#avatar').textContent = (perfil.nome.trim()[0] || '?').toUpperCase();
+    $('#avatar').textContent = inicial(perfil.nome);
     $('#f-nome-ajuste').value = perfil.nome;
     $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
@@ -1878,7 +1914,7 @@
       const pin = await novoPin();
       if (!pin) return;
       trava = { ...(await D.hashPin(pin)), bio: false, tempo: 60 };
-      gravarJSON(K.trava, trava); gravarJSON(K.travaErros, { n: 0, ate: 0 });
+      gravarJSON(K.trava, trava); zerarErrosTrava();
       renderTravaAjustes(); toast(t('trava.criada'));
     } else if (acao === 'trava-trocar') {
       if (!(await pedirPin(t('trava.pedirTrocar')))) return;
@@ -1898,7 +1934,7 @@
     const el = $('#listaContatos');
     if (!contatos.length) { el.innerHTML = `<p class="hint">${t('contatos.vazio')}</p>`; return; }
     el.innerHTML = '<ul class="contatos">' + contatos.slice().sort((a, b) => nomeContato(a).localeCompare(nomeContato(b), locale())).map(c => `<li>
-      <span class="avatar">${esc((nomeContato(c).trim()[0] || '?').toUpperCase())}</span>
+      <span class="avatar">${esc(inicial(nomeContato(c)))}</span>
       <span class="ct-main"><b>${esc(nomeContato(c))}</b>${c.apelido ? `<small>${esc(c.nome)}</small>` : ''}<code>${esc(c.idLongo || c.id)}</code></span>
       <span class="ct-acoes"><button class="btn btn-ghost" type="button" data-acao="contato-renomear" data-pub="${esc(c.pub)}">${t('contatos.renomear')}</button><button class="btn btn-ghost" type="button" data-acao="contato-remover" data-pub="${esc(c.pub)}">${t('contatos.remover')}</button></span>
     </li>`).join('') + '</ul>';
@@ -1968,9 +2004,12 @@
     if (!pode) return;
     let atualIcone = 'a';
     try { atualIcone = a.icone ? a.icone() : 'a'; } catch { atualIcone = 'a'; }
-    const grupo = forma => `<h4>${t(forma === 'A' ? 'icone.logoA' : 'icone.logoC')}</h4><div class="icones" role="radiogroup" aria-label="${esc(t(forma === 'A' ? 'icone.logoA' : 'icone.logoC'))}">` +
-      ICONES.filter(i => i.forma === forma).map(i =>
-        `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('cor.' + i.cor)}</span></label>`).join('') + '</div>';
+    const grupo = forma => {
+      const titulo = t(forma === 'A' ? 'icone.logoA' : 'icone.logoC');
+      return `<h4>${titulo}</h4><div class="icones" role="radiogroup" aria-label="${esc(titulo)}">` +
+        ICONES.filter(i => i.forma === forma).map(i =>
+          `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('cor.' + i.cor)}</span></label>`).join('') + '</div>';
+    };
     $('#icones').innerHTML = grupo('A') + grupo('C');
   }
   function trocarIcone(k) {
@@ -2073,7 +2112,7 @@
       gravarTexto(K.backupEm, String(Date.now()));
       renderAjustes();
     } catch (err) {
-      const [ti, x] = msgDe(err); $('#msgBackup').innerHTML = alertaHTML(ti, x);
+      $('#msgBackup').innerHTML = alertaErro(err);
     } finally { btn.disabled = false; }
   });
   const PESO = { aguardando: 0, registrado: 0, validado: 1, quitado: 2, cancelado: 3 };
@@ -2113,7 +2152,7 @@
       toast(t('toast.backupRestaurado'));
       irPara('registros');
     } catch (err) {
-      const [ti, x] = msgDe(err); msgEl.innerHTML = alertaHTML(ti, x);
+      msgEl.innerHTML = alertaErro(err);
     } finally { if (btn) btn.disabled = false; }
   }
   $('#formRestaurar').addEventListener('submit', e => {
@@ -2175,7 +2214,7 @@
       else toast(t('toast.perfilCriado'));
       irPara('inicio');
     } catch (err) {
-      const [ti, x] = msgDe(err); $('#msgBV').innerHTML = alertaHTML(ti, x);
+      $('#msgBV').innerHTML = alertaErro(err);
     } finally { btn.disabled = false; }
   });
 
@@ -2190,7 +2229,7 @@
     $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
     if (v > 0) campo('valor').value = textoValor(v, moedaForm);
     for (const [n, x] of taxas) if (x >= 0 && campo(n).value.trim()) campo(n).value = fmt.numEntrada(Math.round(x * 10000) / 10000);
-    $$('.field.invalid').forEach(f => { f.classList.remove('invalid'); const er = f.querySelector('.err'); if (er) er.textContent = ''; });
+    $$('.field.invalid').forEach(f => limparErroCampo(f));
     ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
     aplicarTema();
     pintarMoedas();

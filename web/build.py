@@ -5,6 +5,7 @@ Usage: python3 web/build.py [output path]   (default: web/dist/index.html)
 """
 import base64
 import hashlib
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -41,28 +42,26 @@ def sha(js: str) -> str:
     return "'sha256-" + base64.b64encode(hashlib.sha256(js.encode('utf-8')).digest()).decode() + "'"
 
 
+def ler(nome: str) -> str:
+    return (SRC / nome).read_text(encoding='utf-8')
+
+
 def build(target: Path) -> Path:
-    css = (SRC / 'styles.css').read_text(encoding='utf-8')
-    body = (SRC / 'body.html').read_text(encoding='utf-8')
-    textos = (SRC / 'i18n.js').read_text(encoding='utf-8')
-    core = (SRC / 'core.js').read_text(encoding='utf-8')
-    ui = (SRC / 'ui.js').read_text(encoding='utf-8')
-    scripts = ['\n' + textos, '\n/*<core>*/\n' + core + '/*</core>*/\n', '\n' + ui]
+    scripts = ['\n' + ler('i18n.js'), '\n/*<core>*/\n' + ler('core.js') + '/*</core>*/\n', '\n' + ler('ui.js')]
     inicio = HEAD.split('<script>', 1)[1].split('</script>', 1)[0]
     # Content Security Policy: only these exact scripts may run (by hash), nothing is loaded from
     # the network, and no injected markup can run code. Inline styles stay allowed.
     csp = ("default-src 'none'; script-src " + ' '.join(sha(x) for x in [inicio] + scripts) +
            "; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; "
            "connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'")
-    html = (HEAD.replace('__CSP__', csp) + '<style>\n' + css + '</style>\n</head>\n<body>\n' + body +
-            '\n<script>' + scripts[0] + '</script>\n' +
-            '<script>' + scripts[1] + '</script>\n<script>' + scripts[2] + '</script>\n</body>\n</html>\n')
+    tags = '\n'.join(f'<script>{js}</script>' for js in scripts)
+    html = (HEAD.replace('__CSP__', csp) + '<style>\n' + ler('styles.css') + '</style>\n</head>\n<body>\n' + ler('body.html') +
+            '\n' + tags + '\n</body>\n</html>\n')
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(html, encoding='utf-8')
     return target
 
 
 if __name__ == '__main__':
-    import sys
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'dist' / 'index.html'
     print(build(out), f'{out.stat().st_size / 1024:.1f} KB')

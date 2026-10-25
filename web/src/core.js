@@ -239,16 +239,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   // Simple:   I = P · i · n
   // Compound: A = P · (1 + i)^n  (n may be fractional: exponential convention)
   // n = days/30 (monthly, 30-day month) or days/365 (yearly); "total" applies the rate once.
+  function diasDoPeriodo(modo) {
+    if (modo === 'mes') return 30;
+    if (modo === 'ano') return 365;
+    return 0;
+  }
   function calcular(d) {
-    const dias = d.dp - d.de;
-    const periodos = d.modo === 'mes' ? dias / 30 : d.modo === 'ano' ? dias / 365 : 1;
+    const dias = d.dp - d.de, porPeriodo = diasDoPeriodo(d.modo);
+    const periodos = porPeriodo ? dias / porPeriodo : 1;
     let juros;
     if (d.composto && d.modo !== 'total') {
       juros = d.valor * (Math.pow(1 + d.taxa / 1e6, periodos) - 1);
     } else {
       let num = d.valor * d.taxa, den = 1e6;
-      if (d.modo === 'mes') { num *= dias; den *= 30; }
-      if (d.modo === 'ano') { num *= dias; den *= 365; }
+      if (porPeriodo) { num *= dias; den *= porPeriodo; }
       juros = num / den;
     }
     const jurosCentavos = Number(juros.toFixed(4));
@@ -459,16 +463,23 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return juntar([4], c.slice(1), bytesDe(y, 32));
   }
 
-  async function idDe(pub33) {
-    const h = hex(await sha256(pub33)).slice(0, 12).toUpperCase();
-    return `${h.slice(0, 4)}-${h.slice(4, 8)}-${h.slice(8, 12)}`;
+  // A key's ID: the start of its SHA-256 in groups of 4 hex digits.
+  async function idEmGrupos(pub33, grupos) {
+    const h = hex(await sha256(pub33)).slice(0, grupos * 4).toUpperCase();
+    return h.match(/.{4}/g).join('-');
+  }
+  function idDe(pub33) {
+    return idEmGrupos(pub33, 3);
   }
   // Full ID (96 bits, 6 groups): starts with the short ID. Copying it would take ~2^96 tries,
   // so comparing it in person is safe even against someone who can afford to copy the short ID.
-  async function idLongoDe(pub33) {
-    const h = hex(await sha256(pub33)).slice(0, 24).toUpperCase();
-    return h.match(/.{4}/g).join('-');
+  function idLongoDe(pub33) {
+    return idEmGrupos(pub33, 6);
   }
+  async function identificacao(pub33) {
+    return { id: await idDe(pub33), idLongo: await idLongoDe(pub33), pub: b64url(pub33) };
+  }
+  const refDe = idHex => `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`;
 
   // ECDSA signatures have two valid forms (s and n − s). New codes always use the low one and
   // refuse the other, so a code cannot be rewritten into a second, different-looking valid code.
@@ -685,22 +696,22 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (d.pubOutro && !iguais(c.pub, d.pubOutro)) throw new ChaveErro('OUTRA_PESSOA');
       if (!(await confere(c.pub, juntar(TAGS[versao].c, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
     }
-    const parteEmissor = {
-      nome: d.nomeEmissor, id: await idDe(d.pubEmissor), idLongo: await idLongoDe(d.pubEmissor),
-      pub: b64url(d.pubEmissor), assinou: true, ts: d.ts, tz: d.tz
-    };
-    const parteOutra = c
-      ? { nome: c.nome, id: await idDe(c.pub), idLongo: await idLongoDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
-      : d.pubOutro
-        ? { nome: d.nomeOutro, id: await idDe(d.pubOutro), idLongo: await idLongoDe(d.pubOutro), pub: b64url(d.pubOutro), assinou: false, fixo: true }
-        : { nome: d.nomeOutro, assinou: false };
+    const parteEmissor = { nome: d.nomeEmissor, ...(await identificacao(d.pubEmissor)), assinou: true, ts: d.ts, tz: d.tz };
+    let parteOutra;
+    if (c) {
+      parteOutra = { nome: c.nome, ...(await identificacao(c.pub)), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro };
+    } else if (d.pubOutro) {
+      parteOutra = { nome: d.nomeOutro, ...(await identificacao(d.pubOutro)), assinou: false, fixo: true };
+    } else {
+      parteOutra = { nome: d.nomeOutro, assinou: false };
+    }
     const dadosExibir = {
       moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total,
       obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora
     };
     const idHex = hex(d.id).toUpperCase();
     return {
-      tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
+      tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: refDe(idHex),
       hash: await hashDe(versao, pBytes), versao,
       dados: dadosExibir, calc: conferirTotal(d, d.total), emissor: d.papel,
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
@@ -760,7 +771,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!sBaixo(sig) || !(await confere(pub, juntar(TAGS[4].r, rb), sig))) throw new ChaveErro('ASSINATURA');
     const idHex = hex(id).toUpperCase();
     return {
-      tipo: 'recibo', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`, hash: hex(hash),
+      tipo: 'recibo', codigo, idHex, ref: refDe(idHex), hash: hex(hash),
       recibo: { tipo, moeda, casas, valor, dia, ts, tz, rid: hex(rid), nome, pub: b64url(pub), id: await idDe(pub), idLongo: await idLongoDe(pub) }
     };
   }
@@ -818,7 +829,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       sobra += resto;
     }
     acumular(hoje);
-    const encargos = Math.ceil(Number(parcelas.reduce((s, p) => s + p.multa + p.mora, 0).toFixed(4)));
+    const encargos = ceilCentavos(parcelas.reduce((s, p) => s + p.multa + p.mora, 0));
     const principal = parcelas.reduce((s, p) => s + p.restante, 0);
     return {
       parcelas: parcelas.map(({ desde, multou, ...p }) => p),
@@ -868,10 +879,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function forcaSenha(s) {
     s = String(s || '');
     if (s.length < 10) return 0;
-    const tipos = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(s)).length;
     const repetida = /^(.)\1+$/.test(s) || /^(?:0123456789|1234567890|abcdefghij|qwertyuiop)/i.test(s);
     if (repetida) return 0;
-    let p = s.length >= 16 ? 3 : s.length >= 12 ? 2 : 1;
+    let p = 1;
+    if (s.length >= 16) p = 3;
+    else if (s.length >= 12) p = 2;
+    const tipos = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(s)).length;
     if (tipos >= 3) p++;
     if (s.split(' ').filter(Boolean).length >= 4) p++;
     return Math.min(4, p);
@@ -1127,7 +1140,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function nomesEspanhol() {
     if (MOEDAS.BTC.es) return;
     let dn = null;
-    try { dn = new Intl.DisplayNames(['es'], { type: 'currency' }); } catch (e) { dn = null; }
+    try { dn = new Intl.DisplayNames(['es'], { type: 'currency' }); } catch (e) { /* older browser: no list names */ }
     const nomeIntl = (codigo, n) => {
       try {
         const partes = new Intl.NumberFormat('es', { style: 'currency', currency: codigo, currencyDisplay: 'name' }).formatToParts(n);
@@ -1140,7 +1153,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (fixo) { m.es = { s: fixo[0], p: fixo[1], fem: false, nome: fixo[2] }; continue; }
       const s = nomeIntl(codigo, 1), p = nomeIntl(codigo, 2);
       let lista = null;
-      try { lista = dn ? dn.of(codigo) : null; } catch (e) { lista = null; }
+      try { lista = dn ? dn.of(codigo) : null; } catch (e) { /* code unknown to Intl */ }
       if (!lista || lista.toUpperCase() === codigo) lista = null;
       m.es = s && p
         ? { s, p, fem: m.pt.fem, nome: maiuscula(lista || s) }
