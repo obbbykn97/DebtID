@@ -1968,7 +1968,8 @@
       }
     }
     lista.sort((x, y) => x.quando - y.quando);
-    try { a.lembretes(JSON.stringify(lista.slice(0, 60))); } catch { /* ignore */ }
+    const pacote = { canal: t('lemb.canal'), publico: t('lemb.publico'), lista: lista.slice(0, 60) };
+    try { a.lembretes(JSON.stringify(pacote)); } catch { /* ignore */ }
   }
 
   /* ---------------- backup ---------------- */

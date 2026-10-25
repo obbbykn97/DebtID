@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-wDnpiy0hUE9KeASkqw5ts3SBf3k+NvzvIjjST69oj9E=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-Huk45MHIfkl3COWlaRziWyzzi/p5fB6qtlDW+iG/UyU='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-2sEODyfGy0TBhvdaF0rQ0k4cPLScI9kgMdOZNBwNZhY=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-akkTG6piwpriLCfLcvWbe5qBV4ia3+Oleahmzoj4FrM='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%230E0E0E'/%3E%3Cg transform='translate(54 54) scale(1.1) translate(-54 -54)'%3E%3Cpath d='M41 37H50A17 17 0 0 1 50 71H41Z' fill='none' stroke='%23fff' stroke-width='8'/%3E%3Ccircle cx='52.5' cy='54' r='4.6' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -1869,6 +1869,7 @@ const DebtIDTextos = {
     "lemb.ligar": "Lembrar antes dos vencimentos", "lemb.antes": "Quanto tempo antes", "lemb.ligados": "Lembretes ligados.",
     "lemb.negados": "Sem permissão para notificações. Libere nas configurações do Android.",
     "lemb.tituloAntes": "Vencimento em {dias}", "lemb.tituloHoje": "Vence hoje", "lemb.receber": "Receber de {nome}: {valor}", "lemb.pagar": "Pagar a {nome}: {valor}",
+    "lemb.canal": "Vencimentos", "lemb.publico": "Você tem um vencimento no DebtID.",
     "bk.senhaFracaT": "Senha fácil de adivinhar", "bk.senhaFraca": "Evite sequências e caracteres repetidos. Uma frase com 4 palavras é ótima.",
     "bk.forca0": "muito fraca", "bk.forca1": "fraca", "bk.forca2": "razoável", "bk.forca3": "boa", "bk.forca4": "ótima",
     "bk.gerando": "Gerando o backup… pode levar alguns segundos.", "bk.abrindo": "Abrindo o backup… pode levar alguns segundos.",
@@ -2259,6 +2260,7 @@ const DebtIDTextos = {
     "lemb.ligar": "Remind me before due dates", "lemb.antes": "How long before", "lemb.ligados": "Reminders on.",
     "lemb.negados": "No permission for notifications. Allow them in Android settings.",
     "lemb.tituloAntes": "Due in {dias}", "lemb.tituloHoje": "Due today", "lemb.receber": "Receive from {nome}: {valor}", "lemb.pagar": "Pay {nome}: {valor}",
+    "lemb.canal": "Due dates", "lemb.publico": "You have a due date in DebtID.",
     "bk.senhaFracaT": "Easy-to-guess password", "bk.senhaFraca": "Avoid sequences and repeated characters. A four-word phrase is great.",
     "bk.forca0": "very weak", "bk.forca1": "weak", "bk.forca2": "fair", "bk.forca3": "good", "bk.forca4": "great",
     "bk.gerando": "Creating the backup… this may take a few seconds.", "bk.abrindo": "Opening the backup… this may take a few seconds.",
@@ -2650,6 +2652,7 @@ const DebtIDTextos = {
     "lemb.ligar": "Recordar antes de los vencimientos", "lemb.antes": "Con cuánta anticipación", "lemb.ligados": "Recordatorios activados.",
     "lemb.negados": "Sin permiso para notificaciones. Actívalo en los ajustes de Android.",
     "lemb.tituloAntes": "Vencimiento en {dias}", "lemb.tituloHoje": "Vence hoy", "lemb.receber": "Cobrar a {nome}: {valor}", "lemb.pagar": "Pagar a {nome}: {valor}",
+    "lemb.canal": "Vencimientos", "lemb.publico": "Tienes un vencimiento en DebtID.",
     "bk.senhaFracaT": "Contraseña fácil de adivinar", "bk.senhaFraca": "Evita secuencias y caracteres repetidos. Una frase de 4 palabras es ideal.",
     "bk.forca0": "muy débil", "bk.forca1": "débil", "bk.forca2": "aceptable", "bk.forca3": "buena", "bk.forca4": "excelente",
     "bk.gerando": "Generando la copia de seguridad… puede tardar unos segundos.", "bk.abrindo": "Abriendo la copia de seguridad… puede tardar unos segundos.",
@@ -6037,7 +6040,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       }
     }
     lista.sort((x, y) => x.quando - y.quando);
-    try { a.lembretes(JSON.stringify(lista.slice(0, 60))); } catch { /* ignore */ }
+    const pacote = { canal: t('lemb.canal'), publico: t('lemb.publico'), lista: lista.slice(0, 60) };
+    try { a.lembretes(JSON.stringify(pacote)); } catch { /* ignore */ }
   }
 
   /* ---------------- backup ---------------- */
