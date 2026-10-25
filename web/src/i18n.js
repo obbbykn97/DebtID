@@ -233,7 +233,7 @@ const DebtIDTextos = {
     "aj.lembretesIntro": "Uma notificação antes de cada vencimento e outra no dia, mesmo com o app fechado.",
     "aj.texto": "Tamanho do texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
     "aj.icone": "Ícone do app", "aj.iconeHint": "O novo ícone pode levar alguns segundos para aparecer. Em alguns celulares, o app fecha ao trocar; é só abrir de novo.",
-    "icone.logoA": "Logo A", "icone.logoC": "Etiqueta",
+    "icone.logoA": "DebtID", "icone.logoC": "Etiqueta",
     "cor.padrao": "Padrão", "cor.claro": "Claro", "cor.amarelo": "Amarelo", "cor.limao": "Limão", "cor.rosa": "Rosa", "cor.pastel": "Pastel", "cor.lilas": "Lilás", "cor.roxo": "Roxo", "cor.verdeAgua": "Verde-água", "cor.floresta": "Floresta", "cor.ceu": "Céu", "cor.azul": "Azul", "cor.meiaNoite": "Meia-noite", "cor.laranja": "Laranja", "cor.ambar": "Âmbar", "cor.vinho": "Vinho", "cor.areia": "Areia", "cor.neon": "Neon",
     "icone.trocado": "Ícone trocado. Pode levar alguns segundos para aparecer.", "icone.erro": "Não deu para trocar o ícone.",
 
@@ -628,7 +628,7 @@ const DebtIDTextos = {
     "aj.lembretesIntro": "A notification before each due date and another on the day, even with the app closed.",
     "aj.texto": "Text size", "aj.textoNormal": "Normal", "aj.textoGrande": "Large",
     "aj.icone": "App icon", "aj.iconeHint": "The new icon may take a few seconds to show up. On some phones the app closes when you switch; just open it again.",
-    "icone.logoA": "Logo A", "icone.logoC": "Tag",
+    "icone.logoA": "DebtID", "icone.logoC": "Tag",
     "cor.padrao": "Default", "cor.claro": "Light", "cor.amarelo": "Yellow", "cor.limao": "Lime", "cor.rosa": "Pink", "cor.pastel": "Pastel", "cor.lilas": "Lilac", "cor.roxo": "Purple", "cor.verdeAgua": "Teal", "cor.floresta": "Forest", "cor.ceu": "Sky", "cor.azul": "Blue", "cor.meiaNoite": "Midnight", "cor.laranja": "Orange", "cor.ambar": "Amber", "cor.vinho": "Wine", "cor.areia": "Sand", "cor.neon": "Neon",
     "icone.trocado": "Icon changed. It may take a few seconds to show up.", "icone.erro": "Couldn't change the icon.",
 
@@ -1024,7 +1024,7 @@ const DebtIDTextos = {
     "aj.lembretesIntro": "Una notificación antes de cada vencimiento y otra el mismo día, incluso con la app cerrada.",
     "aj.texto": "Tamaño del texto", "aj.textoNormal": "Normal", "aj.textoGrande": "Grande",
     "aj.icone": "Icono de la app", "aj.iconeHint": "El nuevo icono puede tardar unos segundos en aparecer. En algunos teléfonos la app se cierra al cambiarlo; solo vuelve a abrirla.",
-    "icone.logoA": "Logo A", "icone.logoC": "Etiqueta",
+    "icone.logoA": "DebtID", "icone.logoC": "Etiqueta",
     "cor.padrao": "Predeterminado", "cor.claro": "Claro", "cor.amarelo": "Amarillo", "cor.limao": "Lima", "cor.rosa": "Rosa", "cor.pastel": "Pastel", "cor.lilas": "Lila", "cor.roxo": "Morado", "cor.verdeAgua": "Turquesa", "cor.floresta": "Bosque", "cor.ceu": "Cielo", "cor.azul": "Azul", "cor.meiaNoite": "Medianoche", "cor.laranja": "Naranja", "cor.ambar": "Ámbar", "cor.vinho": "Vino", "cor.areia": "Arena", "cor.neon": "Neón",
     "icone.trocado": "Icono cambiado. Puede tardar unos segundos en aparecer.", "icone.erro": "No se pudo cambiar el icono.",
 
