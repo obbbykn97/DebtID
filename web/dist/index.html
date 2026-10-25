@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-sL1K6qq3REu/dDCObGfCEhK5iOmDi4ogkXKcnDUwgxE=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-OrMuB1skRHNgW9O0YH+rhjjYJPPSbzJO7ZmrLI75ynI='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-txWIWjpARNqBm4gFZOcqZSedeOZcimRPHiGOZXQ0Nng=' 'sha256-udHAqwQvsGaD4y/BUk7KXSmbWE7TAwbNFvVbAJ3y4vU=' 'sha256-2rDrk3SmaUA6r3RiVZx950uptTuFypW0BVFIHDOOm4U=' 'sha256-wz3u0s8mTicmwIZ6Sk1NVMqAmJQ+VS4Ht/3tw1azyHA='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -1787,9 +1787,9 @@ const DebtIDTextos = {
     "modal.quitacaoT": "Assinar a quitação?",
     "modal.quitacao": "A quitação declara que {nome} não deve mais nada neste empréstimo (saldo atual: {saldo}). Depois de assinada e entregue, não dá para desfazer.",
     "modal.quitacaoOk": "Assinar quitação",
-    "modal.cancelarT": "Cancelar o empréstimo?",
-    "modal.cancelar": "Use quando o empréstimo foi registrado errado ou não aconteceu. Você assina um cancelamento para {nome} guardar: ele mostra que este empréstimo não vale mais. Não dá para desfazer. Depois, você pode criar o registro corrigido.",
-    "modal.cancelarOk": "Assinar cancelamento",
+    "modal.cancelarEmpT": "Cancelar o empréstimo?",
+    "modal.cancelarEmp": "Use quando o empréstimo foi registrado errado ou não aconteceu. Você assina um cancelamento para {nome} guardar: ele mostra que este empréstimo não vale mais. Não dá para desfazer. Depois, você pode criar o registro corrigido.",
+    "modal.cancelarEmpOk": "Assinar cancelamento",
 
     "st.pagamento": "Registrar pagamento", "st.quitarAssinado": "Assinar quitação", "st.quitarLocal": "Marcar como quitado (só aqui)",
     "st.lerRecibo": "Ler recibo", "st.colarRecibo": "Colar recibo",
@@ -2182,9 +2182,9 @@ const DebtIDTextos = {
     "modal.quitacaoT": "Sign the settlement?",
     "modal.quitacao": "The settlement states that {nome} owes nothing more on this loan (current balance: {saldo}). Once signed and handed over, it can't be undone.",
     "modal.quitacaoOk": "Sign settlement",
-    "modal.cancelarT": "Cancel the loan?",
-    "modal.cancelar": "Use this when the loan was recorded wrong or didn't happen. You sign a cancellation for {nome} to keep: it shows this loan no longer counts. It can't be undone. Then you can create the corrected record.",
-    "modal.cancelarOk": "Sign cancellation",
+    "modal.cancelarEmpT": "Cancel the loan?",
+    "modal.cancelarEmp": "Use this when the loan was recorded wrong or didn't happen. You sign a cancellation for {nome} to keep: it shows this loan no longer counts. It can't be undone. Then you can create the corrected record.",
+    "modal.cancelarEmpOk": "Sign cancellation",
 
     "st.pagamento": "Record payment", "st.quitarAssinado": "Sign settlement", "st.quitarLocal": "Mark as paid (here only)",
     "st.lerRecibo": "Scan receipt", "st.colarRecibo": "Paste receipt",
@@ -2578,9 +2578,9 @@ const DebtIDTextos = {
     "modal.quitacaoT": "¿Firmar el finiquito?",
     "modal.quitacao": "El finiquito declara que {nome} ya no debe nada en este préstamo (saldo actual: {saldo}). Una vez firmado y entregado, no se puede deshacer.",
     "modal.quitacaoOk": "Firmar finiquito",
-    "modal.cancelarT": "¿Cancelar el préstamo?",
-    "modal.cancelar": "Úsalo cuando el préstamo se registró mal o no ocurrió. Firmas una cancelación para que {nome} la guarde: muestra que este préstamo ya no vale. No se puede deshacer. Después puedes crear el registro corregido.",
-    "modal.cancelarOk": "Firmar cancelación",
+    "modal.cancelarEmpT": "¿Cancelar el préstamo?",
+    "modal.cancelarEmp": "Úsalo cuando el préstamo se registró mal o no ocurrió. Firmas una cancelación para que {nome} la guarde: muestra que este préstamo ya no vale. No se puede deshacer. Después puedes crear el registro corregido.",
+    "modal.cancelarEmpOk": "Firmar cancelación",
 
     "st.pagamento": "Registrar pago", "st.quitarAssinado": "Firmar finiquito", "st.quitarLocal": "Marcar como pagado (solo aquí)",
     "st.lerRecibo": "Leer recibo", "st.colarRecibo": "Pegar recibo",
@@ -5485,7 +5485,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       });
       if (!resp) return;
     } else {
-      const ok = await perguntar({ titulo: t('modal.cancelarT'), texto: t('modal.cancelar', { nome: m.devedor.nome }), ok: t('modal.cancelarOk'), perigo: true });
+      const ok = await perguntar({ titulo: t('modal.cancelarEmpT'), texto: t('modal.cancelarEmp', { nome: m.devedor.nome }), ok: t('modal.cancelarEmpOk'), perigo: true });
       if (!ok) return;
       resp = { valor: 0, dia: Math.max(m.dados.de, hojeDia()) };
     }

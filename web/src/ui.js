@@ -1389,7 +1389,7 @@
       });
       if (!resp) return;
     } else {
-      const ok = await perguntar({ titulo: t('modal.cancelarT'), texto: t('modal.cancelar', { nome: m.devedor.nome }), ok: t('modal.cancelarOk'), perigo: true });
+      const ok = await perguntar({ titulo: t('modal.cancelarEmpT'), texto: t('modal.cancelarEmp', { nome: m.devedor.nome }), ok: t('modal.cancelarEmpOk'), perigo: true });
       if (!ok) return;
       resp = { valor: 0, dia: Math.max(m.dados.de, hojeDia()) };
     }
