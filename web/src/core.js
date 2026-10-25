@@ -187,23 +187,23 @@ YER|2|YER|rial iemenita|riais iemenitas|m|Yemeni rial|Yemeni rials|||
 ZAR|2|ZAR|rand|rands|m|rand|rand|Rand sul-africano|South African rand|
 ZMW|2|ZMW|kwacha zambiano|kwachas zambianos|m|Zambian kwacha|Zambian kwacha|||
 ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
-  // subunit names: pt [singular, plural], en [singular, plural]
+  // subunit names: [singular, plural] in pt, en and es
   const SUBUNIDADES = {
-    cent: { pt: ['centavo', 'centavos'], en: ['cent', 'cents'] },
-    centavo: { pt: ['centavo', 'centavos'], en: ['centavo', 'centavos'] },
-    eur: { pt: ['cêntimo', 'cêntimos'], en: ['cent', 'cents'] },
-    gbp: { pt: ['penny', 'pence'], en: ['penny', 'pence'] },
-    sat: { pt: ['satoshi', 'satoshis'], en: ['satoshi', 'satoshis'] },
-    gwei: { pt: ['gwei', 'gwei'], en: ['gwei', 'gwei'] },
-    fen: { pt: ['fen', 'fens'], en: ['fen', 'fen'] },
-    paisa: { pt: ['paisa', 'paisas'], en: ['paisa', 'paise'] },
-    kop: { pt: ['copeque', 'copeques'], en: ['kopeck', 'kopecks'] },
-    grosz: { pt: ['grosz', 'groszy'], en: ['grosz', 'groszy'] },
-    kurus: { pt: ['kuruş', 'kuruş'], en: ['kuruş', 'kuruş'] },
-    fils: { pt: ['fils', 'fils'], en: ['fils', 'fils'] },
-    baisa: { pt: ['baisa', 'baisas'], en: ['baisa', 'baisa'] },
-    mill: { pt: ['milésimo', 'milésimos'], en: ['millime', 'millimes'] },
-    dirham: { pt: ['dirham', 'dirhams'], en: ['dirham', 'dirhams'] }
+    cent: { pt: ['centavo', 'centavos'], en: ['cent', 'cents'], es: ['centavo', 'centavos'] },
+    centavo: { pt: ['centavo', 'centavos'], en: ['centavo', 'centavos'], es: ['centavo', 'centavos'] },
+    eur: { pt: ['cêntimo', 'cêntimos'], en: ['cent', 'cents'], es: ['céntimo', 'céntimos'] },
+    gbp: { pt: ['penny', 'pence'], en: ['penny', 'pence'], es: ['penique', 'peniques'] },
+    sat: { pt: ['satoshi', 'satoshis'], en: ['satoshi', 'satoshis'], es: ['satoshi', 'satoshis'] },
+    gwei: { pt: ['gwei', 'gwei'], en: ['gwei', 'gwei'], es: ['gwei', 'gwei'] },
+    fen: { pt: ['fen', 'fens'], en: ['fen', 'fen'], es: ['fen', 'fen'] },
+    paisa: { pt: ['paisa', 'paisas'], en: ['paisa', 'paise'], es: ['paisa', 'paisas'] },
+    kop: { pt: ['copeque', 'copeques'], en: ['kopeck', 'kopecks'], es: ['kopek', 'kopeks'] },
+    grosz: { pt: ['grosz', 'groszy'], en: ['grosz', 'groszy'], es: ['grosz', 'groszy'] },
+    kurus: { pt: ['kuruş', 'kuruş'], en: ['kuruş', 'kuruş'], es: ['kuruş', 'kuruş'] },
+    fils: { pt: ['fils', 'fils'], en: ['fils', 'fils'], es: ['fils', 'fils'] },
+    baisa: { pt: ['baisa', 'baisas'], en: ['baisa', 'baisa'], es: ['baisa', 'baisas'] },
+    mill: { pt: ['milésimo', 'milésimos'], en: ['millime', 'millimes'], es: ['milésimo', 'milésimos'] },
+    dirham: { pt: ['dirham', 'dirhams'], en: ['dirham', 'dirhams'], es: ['dirham', 'dirhams'] }
   };
   const maiuscula = s => s.charAt(0).toUpperCase() + s.slice(1);
   const MOEDAS = {};
@@ -226,7 +226,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (m && (casas == null || casas === m.casas)) return m;
     const c = casas == null ? 2 : casas;
     if (m) return { ...m, casas: c, sub: null };
-    return { codigo, casas: c, simbolo: codigo, pt: { s: codigo, p: codigo, fem: false, nome: codigo }, en: { s: codigo, p: codigo, nome: codigo }, sub: null };
+    const nome = { s: codigo, p: codigo, fem: false, nome: codigo };
+    return { codigo, casas: c, simbolo: codigo, pt: nome, en: nome, es: nome, sub: null };
   }
 
   /* =================== interest math =================== */
@@ -1109,12 +1110,48 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       meses: ['January','February','March','April','May','June','July','August','September','October','November','December'],
       modo: { total: 'in total', mes: 'per month', ano: 'per year' }, dia: 'day', dias: 'days', as: 'at',
       milhar: ',', decimal: '.'
+    },
+    es: {
+      tag: 'es',
+      meses: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+      modo: { total: 'en total', mes: 'al mes', ano: 'al año' }, dia: 'día', dias: 'días', as: 'a las',
+      milhar: '.', decimal: ','
     }
   };
+  // Spanish currency names come from the browser (Intl), so all ~170 currencies get proper names;
+  // the crypto currencies and anything Intl does not know fall back to fixed names.
+  const ES_FIXOS = {
+    BTC: ['bitcoin', 'bitcoins', 'Bitcoin'], ETH: ['ether', 'ether', 'Ether (Ethereum)'], USDT: ['tether', 'tethers', 'Tether (USDT)'],
+    BRL: ['real brasileño', 'reales brasileños', 'Real brasileño'], ZWG: ['ZiG', 'ZiG', 'ZiG (oro de Zimbabue)']
+  };
+  function nomesEspanhol() {
+    if (MOEDAS.BTC.es) return;
+    let dn = null;
+    try { dn = new Intl.DisplayNames(['es'], { type: 'currency' }); } catch (e) { dn = null; }
+    const nomeIntl = (codigo, n) => {
+      try {
+        const partes = new Intl.NumberFormat('es', { style: 'currency', currency: codigo, currencyDisplay: 'name' }).formatToParts(n);
+        const c = partes.find(x => x.type === 'currency');
+        return c && c.value && c.value.toUpperCase() !== codigo ? c.value : null;
+      } catch (e) { return null; }
+    };
+    for (const codigo of CODIGOS_MOEDAS) {
+      const m = MOEDAS[codigo], fixo = ES_FIXOS[codigo];
+      if (fixo) { m.es = { s: fixo[0], p: fixo[1], fem: false, nome: fixo[2] }; continue; }
+      const s = nomeIntl(codigo, 1), p = nomeIntl(codigo, 2);
+      let lista = null;
+      try { lista = dn ? dn.of(codigo) : null; } catch (e) { lista = null; }
+      if (!lista || lista.toUpperCase() === codigo) lista = null;
+      m.es = s && p
+        ? { s, p, fem: m.pt.fem, nome: maiuscula(lista || s) }
+        : { s: m.en.s, p: m.en.p, fem: false, nome: m.en.nome };
+    }
+  }
   let idioma = 'pt', L = LOC.pt, nfT;
-  /** Sets the language used by fmt, extenso and lerNumero ('pt' or 'en'). Stored codes are not affected. */
+  /** Sets the language used by fmt, extenso and lerNumero ('pt', 'en' or 'es'). Stored codes are not affected. */
   function definirIdioma(l) {
-    idioma = l === 'en' ? 'en' : 'pt';
+    idioma = l === 'en' || l === 'es' ? l : 'pt';
+    if (idioma === 'es') nomesEspanhol();
     L = LOC[idioma];
     nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     return idioma;
@@ -1144,6 +1181,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     /** fractional amount (smallest unit) with up to 2 extra decimals, for the raw interest */
     dinheiro4: (x, m = BRL) => m.simbolo + '\u00a0' + nf(m.casas, m.casas + 2).format(x / 10 ** m.casas),
     numMoeda,
+    sepDecimal: () => L.decimal,
     /** number for an input field: no thousands separator, so it reads back the same ("1000", not "1.000") */
     numEntrada: n => new Intl.NumberFormat(L.tag, { maximumFractionDigits: 4, useGrouping: false }).format(n),
     nomeMoeda: m => m[idioma].nome,
@@ -1163,7 +1201,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     },
     dataExtenso: dia => {
       const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
-      return idioma === 'en' ? `${m} ${dd}, ${x.getUTCFullYear()}` : `${dd === 1 ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
+      if (idioma === 'en') return `${m} ${dd}, ${x.getUTCFullYear()}`;
+      return `${dd === 1 && idioma === 'pt' ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
     },
     momento: (ts, tz) => {
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
@@ -1230,6 +1269,40 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
     return partes.join(' ');
   }
+  // Spanish ("un"/"una" before the currency name; "veintiún"; "mil"; "un millón de...")
+  const ES_UN = ['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince',
+    'dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco',
+    'veintiséis','veintisiete','veintiocho','veintinueve'];
+  const ES_DZ = ['', '', '', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const ES_CT = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  // g: 'm' (uno), 'f' (una), 'a' (apocopated: un, before a noun or "mil")
+  function unidadeEs(n, g) {
+    if (n === 1) return g === 'f' ? 'una' : g === 'a' ? 'un' : 'uno';
+    if (n === 21) return g === 'f' ? 'veintiuna' : g === 'a' ? 'veintiún' : 'veintiuno';
+    return ES_UN[n];
+  }
+  function ate999Es(n, g) {
+    if (n === 100) return 'cien';
+    const c = Math.floor(n / 100), r = n % 100, partes = [];
+    if (c) partes.push(g === 'f' ? ES_CT[c].replace(/os$/, 'as') : ES_CT[c]);
+    if (r) partes.push(r < 30 ? unidadeEs(r, g) : ES_DZ[Math.floor(r / 10)] + (r % 10 ? ' y ' + unidadeEs(r % 10, g) : ''));
+    return partes.join(' ');
+  }
+  function abaixoMilhaoEs(n, g) {
+    const mil = Math.floor(n / 1000), u = n % 1000, partes = [];
+    if (mil) partes.push(mil === 1 ? 'mil' : ate999Es(mil, g === 'f' ? 'f' : 'a') + ' mil');
+    if (u) partes.push(ate999Es(u, g));
+    return partes.join(' ');
+  }
+  function inteiroExtensoEs(n, g = 'a') {
+    if (n === 0) return 'cero';
+    const bi = Math.floor(n / 1e12), mi = Math.floor((n % 1e12) / 1e6), resto = n % 1e6, partes = [];
+    if (bi) partes.push(bi === 1 ? 'un billón' : abaixoMilhaoEs(bi, 'a') + ' billones');
+    if (mi) partes.push(mi === 1 ? 'un millón' : abaixoMilhaoEs(mi, 'a') + ' millones');
+    if (resto) partes.push(abaixoMilhaoEs(resto, g));
+    return partes.join(' ');
+  }
+
   /** Amount (smallest unit) in words, e.g. "duzentos e quarenta reais e trinta e cinco centavos". */
   function extenso(v, m = BRL) {
     const mult = 10 ** m.casas, r = Math.floor(v / mult), c = v - r * mult, partes = [];
@@ -1239,6 +1312,11 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (r) partes.push(inteiroExtensoEn(r) + ' ' + (r === 1 ? nome.s : nome.p));
       if (c) partes.push(inteiroExtensoEn(c) + ' ' + sub[c === 1 ? 0 : 1]);
       return partes.length ? partes.join(' and ') : 'zero ' + nome.p;
+    }
+    if (idioma === 'es') {
+      if (r) partes.push(inteiroExtensoEs(r, nome.fem ? 'f' : 'a') + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? nome.s : nome.p));
+      if (c) partes.push(inteiroExtensoEs(c, 'a') + ' ' + sub[c === 1 ? 0 : 1]);
+      return partes.length ? partes.join(' con ') : 'cero ' + nome.p;
     }
     if (r) partes.push(inteiroExtenso(r, nome.fem) + (r >= 1e6 && r % 1e6 === 0 ? ' de ' : ' ') + (r === 1 ? nome.s : nome.p));
     if (c) partes.push(inteiroExtenso(c) + ' ' + sub[c === 1 ? 0 : 1]);

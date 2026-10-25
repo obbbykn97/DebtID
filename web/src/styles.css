@@ -570,6 +570,201 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .view-pad{padding-top:26px}
 
 /* =====================================================================
+   New pieces: identity checks, more options, payments, records tools,
+   chart, lock screen, settings and the printed report (both looks)
+   ===================================================================== */
+:root{--grafico:#1E9E8C}
+:root[data-theme="dark"]{--grafico:#28A690}
+:root[data-ui="pro"]{--grafico:#6F8F1F}
+:root[data-ui="pro"][data-theme="dark"]{--grafico:#7FA22A}
+html[data-texto="grande"] body{zoom:1.15}
+
+/* identity of the other person */
+.ident{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--sh);margin:-8px 0 22px;color:var(--on)}
+.ident>i{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--on);background:#fff;display:grid;place-items:center;color:#1C1B1F}
+.ident>i .ico{width:16px;height:16px;stroke-width:2.6}
+.ident b{display:block;font-size:15.5px}
+.ident p{margin:2px 0 0;font-size:14.5px}
+.ident .btns{margin-top:10px}
+.ident.ok{background:var(--teal-soft)} .ident.novo{background:var(--peri-soft)} .ident.perigo{background:var(--red-soft)}
+.ident.perigo>i{color:#D7263D}
+.id-longo{display:inline-block;margin-top:6px;font-size:13px;font-weight:700;letter-spacing:.02em;overflow-wrap:anywhere;background:rgba(255,255,255,.6);border-radius:8px;padding:2px 8px}
+.id-completo{font-size:13.5px;color:var(--muted);margin:-6px 0 14px}
+.id-completo code{font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+
+/* loan form: contacts and more options */
+.control-linha{display:flex;gap:10px;align-items:stretch}
+.control-linha .control{flex:1;min-width:0}
+.control-linha .btn{flex:none;padding-inline:14px}
+.fixado{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;font-weight:700;background:var(--teal-soft);color:var(--on);border:2px solid var(--line);border-radius:12px;padding:6px 6px 6px 10px}
+.fixado .ico{width:16px;height:16px}
+.fixado span{flex:1;min-width:0}
+.fixado button{appearance:none;border:0;background:none;font-size:20px;line-height:1;width:32px;height:32px;cursor:pointer;color:inherit;border-radius:8px}
+.mais-opcoes{margin-top:18px;border:2px dashed var(--dash);border-radius:16px;padding:0 14px}
+.mais-opcoes[open]{padding-bottom:16px}
+.mais-opcoes summary{cursor:pointer;font-weight:800;padding:13px 0;list-style-position:inside}
+.mais-opcoes summary small{font-weight:500;color:var(--muted)}
+.mais-opcoes .grid{margin-top:4px}
+@media (min-width:640px){.mais-opcoes .grid{grid-template-columns:1fr 1fr}.mais-opcoes .span2{grid-column:1/-1}}
+.control input[type=number]{-moz-appearance:textfield}
+.mais-opcoes .control textarea{font-family:var(--sans);min-height:64px;word-break:normal}
+
+/* details: second row of figures, payments and timeline */
+.summary-2{margin-top:12px}
+.pagamentos,.linha-tempo{margin-top:22px}
+.pagamentos h3,.linha-tempo h3{margin:0 0 12px}
+.pagamentos h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+.parcelas,.recibos{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.parcelas li,.recibos li{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:14px;padding:10px 12px;min-width:0}
+.parcelas li.ok{background:var(--teal-soft);color:var(--on)} .parcelas li.atraso{background:var(--red-soft);color:var(--on)} .parcelas li.parcial{background:var(--yellow);color:var(--on)}
+.pc-n{flex:none;font-weight:900;font-family:var(--display);font-size:13px;min-width:38px}
+.pc-main{flex:1;min-width:0}
+.pc-main b{display:block;font-size:15px;overflow-wrap:anywhere}
+.pc-main small{display:block;font-size:12.5px;opacity:.8}
+.pc-estado{flex:none;max-width:45%;text-align:right;font-size:12.5px;font-weight:700}
+.recibos .btn{flex:none;padding-inline:6px}
+.linha-tempo ol{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);display:grid;gap:12px}
+.linha-tempo li{position:relative}
+.linha-tempo li::before{content:"";position:absolute;left:-21px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--line)}
+.linha-tempo small{display:block;font-size:12px;color:var(--muted)}
+.qr-recibo{border:2px solid var(--line);border-radius:20px;padding:16px;background:var(--yellow);color:var(--on);box-shadow:var(--sh)}
+.qr-recibo .kicker,.qr-recibo .hint{color:var(--on)}
+.st-cancelado{background:var(--red-soft)}
+.rc-pagos{margin-top:18px;border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.rc-pagos ul{list-style:none;margin:6px 0 0;padding:0}
+.rc-pagos li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:5px 0;border-bottom:1.5px dashed var(--dash);font-size:14px}
+.rc-pagos li:last-child{border-bottom:0}
+.rc-grid .wide{grid-column:1/-1}
+
+/* records: reminders, upcoming dues, tools, filters, people */
+.alert.aviso{background:var(--yellow);margin:0 0 18px}
+.alert.aviso i{color:#1C1B1F}
+.alert .btns{margin-top:10px}
+.vencimentos{margin:0 0 16px}
+.vencimentos h3{margin:0 0 10px}
+.vencimentos ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.venc{appearance:none;-webkit-appearance:none;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--field);border:2px solid var(--line);border-radius:14px;padding:9px 12px;cursor:pointer}
+.venc.atraso{background:var(--red-soft);color:var(--on)}
+.venc-dia b{display:block;font-family:var(--display);font-weight:900;font-size:15px}
+.venc-dia small,.venc-main small{display:block;font-size:12px;opacity:.8}
+.venc-main{min-width:0}
+.venc-main b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.venc-valor{white-space:nowrap}
+.ferramentas{display:grid;gap:10px;margin:18px 0 12px}
+.busca .ico{margin-left:12px;color:var(--muted)}
+.busca input{padding-left:8px}
+.ferr-linha{display:flex;gap:10px;align-items:stretch}
+.ferr-linha .visao{flex:1}
+.ordem select{height:100%;min-height:48px;font:inherit;font-weight:700;font-size:14px;color:var(--ink);background:var(--field);border:2px solid var(--line);border-radius:14px;padding:0 10px;max-width:150px}
+.filtros{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:8px;scrollbar-width:none}
+.filtros::-webkit-scrollbar{display:none}
+.filtros input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.filtros label{flex:none;font-size:13.5px;font-weight:700;padding:7px 13px;border:2px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink);background:var(--card);white-space:nowrap}
+.filtros input:checked+label{background:var(--ink);color:var(--card)}
+.filtros input:focus-visible+label{outline:3px solid var(--peri);outline-offset:2px}
+.pill-filtro{display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;font-weight:700;font-size:14px;background:var(--peri-soft);color:var(--on);border:2px solid var(--line);border-radius:999px;padding:4px 4px 4px 10px}
+.pill-filtro .ico{width:16px;height:16px}
+.pill-filtro button{appearance:none;border:0;background:none;font-size:18px;width:30px;height:30px;cursor:pointer;color:inherit;border-radius:50%}
+.reg-obs{font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reg-side small{font-size:11.5px;color:var(--muted)}
+.reg.pessoa .reg-ico{background:var(--peri);font-family:var(--display);font-weight:900}
+.pessoa-soma{display:block;text-align:right}
+.pessoa-soma small{display:block;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.pessoa-soma b{display:block;font-size:14.5px;white-space:nowrap}
+.pessoa-soma b i{font-style:normal;font-size:.8em;margin-right:.2em;opacity:.8}
+.chip.cancelado{background:var(--red-soft)}
+
+/* monthly profit chart (one series: the title names it, so no legend) */
+.grafico{margin:8px 0 6px}
+.graf-topo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.graf-topo h4{margin:0;font-size:14px}
+.graf-topo select{font:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--field);border:2px solid var(--line);border-radius:10px;padding:4px 8px}
+.graf-moeda{font-size:12.5px;font-weight:800;color:var(--muted)}
+.graf-area{position:relative}
+.graf-area svg{width:100%;height:170px;overflow:visible}
+.graf-area .eixo{stroke:var(--rule);stroke-width:1;vector-effect:non-scaling-stroke}
+.graf-area text{font-size:9px;fill:var(--muted);font-family:var(--sans)}
+.graf-area text.valor{fill:var(--ink);font-weight:700}
+.barra{cursor:default;outline:none}
+.barra path{fill:var(--grafico)}
+.barra .alvo{fill:transparent}
+.barra.on path,.barra:focus-visible path{fill:var(--ink)}
+.barra:focus-visible .alvo{stroke:var(--peri);stroke-width:2;vector-effect:non-scaling-stroke}
+.graf-dica{position:absolute;top:-6px;pointer-events:none;background:var(--dark);color:#fff;font-size:12.5px;font-weight:700;padding:5px 9px;border-radius:8px;white-space:nowrap}
+.graf-tabela{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.graf-tabela th,.graf-tabela td{text-align:left;padding:5px 4px;border-bottom:1px solid var(--rule)}
+.graf-tabela td:last-child,.graf-tabela th:last-child{text-align:right}
+.exportar{margin-top:14px}
+
+/* settings */
+.check{display:flex;align-items:center;gap:10px;font-weight:700;margin:12px 0;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--ink)}
+.ajuste h4{margin:14px 0 8px;font-size:14px}
+.contatos{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.contatos li{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:2px solid var(--line);border-radius:16px;padding:10px 12px}
+.contatos .avatar{width:40px;height:40px;font-size:17px}
+.ct-main{flex:1;min-width:0}
+.ct-main b{display:block;overflow-wrap:anywhere}
+.ct-main small{display:block;color:var(--muted);font-size:12.5px}
+.ct-main code{display:block;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.ct-acoes{display:flex;gap:4px}
+.forca{display:flex;align-items:center;gap:6px;margin-top:12px}
+.forca i{flex:1;max-width:46px;height:6px;border-radius:3px;background:var(--dash)}
+.forca span{font-size:13px;font-weight:700;color:var(--muted);margin-left:6px}
+.forca[data-n="1"] i:nth-child(-n+1){background:var(--orange)}
+.forca[data-n="2"] i:nth-child(-n+2){background:var(--yellow)}
+.forca[data-n="3"] i:nth-child(-n+3){background:var(--teal)}
+.forca[data-n="4"] i{background:var(--teal)}
+.ui-opcoes-3{grid-template-columns:1fr 1fr 1fr}
+@media (max-width:460px){.ui-opcoes-3{grid-template-columns:1fr}}
+.modal-erro{margin:-8px 0 14px}
+.modal-box .control{margin-bottom:0}
+
+/* lock screen */
+.trava{position:fixed;inset:0;z-index:80;background:var(--bg);display:grid;place-items:center;padding:24px 16px;overflow-y:auto}
+.trava-box{width:min(380px,100%);text-align:center}
+.trava-box h2{margin:14px 0 6px}
+.trava-box p{color:var(--ink-2);margin:0 0 18px}
+.trava-box .control input{text-align:center;font-size:22px;letter-spacing:.3em;font-family:var(--mono)}
+.trava-box .err{min-height:20px;margin:8px 0}
+.trava-box .btn-block+.btn-block{margin-top:12px}
+.trava-box .form-foot{justify-content:center;margin-top:16px}
+.trava-marca{width:56px;height:56px;margin:0 auto}
+body.travado{overflow:hidden}
+.relatorio{display:none}
+
+/* Professional look */
+[data-ui="pro"] .ident{border:0;border-left:4px solid var(--line);border-radius:0;box-shadow:none;background:var(--info);color:var(--ink)}
+[data-ui="pro"] .ident.ok{border-left-color:var(--accent)} [data-ui="pro"] .ident.perigo{border-left-color:var(--red)}
+[data-ui="pro"] .ident>i{border:0;background:var(--ink);color:var(--bg)}
+[data-ui="pro"] .id-longo{background:var(--field);border-radius:0}
+[data-ui="pro"] .fixado{border:1px solid var(--line);border-radius:0;background:var(--info);color:var(--ink)}
+[data-ui="pro"] .mais-opcoes{border:1px solid var(--rule);border-radius:0}
+[data-ui="pro"] .mais-opcoes summary{text-transform:uppercase;font-size:13px;letter-spacing:.04em;font-weight:600}
+[data-ui="pro"] .parcelas li,[data-ui="pro"] .recibos li{border:0;border-bottom:1px solid var(--rule);border-radius:0;padding:12px 0;background:transparent;color:var(--ink)}
+[data-ui="pro"] .parcelas li.ok .pc-estado{color:var(--accent)} [data-ui="pro"] .parcelas li.atraso .pc-estado{color:var(--coral)}
+[data-ui="pro"] .parcelas li.ok,[data-ui="pro"] .parcelas li.atraso,[data-ui="pro"] .parcelas li.parcial{background:transparent;color:var(--ink)}
+[data-ui="pro"] .qr-recibo{border:0;border-left:4px solid var(--accent);border-radius:0;box-shadow:none;background:var(--info);color:var(--ink)}
+[data-ui="pro"] .qr-recibo .kicker{color:var(--accent)}
+[data-ui="pro"] .st-cancelado{border-left-color:var(--red)}
+[data-ui="pro"] .rc-pagos{border:1px solid var(--line);border-radius:0}
+[data-ui="pro"] .rc-pagos li{border-bottom:1px solid var(--rule)}
+[data-ui="pro"] .alert.aviso{border-left-color:var(--accent);background:var(--info)}
+[data-ui="pro"] .venc{border:0;border-bottom:1px solid var(--rule);border-radius:0;background:transparent;padding:12px 0}
+[data-ui="pro"] .venc.atraso{background:transparent;color:var(--ink)} [data-ui="pro"] .venc.atraso .venc-dia b{color:var(--coral)}
+[data-ui="pro"] .ordem select,[data-ui="pro"] .graf-topo select{border:1px solid var(--rule);border-bottom-color:var(--line);border-radius:0}
+[data-ui="pro"] .filtros label{border:1px solid var(--rule);border-radius:0;font-weight:600;text-transform:uppercase;font-size:11.5px;letter-spacing:.03em}
+[data-ui="pro"] .filtros input:checked+label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+[data-ui="pro"] .pill-filtro{border:1px solid var(--line);border-radius:0;background:var(--info);color:var(--ink)}
+[data-ui="pro"] .reg.pessoa .reg-ico{background:var(--ink);color:var(--bg)}
+[data-ui="pro"] .chip.cancelado{border-color:var(--red);color:var(--red);background:transparent}
+[data-ui="pro"] .contatos li{border:0;border-bottom:1px solid var(--rule);border-radius:0;padding:12px 0}
+[data-ui="pro"] .graf-dica{border-radius:0}
+[data-ui="pro"] .forca i{border-radius:0}
+[data-ui="pro"] .trava-marca{width:44px;height:44px}
+[data-ui="pro"] .linha-tempo ol{border-left:1px solid var(--line)}
+
+/* =====================================================================
    Print: only the receipt, always light
    ===================================================================== */
 @media print{
@@ -580,6 +775,22 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
   body.com-abas{padding:0}
   .decos,.sticker,.top,.tabbar,.foot,.toast,.modal,.scanner,.view:not(#v-detalhe){display:none !important}
   #v-detalhe>.wrap>*:not(.receipt){display:none !important}
+  .trava,.relatorio{display:none !important}
+  body.imprimir-relatorio .page{display:none !important}
+  body.imprimir-relatorio .relatorio{display:block !important;color:#000;font-size:10pt}
+  .rel-topo{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:8px}
+  .rel-topo b{font-size:16pt}
+  .rel-meta{font-size:9pt;margin:0 0 10px}
+  .relatorio .summary{grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .relatorio .stat{box-shadow:none;border:1px solid #000;border-radius:6px;padding:6px 8px;color:#000;background:#fff !important}
+  .relatorio .stat b{font-size:12pt}
+  .relatorio h3{font-size:11pt;margin:12px 0 6px}
+  .rel-tabela{width:100%;border-collapse:collapse;font-size:8.5pt}
+  .rel-tabela th,.rel-tabela td{border-bottom:1px solid #999;padding:4px 5px;text-align:left;vertical-align:top}
+  .rel-tabela th{border-bottom:1.5px solid #000;font-size:8pt;text-transform:uppercase}
+  .rel-tabela .num{text-align:right;white-space:nowrap}
+  .rel-nota{font-size:8pt;color:#444;margin-top:12px}
+  .rc-pagos{break-inside:avoid}
   .page{padding:0;overflow:visible;min-height:0}
   .shell{border:0;box-shadow:none;background:none;padding:0;max-width:none;border-radius:0}
   [data-ui] .wrap{padding:0;max-width:none}
