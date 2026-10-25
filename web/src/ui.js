@@ -1919,12 +1919,46 @@
   }
 
   /* ---------------- app icon (Android app): logo A is the default, C is the alternative ---------------- */
+  /*<icones>*/
   const ICONES = [
-    { k: 'a', fundo: '#0E0E0E', tinta: '#FFFFFF', ponto: '#9DBF3E', forma: 'A' },
-    { k: 'a-cores', fundo: '#F8CB47', tinta: '#1C1B1F', ponto: '#EC4C86', forma: 'A' },
-    { k: 'c', fundo: '#0E0E0E', tinta: '#FFFFFF', forma: 'C' },
-    { k: 'c-cores', fundo: '#DFF45C', tinta: '#1C1B1F', forma: 'C' }
+    { k: 'a', forma: 'A', cor: 'padrao', fundo: '#0E0E0E', tinta: '#FFFFFF', ponto: '#9DBF3E' },
+    { k: 'a-claro', forma: 'A', cor: 'claro', fundo: '#FFFFFF', tinta: '#111111', ponto: '#7FA22A' },
+    { k: 'a-amarelo', forma: 'A', cor: 'amarelo', fundo: '#F8CB47', tinta: '#1C1B1F', ponto: '#EC4C86' },
+    { k: 'a-limao', forma: 'A', cor: 'limao', fundo: '#DFF45C', tinta: '#1C1B1F', ponto: '#A35CF0' },
+    { k: 'a-rosa', forma: 'A', cor: 'rosa', fundo: '#EC4C86', tinta: '#FFFFFF', ponto: '#F8CB47' },
+    { k: 'a-pastel', forma: 'A', cor: 'pastel', fundo: '#FFD9DC', tinta: '#1C1B1F', ponto: '#1E9E8C' },
+    { k: 'a-lilas', forma: 'A', cor: 'lilas', fundo: '#8F9CF3', tinta: '#1C1B1F', ponto: '#FFFFFF' },
+    { k: 'a-roxo', forma: 'A', cor: 'roxo', fundo: '#A35CF0', tinta: '#FFFFFF', ponto: '#DFF45C' },
+    { k: 'a-verdeAgua', forma: 'A', cor: 'verdeAgua', fundo: '#1E9E8C', tinta: '#FFFFFF', ponto: '#F8CB47' },
+    { k: 'a-floresta', forma: 'A', cor: 'floresta', fundo: '#1F4D3A', tinta: '#F1EBDD', ponto: '#D9A441' },
+    { k: 'a-ceu', forma: 'A', cor: 'ceu', fundo: '#BFE6FF', tinta: '#0B2A4A', ponto: '#FF5C1F' },
+    { k: 'a-azul', forma: 'A', cor: 'azul', fundo: '#1F4FD8', tinta: '#FFFFFF', ponto: '#7FE0FF' },
+    { k: 'a-meiaNoite', forma: 'A', cor: 'meiaNoite', fundo: '#121A33', tinta: '#E6ECFF', ponto: '#FF6FAE' },
+    { k: 'a-laranja', forma: 'A', cor: 'laranja', fundo: '#FF5C1F', tinta: '#FFFFFF', ponto: '#1C1B1F' },
+    { k: 'a-ambar', forma: 'A', cor: 'ambar', fundo: '#F7931A', tinta: '#FFFFFF', ponto: '#1C1B1F' },
+    { k: 'a-vinho', forma: 'A', cor: 'vinho', fundo: '#6B1E3A', tinta: '#F7E6D7', ponto: '#F2B24C' },
+    { k: 'a-areia', forma: 'A', cor: 'areia', fundo: '#EFE4D2', tinta: '#3B2F2A', ponto: '#C8553D' },
+    { k: 'a-neon', forma: 'A', cor: 'neon', fundo: '#000000', tinta: '#39FF14', ponto: '#FF2BD6' },
+    { k: 'c', forma: 'C', cor: 'padrao', fundo: '#0E0E0E', tinta: '#FFFFFF' },
+    { k: 'c-claro', forma: 'C', cor: 'claro', fundo: '#FFFFFF', tinta: '#111111' },
+    { k: 'c-limao', forma: 'C', cor: 'limao', fundo: '#DFF45C', tinta: '#1C1B1F' },
+    { k: 'c-amarelo', forma: 'C', cor: 'amarelo', fundo: '#F8CB47', tinta: '#1C1B1F' },
+    { k: 'c-rosa', forma: 'C', cor: 'rosa', fundo: '#EC4C86', tinta: '#FFFFFF' },
+    { k: 'c-pastel', forma: 'C', cor: 'pastel', fundo: '#FFD9DC', tinta: '#C8553D' },
+    { k: 'c-lilas', forma: 'C', cor: 'lilas', fundo: '#8F9CF3', tinta: '#1C1B1F' },
+    { k: 'c-roxo', forma: 'C', cor: 'roxo', fundo: '#A35CF0', tinta: '#FFFFFF' },
+    { k: 'c-verdeAgua', forma: 'C', cor: 'verdeAgua', fundo: '#1E9E8C', tinta: '#FFFFFF' },
+    { k: 'c-floresta', forma: 'C', cor: 'floresta', fundo: '#1F4D3A', tinta: '#D9A441' },
+    { k: 'c-ceu', forma: 'C', cor: 'ceu', fundo: '#BFE6FF', tinta: '#0B2A4A' },
+    { k: 'c-azul', forma: 'C', cor: 'azul', fundo: '#1F4FD8', tinta: '#FFFFFF' },
+    { k: 'c-meiaNoite', forma: 'C', cor: 'meiaNoite', fundo: '#121A33', tinta: '#FF6FAE' },
+    { k: 'c-laranja', forma: 'C', cor: 'laranja', fundo: '#FF5C1F', tinta: '#FFFFFF' },
+    { k: 'c-ambar', forma: 'C', cor: 'ambar', fundo: '#F7931A', tinta: '#1C1B1F' },
+    { k: 'c-vinho', forma: 'C', cor: 'vinho', fundo: '#6B1E3A', tinta: '#F2B24C' },
+    { k: 'c-areia', forma: 'C', cor: 'areia', fundo: '#EFE4D2', tinta: '#3B2F2A' },
+    { k: 'c-neon', forma: 'C', cor: 'neon', fundo: '#000000', tinta: '#39FF14' }
   ];
+  /*</icones>*/
   const svgIcone = i => `<svg viewBox="0 0 256 256" aria-hidden="true"><rect width="256" height="256" fill="${i.fundo}"/><g transform="translate(19.2 19.2) scale(.85)">${i.forma === 'A'
     ? `<rect x="64" y="52" width="36" height="152" rx="6" fill="${i.tinta}"/><path d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z" fill="${i.tinta}"/><circle cx="133" cy="128" r="13" fill="${i.ponto}"/>`
     : `<path fill="${i.tinta}" fill-rule="evenodd" d="M82 76H166A52 52 0 0 1 166 180H82L38 136V120ZM66 128A14 14 0 1 0 94 128A14 14 0 1 0 66 128Z"/>`}</g></svg>`;
@@ -1934,8 +1968,10 @@
     if (!pode) return;
     let atualIcone = 'a';
     try { atualIcone = a.icone ? a.icone() : 'a'; } catch { atualIcone = 'a'; }
-    $('#icones').innerHTML = ICONES.map(i =>
-      `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('icone.' + i.k)}</span></label>`).join('');
+    const grupo = forma => `<h4>${t(forma === 'A' ? 'icone.logoA' : 'icone.logoC')}</h4><div class="icones" role="radiogroup" aria-label="${esc(t(forma === 'A' ? 'icone.logoA' : 'icone.logoC'))}">` +
+      ICONES.filter(i => i.forma === forma).map(i =>
+        `<label class="icone-op"><input type="radio" name="icone" value="${i.k}"${i.k === atualIcone ? ' checked' : ''}>${svgIcone(i)}<span>${t('cor.' + i.cor)}</span></label>`).join('') + '</div>';
+    $('#icones').innerHTML = grupo('A') + grupo('C');
   }
   function trocarIcone(k) {
     const a = app();

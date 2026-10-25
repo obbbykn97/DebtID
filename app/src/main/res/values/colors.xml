@@ -3,7 +3,41 @@
     <color name="window_background">#FFFFFF</color>
     <color name="system_bars">#141414</color>
     <color name="icon_background">#0E0E0E</color>
-    <color name="icone_a_cores_fundo">#F8CB47</color>
+    <!-- icones:inicio -->
+    <color name="icone_a_claro_fundo">#FFFFFF</color>
+    <color name="icone_a_amarelo_fundo">#F8CB47</color>
+    <color name="icone_a_limao_fundo">#DFF45C</color>
+    <color name="icone_a_rosa_fundo">#EC4C86</color>
+    <color name="icone_a_pastel_fundo">#FFD9DC</color>
+    <color name="icone_a_lilas_fundo">#8F9CF3</color>
+    <color name="icone_a_roxo_fundo">#A35CF0</color>
+    <color name="icone_a_verdeagua_fundo">#1E9E8C</color>
+    <color name="icone_a_floresta_fundo">#1F4D3A</color>
+    <color name="icone_a_ceu_fundo">#BFE6FF</color>
+    <color name="icone_a_azul_fundo">#1F4FD8</color>
+    <color name="icone_a_meianoite_fundo">#121A33</color>
+    <color name="icone_a_laranja_fundo">#FF5C1F</color>
+    <color name="icone_a_ambar_fundo">#F7931A</color>
+    <color name="icone_a_vinho_fundo">#6B1E3A</color>
+    <color name="icone_a_areia_fundo">#EFE4D2</color>
+    <color name="icone_a_neon_fundo">#000000</color>
     <color name="icone_c_fundo">#0E0E0E</color>
-    <color name="icone_c_cores_fundo">#DFF45C</color>
+    <color name="icone_c_claro_fundo">#FFFFFF</color>
+    <color name="icone_c_limao_fundo">#DFF45C</color>
+    <color name="icone_c_amarelo_fundo">#F8CB47</color>
+    <color name="icone_c_rosa_fundo">#EC4C86</color>
+    <color name="icone_c_pastel_fundo">#FFD9DC</color>
+    <color name="icone_c_lilas_fundo">#8F9CF3</color>
+    <color name="icone_c_roxo_fundo">#A35CF0</color>
+    <color name="icone_c_verdeagua_fundo">#1E9E8C</color>
+    <color name="icone_c_floresta_fundo">#1F4D3A</color>
+    <color name="icone_c_ceu_fundo">#BFE6FF</color>
+    <color name="icone_c_azul_fundo">#1F4FD8</color>
+    <color name="icone_c_meianoite_fundo">#121A33</color>
+    <color name="icone_c_laranja_fundo">#FF5C1F</color>
+    <color name="icone_c_ambar_fundo">#F7931A</color>
+    <color name="icone_c_vinho_fundo">#6B1E3A</color>
+    <color name="icone_c_areia_fundo">#EFE4D2</color>
+    <color name="icone_c_neon_fundo">#000000</color>
+    <!-- icones:fim -->
 </resources>

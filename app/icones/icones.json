@@ -1,0 +1,43 @@
+{
+  "_sobre": "App icons the person can pick in Settings. After editing, run: python3 app/icones/gerar_icones.py && python3 web/build.py. 'cor' names the color (translated in web/src/i18n.js as cor.<name>). Logo A: fundo = background, tinta = I and D, ponto = the dot. Logo C (tag): fundo and tinta. The first A icon is the default.",
+  "A": [
+    { "cor": "padrao",     "fundo": "#0E0E0E", "tinta": "#FFFFFF", "ponto": "#9DBF3E" },
+    { "cor": "claro",      "fundo": "#FFFFFF", "tinta": "#111111", "ponto": "#7FA22A" },
+    { "cor": "amarelo",    "fundo": "#F8CB47", "tinta": "#1C1B1F", "ponto": "#EC4C86" },
+    { "cor": "limao",      "fundo": "#DFF45C", "tinta": "#1C1B1F", "ponto": "#A35CF0" },
+    { "cor": "rosa",       "fundo": "#EC4C86", "tinta": "#FFFFFF", "ponto": "#F8CB47" },
+    { "cor": "pastel",     "fundo": "#FFD9DC", "tinta": "#1C1B1F", "ponto": "#1E9E8C" },
+    { "cor": "lilas",      "fundo": "#8F9CF3", "tinta": "#1C1B1F", "ponto": "#FFFFFF" },
+    { "cor": "roxo",       "fundo": "#A35CF0", "tinta": "#FFFFFF", "ponto": "#DFF45C" },
+    { "cor": "verdeAgua",  "fundo": "#1E9E8C", "tinta": "#FFFFFF", "ponto": "#F8CB47" },
+    { "cor": "floresta",   "fundo": "#1F4D3A", "tinta": "#F1EBDD", "ponto": "#D9A441" },
+    { "cor": "ceu",        "fundo": "#BFE6FF", "tinta": "#0B2A4A", "ponto": "#FF5C1F" },
+    { "cor": "azul",       "fundo": "#1F4FD8", "tinta": "#FFFFFF", "ponto": "#7FE0FF" },
+    { "cor": "meiaNoite",  "fundo": "#121A33", "tinta": "#E6ECFF", "ponto": "#FF6FAE" },
+    { "cor": "laranja",    "fundo": "#FF5C1F", "tinta": "#FFFFFF", "ponto": "#1C1B1F" },
+    { "cor": "ambar",      "fundo": "#F7931A", "tinta": "#FFFFFF", "ponto": "#1C1B1F" },
+    { "cor": "vinho",      "fundo": "#6B1E3A", "tinta": "#F7E6D7", "ponto": "#F2B24C" },
+    { "cor": "areia",      "fundo": "#EFE4D2", "tinta": "#3B2F2A", "ponto": "#C8553D" },
+    { "cor": "neon",       "fundo": "#000000", "tinta": "#39FF14", "ponto": "#FF2BD6" }
+  ],
+  "C": [
+    { "cor": "padrao",     "fundo": "#0E0E0E", "tinta": "#FFFFFF" },
+    { "cor": "claro",      "fundo": "#FFFFFF", "tinta": "#111111" },
+    { "cor": "limao",      "fundo": "#DFF45C", "tinta": "#1C1B1F" },
+    { "cor": "amarelo",    "fundo": "#F8CB47", "tinta": "#1C1B1F" },
+    { "cor": "rosa",       "fundo": "#EC4C86", "tinta": "#FFFFFF" },
+    { "cor": "pastel",     "fundo": "#FFD9DC", "tinta": "#C8553D" },
+    { "cor": "lilas",      "fundo": "#8F9CF3", "tinta": "#1C1B1F" },
+    { "cor": "roxo",       "fundo": "#A35CF0", "tinta": "#FFFFFF" },
+    { "cor": "verdeAgua",  "fundo": "#1E9E8C", "tinta": "#FFFFFF" },
+    { "cor": "floresta",   "fundo": "#1F4D3A", "tinta": "#D9A441" },
+    { "cor": "ceu",        "fundo": "#BFE6FF", "tinta": "#0B2A4A" },
+    { "cor": "azul",       "fundo": "#1F4FD8", "tinta": "#FFFFFF" },
+    { "cor": "meiaNoite",  "fundo": "#121A33", "tinta": "#FF6FAE" },
+    { "cor": "laranja",    "fundo": "#FF5C1F", "tinta": "#FFFFFF" },
+    { "cor": "ambar",      "fundo": "#F7931A", "tinta": "#1C1B1F" },
+    { "cor": "vinho",      "fundo": "#6B1E3A", "tinta": "#F2B24C" },
+    { "cor": "areia",      "fundo": "#EFE4D2", "tinta": "#3B2F2A" },
+    { "cor": "neon",       "fundo": "#000000", "tinta": "#39FF14" }
+  ]
+}

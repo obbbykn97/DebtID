@@ -52,10 +52,6 @@ public class MainActivity extends Activity {
     private static final String ASSETS = "file:///android_asset/";
     private static final int REQ_NOTIFICACOES = 1;
     private static final int REQ_ARQUIVO = 2;
-    /** App icons: the key the page uses → the launcher entry (activity-alias) in the manifest. */
-    private static final String[][] ICONES = {
-            {"a", ".IconeA"}, {"a-cores", ".IconeACores"}, {"c", ".IconeC"}, {"c-cores", ".IconeCCores"}
-    };
     /** A shared text longer than this is not a DebtID code (codes have a few hundred characters). */
     private static final int MAX_TEXTO = 20000;
 
@@ -296,11 +292,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String icone() {
             PackageManager pm = getPackageManager();
-            for (String[] i : ICONES) {
+            for (String[] i : Icones.LISTA) {
                 int estado = pm.getComponentEnabledSetting(componente(i[1]));
                 if (estado == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) return i[0];
             }
-            return "a"; // nothing changed yet: the manifest default
+            return Icones.LISTA[0][0]; // nothing changed yet: the manifest default
         }
 
         /**
@@ -310,13 +306,13 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public boolean trocarIcone(String chave) {
             String escolhido = null;
-            for (String[] i : ICONES) if (i[0].equals(chave)) escolhido = i[1];
+            for (String[] i : Icones.LISTA) if (i[0].equals(chave)) escolhido = i[1];
             if (escolhido == null) return false;
             PackageManager pm = getPackageManager();
             try {
                 pm.setComponentEnabledSetting(componente(escolhido),
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-                for (String[] i : ICONES) {
+                for (String[] i : Icones.LISTA) {
                     if (i[1].equals(escolhido)) continue;
                     pm.setComponentEnabledSetting(componente(i[1]),
                             PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
