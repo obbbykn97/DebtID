@@ -5,27 +5,50 @@ on:
     branches: [main]
     # documentation changes do not need a new APK
     paths-ignore: ['**.md', 'docs/**', 'LICENSE']
+  # pull requests get the tests and a test APK (published releases come only from main)
+  pull_request:
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   workflow_dispatch:
 
+# read-only by default; only the job that publishes a release gets write access
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apk:
+  testes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Core tests (interest math, signatures, codes, backups)
+        run: node --test web/test/*.test.mjs
+      - name: The bundled page matches web/src
+        run: |
+          python3 web/build.py "$RUNNER_TEMP/index.html"
+          cmp "$RUNNER_TEMP/index.html" web/dist/index.html || { echo "::error::web/dist/index.html is out of date. Run: python3 web/build.py"; exit 1; }
 
-      - uses: actions/setup-java@v5
+  apk:
+    needs: testes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
       - name: Build the web page (web/src -> web/dist/index.html)
         run: python3 web/build.py web/dist/index.html
 
+      # Secrets exist only for pushes and for pull requests opened from this repository (never from forks).
+      # Test APKs from pull requests are signed with the same key, so they install over the current app.
       - name: Signing key
         env:
           KEYSTORE_B64: ${{ secrets.DEBTID_KEYSTORE_B64 }}
@@ -56,22 +79,23 @@ jobs:
           ./gradlew --no-daemon assembleRelease
           cp app/build/outputs/apk/release/app-release.apk DebtID.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: DebtID-APK
           path: DebtID.apk
 
-      # Only APKs signed with the permanent key are published, so updates always install over the previous version.
+      # Only APKs from main signed with the permanent key are published, so updates always install over the previous version.
       - name: Publish release
-        if: env.SIGNED_RELEASE == 'true'
+        if: env.SIGNED_RELEASE == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           printf '%s\n' \
             "**English:** download \`DebtID.apk\` on your Android phone and open it to install." \
             "" \
             "**Português:** baixe o \`DebtID.apk\` no seu celular Android e abra o arquivo para instalar." > notes.md
-          gh release create "v1.${{ github.run_number }}" DebtID.apk \
-            --title "DebtID 1.${{ github.run_number }}" \
+          gh release create "v1.$RUN_NUMBER" DebtID.apk \
+            --title "DebtID 1.$RUN_NUMBER" \
             --notes-file notes.md \
             --latest || echo "::warning::Could not create the release; the APK is available under Artifacts."
