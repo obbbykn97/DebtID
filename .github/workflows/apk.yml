@@ -73,8 +73,11 @@ jobs:
 
       - name: Build
         env:
-          DEBTID_VERSION_CODE: ${{ github.run_number }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
+          # this repository starts at version 2.x; its version codes (100 + run) stay above every 1.x APK,
+          # so Android installs the new versions over the old app
+          export DEBTID_VERSION_CODE=$((100 + RUN_NUMBER)) DEBTID_VERSION_NAME="2.$RUN_NUMBER"
           chmod +x gradlew
           ./gradlew --no-daemon assembleRelease
           cp app/build/outputs/apk/release/app-release.apk DebtID.apk
@@ -86,7 +89,7 @@ jobs:
 
       # Only APKs from main signed with the permanent key are published, so updates always install over the previous version.
       - name: Publish release
-        if: env.SIGNED_RELEASE == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.SIGNED_RELEASE == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_NUMBER: ${{ github.run_number }}
@@ -97,7 +100,7 @@ jobs:
             "Português: baixe o \`DebtID.apk\` no celular Android e abra o arquivo para instalar." \
             "" \
             "Español: descarga \`DebtID.apk\` en tu teléfono Android y ábrelo para instalarlo." > notes.md
-          gh release create "v1.$RUN_NUMBER" DebtID.apk \
-            --title "DebtID 1.$RUN_NUMBER" \
+          gh release create "v2.$RUN_NUMBER" DebtID.apk \
+            --title "DebtID 2.$RUN_NUMBER" \
             --notes-file notes.md \
             --latest || echo "::warning::Could not create the release; the APK is available under Artifacts."
