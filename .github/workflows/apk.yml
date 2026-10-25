@@ -92,9 +92,11 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
         run: |
           printf '%s\n' \
-            "**English:** download \`DebtID.apk\` on your Android phone and open it to install." \
+            "English: download \`DebtID.apk\` on your Android phone and open it to install." \
             "" \
-            "**Português:** baixe o \`DebtID.apk\` no seu celular Android e abra o arquivo para instalar." > notes.md
+            "Português: baixe o \`DebtID.apk\` no celular Android e abra o arquivo para instalar." \
+            "" \
+            "Español: descarga \`DebtID.apk\` en tu teléfono Android y ábrelo para instalarlo." > notes.md
           gh release create "v1.$RUN_NUMBER" DebtID.apk \
             --title "DebtID 1.$RUN_NUMBER" \
             --notes-file notes.md \

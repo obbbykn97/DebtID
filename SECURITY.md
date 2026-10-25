@@ -1,9 +1,7 @@
-# Security · Segurança
+# Security · Segurança · Seguridad
 
-**English** — If you find a security problem in DebtID (for example, a way to forge or change a signed code, to read a backup without its password, or to run code inside the app), please report it privately: open the repository's **Security** tab and choose **Report a vulnerability**. If that option isn't available, open an issue that only asks for a private contact, without the details. Please don't publish the details before a fix is out.
+**English.** If you find a security problem in DebtID, such as a way to forge or change a signed code, to open a backup without its password or to run code inside the app, please report it privately. Open the repository's **Security** tab and choose **Report a vulnerability**. If that option isn't there, open an issue asking only for a private contact, without the details. Please wait for the fix before publishing anything. The README's *Security* section explains what DebtID protects and what it doesn't.
 
-What DebtID does and doesn't promise is described in the README, under *Security, without the hype*.
+**Português.** Se você encontrar um problema de segurança no DebtID, como um jeito de forjar ou alterar um código assinado, de abrir um backup sem a senha ou de executar código dentro do app, avise em particular. Abra a aba **Security** do repositório e escolha **Report a vulnerability**. Se essa opção não aparecer, abra uma issue pedindo só um contato privado, sem os detalhes. Espere a correção sair antes de publicar qualquer coisa. A seção *Segurança* do README explica o que o DebtID protege e o que não protege.
 
-**Português** — Se você encontrar um problema de segurança no DebtID (por exemplo, um jeito de forjar ou alterar um código assinado, de abrir um backup sem a senha ou de executar código dentro do app), avise em particular: abra a aba **Security** do repositório e escolha **Report a vulnerability**. Se essa opção não aparecer, abra uma issue pedindo apenas um contato privado, sem os detalhes. Não publique os detalhes antes de a correção sair.
-
-O que o DebtID promete, e o que não promete, está no README, em *Segurança, sem exagero*.
+**Español.** Si encuentras un problema de seguridad en DebtID, como una forma de falsificar o cambiar un código firmado, de abrir una copia de seguridad sin su contraseña o de ejecutar código dentro de la app, avísalo en privado. Abre la pestaña **Security** del repositorio y elige **Report a vulnerability**. Si esa opción no aparece, abre una issue pidiendo solo un contacto privado, sin los detalles. Espera a que salga la corrección antes de publicar nada. La sección *Seguridad* del README explica qué protege DebtID y qué no.
