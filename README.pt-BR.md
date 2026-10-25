@@ -26,14 +26,14 @@ Qualquer um dos dois pode começar o registro.
 - Uma observação no empréstimo ("para o conserto do carro"), também assinada.
 - Recibos assinados por quem emprestou: pagamento parcial, quitação e cancelamento. O cancelamento serve para um empréstimo registrado errado, e depois dá para criar o registro corrigido. O registro mostra o saldo, cada parcela e os encargos.
 - Contatos reconhecidos pela chave. O DebtID avisa quando um ID nunca apareceu antes e alerta para um possível golpe quando alguém usa o nome de um contato com outra chave. Também dá para prender um empréstimo à chave de um contato, e aí só essa pessoa consegue confirmar.
-- Recibo com os valores por extenso, as duas assinaturas, os pagamentos e o QR code, pronto para imprimir ou salvar em PDF.
+- Recibo com as duas assinaturas, os pagamentos e o QR code, pronto para imprimir ou salvar em PDF. Em português, inglês e espanhol ele traz os valores por extenso; nos outros idiomas, os valores aparecem em números com o nome da moeda.
 - Lista de registros com busca, ordenação e filtros (atrasados, aguardando, validados, só registro, quitados e cancelados), visão por pessoa, próximos vencimentos e a linha do tempo de cada empréstimo.
 - Lucro por período: o recebido conta a parte dos juros de cada pagamento, pela data do pagamento, e o a receber conta o que falta nos empréstimos em aberto. Dá para ver o mês, o ano, tudo ou um intervalo de datas, com um gráfico mês a mês (que também abre como tabela). Quem deve vê os juros pagos e a pagar.
 - Planilha de todos os registros (CSV) e relatório do período para imprimir (PDF).
 - Lembretes de vencimento no Android, mesmo com o app fechado. Na tela bloqueada aparece só uma linha neutra, sem nomes nem valores.
 - Trava com PIN, e com digital ou rosto no Android 10 ou mais novo. O PIN também é pedido antes de backups, de restaurar e de apagar os dados.
 - Opção "Só registrar", que guarda o empréstimo só para o seu controle. A confirmação da outra pessoa pode ser pedida depois.
-- Português, inglês e espanhol. O app pergunta o idioma na primeira vez e dá para trocar em *Ajustes*, onde também há a opção de texto grande.
+- 12 idiomas, os mais falados do mundo segundo o Ethnologue: inglês, chinês (mandarim), hindi, espanhol, árabe, francês, bengali, português, indonésio, urdu, russo e alemão. Árabe e urdu são escritos da direita para a esquerda, e a tela se espelha. Na primeira vez o app sugere o idioma do celular; dá para trocar em *Ajustes*, onde também há a opção de texto grande.
 - Duas aparências, *Profissional* e *Soft*, cada uma com tema claro e escuro, e 36 ícones de app para escolher.
 - Backup com senha do perfil, dos registros e dos contatos. O app lembra de fazer um backup quando há registros novos.
 - No Android, o QR é lido pelo Google Play services (o app não pede permissão de câmera), e os códigos podem chegar pelo menu *Compartilhar* de outro app.
@@ -63,9 +63,10 @@ Para avisar sobre uma falha de segurança, veja o [SECURITY.md](SECURITY.md).
 
 ```
 web/src/        código da página (HTML, CSS e JS, sem dependências; textos em i18n.js)
+web/src/idiomas/  textos dos outros nove idiomas, um arquivo por idioma
 web/build.py    junta tudo em um único arquivo e calcula a Content Security Policy
 web/dist/       o index.html pronto, que abre direto no navegador
-web/test/       testes automáticos do núcleo e dos textos (node --test)
+web/test/       testes automáticos do núcleo, dos textos e dos formatos de cada idioma (node --test)
 app/            app Android (uma WebView que carrega web/dist/index.html, mais lembretes, desbloqueio e ícones)
 app/icones/     as cores dos ícones (icones.json) e o script que gera os arquivos
 docs/           logo

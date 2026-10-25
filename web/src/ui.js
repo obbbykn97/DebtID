@@ -21,7 +21,7 @@
   const semAcento = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const limparNome = s => String(s).normalize('NFC').replace(/\s+/g, ' ').trim();
   const normNome = s => semAcento(limparNome(s));
-  const locale = () => ({ pt: 'pt-BR', en: 'en', es: 'es' })[DebtIDIdioma.atual()] || 'pt-BR';
+  const locale = () => fmt.tag(); // language tag for Intl and sorting (with Latin digits)
 
   /* ---------------- local storage ---------------- */
   const K = {
@@ -920,7 +920,7 @@
   function imprimir() {
     const m = atual.m;
     if (m.tipo === 'recibo') return imprimirComo(t('rc.pdfRecibo', { ref: m.ref }));
-    imprimirComo(t('rc.pdf', { nome: m.devedor.nome, data: fmt.data(m.dados.de).replace(/\//g, '-').replace(/,/g, '') }));
+    imprimirComo(t('rc.pdf', { nome: m.devedor.nome, data: fmt.data(m.dados.de).replace(/[\u200e\u200f\u061c]/g, '').replace(/\//g, '-').replace(/,/g, '') }));
   }
   // Saves a text file: the Android app asks where to save it; the browser downloads it.
   function salvarArquivo(nome, tipo, texto) {
@@ -1165,7 +1165,7 @@
     let html = `<div class="summary">
       <div class="stat s-1"><span>${t('res.total')}</span>${valorStat(dinheiro(c.total, d))}<small>${t('res.totalNota')}</small></div>
       <div class="stat s-2"><span>${t('res.lucro')}</span>${valorStat(dinheiro(c.lucro, d))}<small>${t('res.lucroNota', { pct })}</small></div>
-      <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} → ${fmt.dataCurta(d.dp)}</small></div>
+      <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
     if (reg && (temRegras(reg) || recibosDe(reg).length) && reg.status !== 'cancelado') {
@@ -1234,7 +1234,7 @@
 
   function textoJuros(d, c) {
     if (d.taxa === 0) return t('juros.sem');
-    const v = { taxa: `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}`, dias: fmt.dias(c.dias), juros: dinheiro(c.lucro, d),
+    const v = { taxa: fmt.taxaModo(d.taxa, d.modo), dias: fmt.dias(c.dias), juros: dinheiro(c.lucro, d),
                 base: t(d.modo === 'mes' ? 'juros.baseMes' : 'juros.baseAno') };
     if (d.composto) return t('juros.compostos', v);
     return t(d.modo === 'total' ? 'juros.simplesTotal' : 'juros.simples', v);
@@ -1280,7 +1280,7 @@
     else if (reg && reg.status === 'quitado') situacaoCurta = t(reg.quitadoAssinado ? 'rc.curtaQuitadoAss' : 'rotulo.quitado');
     const confirmado = m.confirmadoEm ? fmt.momento(m.confirmadoEm.ts, m.confirmadoEm.tz) : '—';
     const taxa = d.taxa === 0 ? t('rc.semJuros')
-      : `${fmt.taxa(d.taxa)} ${fmt.modo(d.modo)}${d.modo === 'total' ? '' : t(d.composto ? 'rc.compostos' : 'rc.simples')}`;
+      : `${fmt.taxaModo(d.taxa, d.modo)}${d.modo === 'total' ? '' : t(d.composto ? 'rc.compostos' : 'rc.simples')}`;
     let extras = '';
     if (d.parcelas > 1) {
       const lista = D.parcelasDe(d, c.total);
@@ -1810,7 +1810,8 @@
   const estadoTexto = r => t('rotulo.' + (atrasado(r, hojeDia()) ? 'vencido' : r.status));
   function exportarCSV() {
     if (!registros.length) return toast(t('toast.nadaExportar'));
-    const idioma = DebtIDIdioma.atual(), sep = idioma === 'en' ? ',' : ';', decimal = idioma === 'en' ? '.' : ',';
+    // where the decimal mark is a comma, spreadsheets expect ";" between columns
+    const decimal = fmt.sepDecimal(), sep = decimal === ',' ? ';' : ',';
     const num = (v, casas) => (v / 10 ** casas).toFixed(casas).replace('.', decimal);
     // a cell that starts with = + - @ could run as a formula in a spreadsheet: it gets a leading quote
     const cel = v => {
@@ -2219,6 +2220,17 @@
   });
 
   /* ---------------- language ---------------- */
+  // the language pickers (cards in the onboarding, a grid in Settings), from the list in i18n.js
+  function pintarIdiomas() {
+    $('#idiomasBV').innerHTML = DebtIDIdiomas.map(i => `<label class="ui-op idioma-op" lang="${i.tag}">
+        <input type="radio" name="idioma-bv" value="${i.k}">
+        <span class="lang-tag" aria-hidden="true">${i.k.toUpperCase()}</span>
+        <b>${i.nome}</b>${i.nota ? `<small>${i.nota}</small>` : ''}
+      </label>`).join('');
+    $('#idiomasAjuste').innerHTML = DebtIDIdiomas.map(i =>
+      `<input type="radio" name="idioma" id="id-${i.k}" value="${i.k}"><label for="id-${i.k}" lang="${i.tag}">${i.nome}</label>`).join('');
+  }
+  pintarIdiomas();
   function aplicarIdioma(l, salvar) {
     // amounts already typed are re-read in the old language and rewritten in the new one
     const v = D.lerNumero(campo('valor').value, true);

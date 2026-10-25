@@ -26,14 +26,14 @@ Cualquiera de los dos puede empezar el registro.
 - Una nota en el préstamo ("para la reparación del coche"), también firmada.
 - Recibos firmados por quien prestó: pago parcial, finiquito y cancelación. La cancelación sirve para un préstamo registrado por error, y después se puede crear el registro corregido. Cada registro muestra el saldo, cada cuota y los cargos por atraso.
 - Contactos reconocidos por su clave. DebtID avisa cuando un ID nunca apareció antes y alerta de una posible estafa cuando alguien usa el nombre de un contacto con otra clave. También se puede atar un préstamo a la clave de un contacto, y así solo esa persona puede confirmarlo.
-- Recibo con los importes en letras, las dos firmas, los pagos y el código QR, listo para imprimir o guardar en PDF.
+- Recibo con las dos firmas, los pagos y el código QR, listo para imprimir o guardar en PDF. En español, portugués e inglés trae los importes en letras; en los otros idiomas, los importes aparecen en cifras con el nombre de la moneda.
 - Lista de registros con búsqueda, orden y filtros (atrasados, pendientes, validados, solo registro, pagados y cancelados), vista por persona, próximos vencimientos y el historial de cada préstamo.
 - Ganancia por período: la recibida cuenta la parte de interés de cada pago, por la fecha del pago, y la por recibir cuenta lo que falta en los préstamos pendientes. Se puede ver el mes, el año, todo o un rango de fechas, con un gráfico mensual que también se abre como tabla. Quien debe ve los intereses pagados y por pagar.
 - Hoja de cálculo de todos los registros (CSV) e informe del período para imprimir (PDF).
 - Recordatorios de vencimiento en Android, incluso con la app cerrada. En la pantalla de bloqueo solo aparece una línea neutra, sin nombres ni importes.
 - Bloqueo con PIN, y con huella o rostro en Android 10 o posterior. El PIN también se pide antes de las copias de seguridad, de restaurar y de borrar los datos.
 - La opción "Solo registrar", que guarda el préstamo para tu propio control. La confirmación de la otra persona se puede pedir después.
-- Español, portugués e inglés. La app pregunta el idioma la primera vez y se puede cambiar en *Ajustes*, donde también está la opción de texto grande.
+- 12 idiomas, los más hablados del mundo según Ethnologue: inglés, chino mandarín, hindi, español, árabe, francés, bengalí, portugués, indonesio, urdu, ruso y alemán. El árabe y el urdu se escriben de derecha a izquierda, y la pantalla se refleja. La primera vez, la app propone el idioma del teléfono; se puede cambiar en *Ajustes*, donde también está la opción de texto grande.
 - Dos apariencias, *Profesional* y *Soft*, cada una con tema claro y oscuro, y 36 iconos de app para elegir.
 - Copia de seguridad con contraseña del perfil, los registros y los contactos. La app recuerda hacer una copia cuando hay registros nuevos.
 - En Android, el QR se lee con Google Play services (la app no pide permiso de cámara) y los códigos pueden llegar desde el menú *Compartir* de otra app.
@@ -63,9 +63,10 @@ Para avisar de un fallo de seguridad, mira [SECURITY.md](SECURITY.md).
 
 ```
 web/src/        código de la página (HTML, CSS y JS, sin dependencias; textos en i18n.js)
+web/src/idiomas/  textos de los otros nueve idiomas, un archivo por idioma
 web/build.py    une todo en un solo archivo y calcula la Content Security Policy
 web/dist/       el index.html listo, que se abre directamente en el navegador
-web/test/       pruebas automáticas del núcleo y de los textos (node --test)
+web/test/       pruebas automáticas del núcleo, de los textos y de los formatos de cada idioma (node --test)
 app/            app Android (una WebView que carga web/dist/index.html, más recordatorios, desbloqueo e iconos)
 app/icones/     los colores de los iconos (icones.json) y el script que genera los archivos
 docs/           logo

@@ -23,15 +23,18 @@ HEAD = '''<!doctype html>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
 (function () { // apply look, theme, text size and language before the first paint (no flash)
-  var d = document.documentElement, u, t, l, x, n = navigator.language || '';
+  var d = document.documentElement, u, t, l, x, n = (navigator.language || '').toLowerCase().split('-')[0];
+  var idiomas = /^(en|zh|hi|es|ar|fr|bn|pt|id|ur|ru|de)$/;
   try { u = localStorage.getItem('debtid.ui'); t = localStorage.getItem('debtid.tema'); l = localStorage.getItem('debtid.idioma'); x = localStorage.getItem('debtid.texto'); } catch (e) {}
   d.setAttribute('data-ui', u === 'soft' || u === 'pro' ? u : 'pro');
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   d.setAttribute('data-theme', t);
   if (x === 'grande') d.setAttribute('data-texto', 'grande');
-  if (l !== 'pt' && l !== 'en' && l !== 'es') l = /^pt/i.test(n) ? 'pt' : /^es/i.test(n) ? 'es' : 'en';
+  if (n === 'in') n = 'id'; // older Android name for Indonesian
+  if (!idiomas.test(l)) l = idiomas.test(n) ? n : 'en';
   d.setAttribute('data-lang', l);
-  d.lang = l === 'en' ? 'en' : l === 'es' ? 'es' : 'pt-BR';
+  d.lang = l === 'pt' ? 'pt-BR' : l === 'zh' ? 'zh-CN' : l;
+  if (l === 'ar' || l === 'ur') d.dir = 'rtl';
   if (l !== 'pt') d.className += ' i18n-espera'; // page text is written in Portuguese: hide it until it is translated
 })();
 </script>
@@ -46,8 +49,14 @@ def ler(nome: str) -> str:
     return (SRC / nome).read_text(encoding='utf-8')
 
 
+def textos() -> str:
+    """i18n.js, then one file per extra language (web/src/idiomas/*.js), then the call that applies the language."""
+    extras = ''.join('\n' + p.read_text(encoding='utf-8') for p in sorted((SRC / 'idiomas').glob('*.js')))
+    return '\n' + ler('i18n.js') + extras + '\nDebtIDIdioma.aplicar(document.documentElement.dataset.lang);\n'
+
+
 def build(target: Path) -> Path:
-    scripts = ['\n' + ler('i18n.js'), '\n/*<core>*/\n' + ler('core.js') + '/*</core>*/\n', '\n' + ler('ui.js')]
+    scripts = [textos(), '\n/*<core>*/\n' + ler('core.js') + '/*</core>*/\n', '\n' + ler('ui.js')]
     inicio = HEAD.split('<script>', 1)[1].split('</script>', 1)[0]
     # Content Security Policy: only these exact scripts may run (by hash), nothing is loaded from
     # the network, and no injected markup can run code. Inline styles stay allowed.

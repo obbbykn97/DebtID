@@ -242,7 +242,7 @@
                   <p class="hint span2" data-i18n="dica.atraso">Opcional. Valem só depois do vencimento, sobre o valor que faltar pagar. Combinem valores razoáveis: a lei pode limitar multas e juros.</p>
                   <div class="field span2" data-f="obs">
                     <label for="f-obs"><span data-i18n="form.obs">Observação</span> <small id="contaObs">0/140</small></label>
-                    <div class="control"><textarea id="f-obs" name="obs" rows="2" maxlength="140" placeholder="Ex.: para o conserto do carro" data-i18n-ph="form.obsPh"></textarea></div>
+                    <div class="control"><textarea dir="auto" id="f-obs" name="obs" rows="2" maxlength="140" placeholder="Ex.: para o conserto do carro" data-i18n-ph="form.obsPh"></textarea></div>
                     <p class="hint" data-i18n="dica.obs">Vai junto no código assinado, e a outra pessoa vê antes de confirmar.</p>
                     <div class="err" id="e-obs"></div>
                   </div>
@@ -281,7 +281,7 @@
             <form id="vform" novalidate autocomplete="off">
               <div class="field">
                 <label for="f-codigo" data-i18n="conf.codigo">Código</label>
-                <div class="control"><textarea id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira" data-i18n-ph="conf.ph"></textarea></div>
+                <div class="control"><textarea dir="auto" id="f-codigo" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Cole aqui o código ou a mensagem inteira" data-i18n-ph="conf.ph"></textarea></div>
               </div>
               <div class="form-foot">
                 <button class="btn btn-primary" type="submit"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="conf.conferir">Conferir código</span></button>
@@ -406,11 +406,7 @@
           <section class="panel" aria-labelledby="t-aparencia">
             <div class="ajuste">
               <h3 id="t-idioma" data-i18n="aj.idioma">Idioma</h3>
-              <div class="seg" style="--n:3" role="radiogroup" aria-labelledby="t-idioma">
-                <input type="radio" name="idioma" id="id-pt" value="pt"><label for="id-pt" lang="pt-BR">Português</label>
-                <input type="radio" name="idioma" id="id-en" value="en"><label for="id-en" lang="en">English</label>
-                <input type="radio" name="idioma" id="id-es" value="es"><label for="id-es" lang="es">Español</label>
-              </div>
+              <div class="idiomas" id="idiomasAjuste" role="radiogroup" aria-labelledby="t-idioma"></div>
             </div>
             <div class="ajuste">
               <h3 id="t-moeda" data-i18n="aj.moeda">Moeda padrão</h3>
@@ -473,7 +469,7 @@
               <p class="hint" data-i18n="aj.backupHint">Guarde este texto onde só você acessa, como um e-mail para você mesmo ou um gerenciador de senhas.</p>
             </div>
             <form id="formRestaurar" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-rs-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field"><label for="f-rs-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea dir="auto" id="f-rs-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
               <div class="field" style="margin-top:14px"><label for="f-rs-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-rs-senha" type="password" autocomplete="current-password"></div></div>
               <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="aj.restaurar">Restaurar</button></div>
             </form>
@@ -499,26 +495,10 @@
       <section class="view" id="v-boas-vindas" data-view="boas-vindas">
         <div class="wrap view-pad">
           <div class="bv" id="bv0">
-            <p class="kicker">Bem-vindo · Welcome · Bienvenido</p>
-            <h1 class="bv-title">Idioma <span class="bv-sep">·</span> Language</h1>
-            <p class="intro">Escolha o idioma do app. <span class="bv-sep">·</span> Choose the app language. <span class="bv-sep">·</span> Elige el idioma.</p>
-            <div class="ui-opcoes ui-opcoes-3" role="radiogroup" aria-label="Idioma · Language">
-              <label class="ui-op" lang="pt-BR">
-                <input type="radio" name="idioma-bv" value="pt">
-                <span class="lang-tag" aria-hidden="true">PT</span>
-                <b>Português</b><small>Brasil</small>
-              </label>
-              <label class="ui-op" lang="en">
-                <input type="radio" name="idioma-bv" value="en">
-                <span class="lang-tag" aria-hidden="true">EN</span>
-                <b>English</b><small>International</small>
-              </label>
-              <label class="ui-op" lang="es">
-                <input type="radio" name="idioma-bv" value="es">
-                <span class="lang-tag" aria-hidden="true">ES</span>
-                <b>Español</b><small>Internacional</small>
-              </label>
-            </div>
+            <p class="kicker" data-i18n="bv.bemVindo">Boas-vindas</p>
+            <h1 class="bv-title" id="t-idioma-bv" data-i18n="bv.idioma">Idioma</h1>
+            <p class="intro" data-i18n="bv.idiomaIntro">Escolha o idioma do app. Dá para trocar depois, em Ajustes.</p>
+            <div class="ui-opcoes ui-opcoes-idiomas" id="idiomasBV" role="radiogroup" aria-labelledby="t-idioma-bv"></div>
             <button class="btn btn-primary btn-block" type="button" id="bvIdioma"><span data-i18n="bv.continuar">Continuar</span><svg class="ico"><use href="#i-seta"/></svg></button>
           </div>
 
@@ -559,7 +539,7 @@
               <button class="btn btn-ghost" type="button" id="bvVoltar" data-i18n="bv.voltar">Voltar</button>
             </div>
             <form id="formRestaurarBV" class="block form-restaurar" hidden novalidate autocomplete="off">
-              <div class="field"><label for="f-bv-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
+              <div class="field"><label for="f-bv-codigo" data-i18n="aj.codBackup">Código do backup</label><div class="control"><textarea dir="auto" id="f-bv-codigo" rows="3" spellcheck="false" autocapitalize="off" placeholder="DIDB-…"></textarea></div></div>
               <div class="field" style="margin-top:14px"><label for="f-bv-senha" data-i18n="aj.senhaBackup">Senha do backup</label><div class="control"><input id="f-bv-senha" type="password" autocomplete="current-password"></div></div>
               <div class="form-foot"><button class="btn btn-alt btn-block" type="submit" data-i18n="aj.restaurarBackup">Restaurar backup</button></div>
             </form>

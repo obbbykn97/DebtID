@@ -1,5 +1,6 @@
 /* =====================================================================
-   DebtID: UI strings in Brazilian Portuguese, English and Spanish.
+   DebtID: UI strings in Brazilian Portuguese, English and Spanish
+   (the other nine languages are in web/src/idiomas/).
    Values may contain {placeholders}; HTML is allowed only where the
    caller inserts the string as HTML (and escapes the values it passes).
    ===================================================================== */
@@ -125,6 +126,7 @@ const DebtIDTextos = {
     "modal.assinarCredor": "Sua assinatura confirma que você emprestou {valor} para {nome}, com total de {total} até {data}. Depois de assinado, não dá para desfazer.",
     "modal.assinarOk": "Assinar",
 
+    "bv.bemVindo": "Boas-vindas", "bv.idioma": "Idioma", "bv.idiomaIntro": "Escolha o idioma do app. Dá para trocar depois, em Ajustes.",
     "bv.passo2": "Passo 2 de 3", "bv.aparencia": "Escolha a aparência", "bv.aparenciaIntro": "Dá para trocar depois, em Ajustes.",
     "bv.proDesc": "Sóbrio, preto e branco, direto ao ponto.", "bv.softDesc": "Colorido, com contornos marcados.",
     "bv.continuar": "Continuar", "bv.voltar": "Voltar",
@@ -520,6 +522,7 @@ const DebtIDTextos = {
     "modal.assinarCredor": "Your signature confirms that you lent {valor} to {nome}, to be repaid {total} by {data}. Once signed, this can't be undone.",
     "modal.assinarOk": "Sign",
 
+    "bv.bemVindo": "Welcome", "bv.idioma": "Language", "bv.idiomaIntro": "Choose the app language. You can change it later in Settings.",
     "bv.passo2": "Step 2 of 3", "bv.aparencia": "Choose a look", "bv.aparenciaIntro": "You can change it later in Settings.",
     "bv.proDesc": "Sober, black and white, straight to the point.", "bv.softDesc": "Colorful, with bold outlines.",
     "bv.continuar": "Continue", "bv.voltar": "Back",
@@ -915,6 +918,7 @@ const DebtIDTextos = {
     "modal.assinarCredor": "Tu firma confirma que prestaste {valor} a {nome}, con un total de {total} hasta el {data}. Una vez firmado, no se puede deshacer.",
     "modal.assinarOk": "Firmar",
 
+    "bv.bemVindo": "Bienvenida", "bv.idioma": "Idioma", "bv.idiomaIntro": "Elige el idioma de la app. Puedes cambiarlo después, en Ajustes.",
     "bv.passo2": "Paso 2 de 3", "bv.aparencia": "Elige la apariencia", "bv.aparenciaIntro": "Puedes cambiarla después, en Ajustes.",
     "bv.proDesc": "Sobria, en blanco y negro, directa.", "bv.softDesc": "Colorida, con contornos marcados.",
     "bv.continuar": "Continuar", "bv.voltar": "Volver",
@@ -1191,6 +1195,24 @@ const DebtIDTextos = {
   }
 };
 
+/* The app languages, in order of total speakers (Ethnologue 2026). The other languages' texts
+   are in web/src/idiomas/, one file each; build.py adds them after this file.
+   tag: the language tag for lang="" and for Intl; nome: the language's own name. */
+const DebtIDIdiomas = [
+  { k: 'en', tag: 'en', nome: 'English' },
+  { k: 'zh', tag: 'zh-CN', nome: '中文', nota: '简体' },
+  { k: 'hi', tag: 'hi', nome: 'हिन्दी' },
+  { k: 'es', tag: 'es', nome: 'Español' },
+  { k: 'ar', tag: 'ar', nome: 'العربية', rtl: true },
+  { k: 'fr', tag: 'fr', nome: 'Français' },
+  { k: 'bn', tag: 'bn', nome: 'বাংলা' },
+  { k: 'pt', tag: 'pt-BR', nome: 'Português', nota: 'Brasil' },
+  { k: 'id', tag: 'id', nome: 'Bahasa Indonesia' },
+  { k: 'ur', tag: 'ur', nome: 'اردو', rtl: true },
+  { k: 'ru', tag: 'ru', nome: 'Русский' },
+  { k: 'de', tag: 'de', nome: 'Deutsch' }
+];
+
 /* Applies the language to the static page text (data-i18n attributes) and exposes t(). */
 const DebtIDIdioma = (() => {
   let atual = 'pt';
@@ -1199,10 +1221,12 @@ const DebtIDIdioma = (() => {
     if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (n in v ? v[n] : m));
     return s;
   };
+  const info = l => DebtIDIdiomas.find(x => x.k === l);
   function aplicar(l) {
-    atual = l === 'en' || l === 'es' ? l : 'pt';
-    const raiz = document.documentElement;
-    raiz.lang = { pt: 'pt-BR', en: 'en', es: 'es' }[atual];
+    atual = info(l) && DebtIDTextos[l] ? l : 'pt';
+    const raiz = document.documentElement, i = info(atual);
+    raiz.lang = i.tag;
+    raiz.dir = i.rtl ? 'rtl' : 'ltr';
     raiz.dataset.lang = atual;
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
@@ -1213,6 +1237,5 @@ const DebtIDIdioma = (() => {
     raiz.classList.remove('i18n-espera');
     return atual;
   }
-  return { t, aplicar, atual: () => atual };
+  return { t, aplicar, atual: () => atual, tag: () => info(atual).tag, rtl: () => !!info(atual).rtl };
 })();
-DebtIDIdioma.aplicar(document.documentElement.dataset.lang);

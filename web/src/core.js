@@ -1110,7 +1110,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return { gerar, svg };
   })();
 
-  /* =================== formatting (pt-BR or English) =================== */
+  /* =================== formatting =================== */
+  // Portuguese, English and Spanish have hand-made formats (and amounts in words). The other
+  // languages use the browser's Intl formats, always with Latin digits, so amounts, codes and
+  // typed numbers look the same as in the rest of the app.
   const LOC = {
     pt: {
       tag: 'pt-BR',
@@ -1131,6 +1134,24 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       milhar: '.', decimal: ','
     }
   };
+  // The Intl languages: language tag and the words after a rate ("10% per month").
+  const LOC_INTL = {
+    zh: { tag: 'zh-CN', modo: { total: '（总计）', mes: '/月', ano: '/年' }, sepModo: '' },
+    hi: { tag: 'hi-u-nu-latn', modo: { total: 'कुल', mes: 'प्रति माह', ano: 'प्रति वर्ष' } },
+    ar: { tag: 'ar-u-nu-latn', modo: { total: 'إجمالًا', mes: 'شهريًا', ano: 'سنويًا' }, rtl: true },
+    fr: { tag: 'fr', modo: { total: 'au total', mes: 'par mois', ano: 'par an' } },
+    bn: { tag: 'bn-u-nu-latn', modo: { total: 'মোট', mes: 'প্রতি মাসে', ano: 'প্রতি বছরে' } },
+    id: { tag: 'id', modo: { total: 'total', mes: 'per bulan', ano: 'per tahun' } },
+    ur: { tag: 'ur-u-nu-latn', modo: { total: 'کل', mes: 'ماہانہ', ano: 'سالانہ' }, rtl: true },
+    ru: { tag: 'ru', modo: { total: 'всего', mes: 'в месяц', ano: 'в год' } },
+    de: { tag: 'de', modo: { total: 'insgesamt', mes: 'pro Monat', ano: 'pro Jahr' } }
+  };
+  for (const [k, b] of Object.entries(LOC_INTL)) {
+    let partes = [];
+    try { partes = new Intl.NumberFormat(b.tag).formatToParts(12345.6); } catch (e) { /* no Intl: defaults below */ }
+    const parte = tipo => (partes.find(x => x.type === tipo) || {}).value;
+    LOC[k] = { ...b, intl: true, milhar: parte('group') || ',', decimal: parte('decimal') || '.' };
+  }
   // Spanish currency names come from the browser (Intl), so all ~170 currencies get proper names;
   // the crypto currencies and anything Intl does not know fall back to fixed names.
   const ES_FIXOS = {
@@ -1160,11 +1181,49 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         : { s: m.en.s, p: m.en.p, fem: false, nome: m.en.nome };
     }
   }
+  // Currency list names in the Intl languages; the crypto currencies have fixed names.
+  const CRIPTO_NOMES = {
+    zh: ['比特币', '以太币 (Ethereum)', '泰达币 (USDT)'],
+    hi: ['बिटकॉइन', 'ईथर (Ethereum)', 'टीथर (USDT)'],
+    ar: ['بيتكوين', 'إيثر (Ethereum)', 'تيثر (USDT)'],
+    fr: ['Bitcoin', 'Ether (Ethereum)', 'Tether (USDT)'],
+    bn: ['বিটকয়েন', 'ইথার (Ethereum)', 'টেথার (USDT)'],
+    id: ['Bitcoin', 'Ether (Ethereum)', 'Tether (USDT)'],
+    ur: ['بٹ کوائن', 'ایتھر (Ethereum)', 'ٹیتھر (USDT)'],
+    ru: ['Биткоин', 'Эфир (Ethereum)', 'Tether (USDT)'],
+    de: ['Bitcoin', 'Ether (Ethereum)', 'Tether (USDT)']
+  };
+  function nomesIntl(k) {
+    if (MOEDAS.BTC[k]) return;
+    let dn = null;
+    try { dn = new Intl.DisplayNames([LOC[k].tag], { type: 'currency' }); } catch (e) { /* older browser: English names */ }
+    const [btc, eth, usdt] = CRIPTO_NOMES[k];
+    for (const codigo of CODIGOS_MOEDAS) {
+      const m = MOEDAS[codigo];
+      let nome = { BTC: btc, ETH: eth, USDT: usdt }[codigo] || null;
+      if (!nome) {
+        try { nome = dn ? dn.of(codigo) : null; } catch (e) { /* code unknown to Intl */ }
+        if (!nome || nome.toUpperCase() === codigo) nome = m.en.nome;
+      }
+      m[k] = { s: nome, p: nome, fem: false, nome: maiuscula(nome) };
+    }
+  }
   let idioma = 'pt', L = LOC.pt, nfT;
-  /** Sets the language used by fmt, extenso and lerNumero ('pt', 'en' or 'es'). Stored codes are not affected. */
+  const cacheDTF = {};
+  /** Intl date format in the current language, for a day number (the date is read in UTC). */
+  const dtf = opcoes => {
+    const k = L.tag + JSON.stringify(opcoes);
+    return cacheDTF[k] || (cacheDTF[k] = new Intl.DateTimeFormat(L.tag, { timeZone: 'UTC', ...opcoes }));
+  };
+  // an amount, ID or time zone inside right-to-left text keeps its left-to-right order;
+  // a phrase (an amount with the currency's name) takes the direction of its first letter
+  const isolar = s => (L.rtl ? '\u2066' + s + '\u2069' : s);
+  const isolarFrase = s => (L.rtl ? '\u2068' + s + '\u2069' : s);
+  /** Sets the language used by fmt, extenso and lerNumero (any key of LOC). Stored codes are not affected. */
   function definirIdioma(l) {
-    idioma = l === 'en' || l === 'es' ? l : 'pt';
+    idioma = Object.prototype.hasOwnProperty.call(LOC, l) ? l : 'pt';
     if (idioma === 'es') nomesEspanhol();
+    if (LOC[idioma].intl) nomesIntl(idioma);
     L = LOC[idioma];
     nfT = new Intl.NumberFormat(L.tag, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
     return idioma;
@@ -1188,40 +1247,59 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const BRL = MOEDAS.BRL;
   const fmt = {
     idioma: () => idioma,
+    /** language tag for Intl (Latin digits), e.g. "pt-BR", "ar-u-nu-latn" */
+    tag: () => L.tag,
     num: n => nfT.format(n),
     /** amount (smallest unit) with the currency symbol, e.g. "₿ 0.00125000", "R$ 1.250,00" */
-    dinheiro: (v, m = BRL) => m.simbolo + '\u00a0' + numMoeda(v, m.casas), // no-break space: symbol never wraps alone
+    dinheiro: (v, m = BRL) => isolar(m.simbolo + '\u00a0' + numMoeda(v, m.casas)), // no-break space: symbol never wraps alone
     /** fractional amount (smallest unit) with up to 2 extra decimals, for the raw interest */
-    dinheiro4: (x, m = BRL) => m.simbolo + '\u00a0' + nf(m.casas, m.casas + 2).format(x / 10 ** m.casas),
+    dinheiro4: (x, m = BRL) => isolar(m.simbolo + '\u00a0' + nf(m.casas, m.casas + 2).format(x / 10 ** m.casas)),
     numMoeda,
     sepDecimal: () => L.decimal,
     /** number for an input field: no thousands separator, so it reads back the same ("1000", not "1.000") */
     numEntrada: n => new Intl.NumberFormat(L.tag, { maximumFractionDigits: 4, useGrouping: false }).format(n),
-    nomeMoeda: m => m[idioma].nome,
+    nomeMoeda: m => (m[idioma] || m.en).nome,
     brl: c => fmt.dinheiro(c, BRL),
     brl4: c => fmt.dinheiro4(c, BRL),
-    taxa: t => nfT.format(t / 10000) + '%',
+    taxa: t => {
+      if (L.intl) return new Intl.NumberFormat(L.tag, { style: 'percent', maximumFractionDigits: 4 }).format(t / 1e6);
+      return nfT.format(t / 10000) + '%';
+    },
     modo: m => L.modo[m],
-    dias: n => n + ' ' + (n === 1 ? L.dia : L.dias),
+    /** rate and period together, e.g. "2,5% ao mês" */
+    taxaModo: (t, m) => fmt.taxa(t) + (L.sepModo ?? ' ') + L.modo[m],
+    dias: n => {
+      if (L.intl) {
+        try { return new Intl.NumberFormat(L.tag, { style: 'unit', unit: 'day', unitDisplay: 'long' }).format(n); } catch (e) { return n + ' d'; }
+      }
+      return n + ' ' + (n === 1 ? L.dia : L.dias);
+    },
     data: dia => {
+      if (L.intl) return dtf({ day: '2-digit', month: '2-digit', year: 'numeric' }).format(dataUTC(dia));
       const x = dataUTC(dia);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}, ${x.getUTCFullYear()}`
                              : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`;
     },
     dataCurta: dia => {
+      if (L.intl) return dtf({ day: 'numeric', month: 'short' }).format(dataUTC(dia));
       const x = dataUTC(dia);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}` : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`;
     },
     dataExtenso: dia => {
+      if (L.intl) return dtf({ day: 'numeric', month: 'long', year: 'numeric' }).format(dataUTC(dia));
       const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
       if (idioma === 'en') return `${m} ${dd}, ${x.getUTCFullYear()}`;
       return `${dd === 1 && idioma === 'pt' ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
     },
     momento: (ts, tz) => {
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
+      const fuso = `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
+      if (L.intl) {
+        const hora = dtf({ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        return hora.format(x) + ' ' + isolar(fuso);
+      }
       const dia = Math.floor((ts + tz * 900) / 86400);
-      return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ` +
-             `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
+      return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ${fuso}`;
     }
   };
 
@@ -1316,8 +1394,21 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return partes.join(' ');
   }
 
+  // The Intl languages get the amount in digits with the currency's name ("1 234,50 euros"):
+  // numbers in words follow rules (gender, cases, dual forms) too intricate to get right everywhere.
+  function valorComNome(v, m) {
+    const mult = 10 ** m.casas, casas = v % mult ? m.casas : 0;
+    if (/^[A-Z]{3}$/.test(m.codigo)) {
+      try {
+        return isolarFrase(new Intl.NumberFormat(L.tag, { style: 'currency', currency: m.codigo, currencyDisplay: 'name', minimumFractionDigits: casas, maximumFractionDigits: casas }).format(v / mult));
+      } catch (e) { /* currency unknown to Intl: digits and code below */ }
+    }
+    return isolarFrase(numMoeda(v, m.casas, casas) + ' ' + m.codigo);
+  }
+
   /** Amount (smallest unit) in words, e.g. "duzentos e quarenta reais e trinta e cinco centavos". */
   function extenso(v, m = BRL) {
+    if (L.intl) return valorComNome(v, m);
     const mult = 10 ** m.casas, r = Math.floor(v / mult), c = v - r * mult, partes = [];
     const nome = m[idioma], sub = m.sub && m.sub[idioma];
     if (c && !sub) return numMoeda(v, m.casas) + ' ' + nome.p; // currency unknown to this version: digits only
@@ -1339,8 +1430,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   /* =================== typed numbers (lenient parsing) ===================
      Accepts both "1.250,50" and "1,250.50". When only one kind of separator appears, the
      current language decides: the decimal mark is "," in Portuguese and "." in English. */
+  // digits typed on Arabic, Urdu, Hindi, Bengali or full-width keyboards, and their separators
+  const ALGARISMOS = [0x660, 0x6F0, 0x966, 0x9E6, 0xFF10];
+  const latinos = s => s.replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\uFF10-\uFF19]/g, c => {
+    const x = c.charCodeAt(0), base = ALGARISMOS.find(b => x >= b && x <= b + 9);
+    return String(x - base);
+  }).replace(/[\u066B\uFF0E]/g, '.').replace(/[\u066C\uFF0C]/g, ',');
   function lerNumero(bruto, milhar) {
-    let s = String(bruto).replace(/[R$\s% ]/g, '');
+    let s = latinos(String(bruto)).replace(/[R$\s%\u066A ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;
     const vg = s.lastIndexOf(','), pt = s.lastIndexOf('.');
     if (vg > -1 && pt > -1) {

@@ -26,14 +26,14 @@ Either side can start the record.
 - A note on the loan ("for the car repair"), also signed.
 - Receipts signed by the lender for partial payments, the settlement and cancellations. A cancellation is for a loan entered by mistake, and you can then create the corrected record. Each record shows its balance, every installment and any late charges.
 - Contacts recognized by their key. DebtID tells you when an ID has never shown up before and warns you about a possible scam when someone uses a contact's name with a different key. A loan can also be tied to a contact's key so that only that person can confirm it.
-- A receipt with the amounts spelled out, both signatures, the payments and the QR code, ready to print or save as a PDF.
+- A receipt with both signatures, the payments and the QR code, ready to print or save as a PDF. In English, Portuguese and Spanish it spells out the amounts in words; in the other languages it shows them in figures with the currency's name.
 - A records list with search, sorting and filters (late, pending, validated, record only, paid and cancelled), a by-person view, the next due dates and a timeline for each loan.
 - Profit by period. Profit received counts the interest share of each payment, by payment date; profit to receive counts what is still due on open loans. You can view this month, this year, all time or a date range, with a monthly chart that also opens as a table. Borrowers see interest paid and still to pay.
 - A spreadsheet of all records (CSV) and a printable report for the period (PDF).
 - Due-date reminders on Android, even with the app closed. The lock screen shows a neutral line with no names or amounts.
 - An app lock with a PIN, and with fingerprint or face on Android 10 and later. The PIN is also asked before backups, restoring and erasing data.
 - A "Just record" option that keeps a loan for your own tracking. You can ask the other person to confirm it later.
-- English, Brazilian Portuguese and Spanish. The app asks on first launch, and you can switch in *Settings*, which also has a large-text option.
+- 12 languages, the most spoken in the world according to Ethnologue: English, Mandarin Chinese, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Indonesian, Urdu, Russian and German. Arabic and Urdu read right to left, and the screen mirrors. On first launch the app suggests the phone's language; you can switch in *Settings*, which also has a large-text option.
 - Two looks, *Professional* and *Soft*, each with light and dark themes, and 36 app icons to choose from.
 - A password-protected backup of your profile, records and contacts. The app reminds you to back up when there are new records.
 - On Android, QR codes are scanned through Google Play services (the app asks for no camera permission), and codes can come in from another app's *Share* menu.
@@ -63,9 +63,10 @@ To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ```
 web/src/        page source (HTML, CSS and JS, no dependencies; texts in i18n.js)
+web/src/idiomas/  texts for the other nine languages, one file each
 web/build.py    bundles everything into one file and computes the Content Security Policy
 web/dist/       the built index.html, which opens directly in a browser
-web/test/       automated tests of the core and the texts (node --test)
+web/test/       automated tests of the core, the texts and the language formats (node --test)
 app/            Android app (a WebView that loads web/dist/index.html, plus reminders, unlock and icons)
 app/icones/     the icon colors (icones.json) and the script that generates the icon files
 docs/           logo
