@@ -769,6 +769,7 @@ body.travado{overflow:hidden}
 [data-ui="pro"] .graf-dica{border-radius:0}
 [data-ui="pro"] .forca i{border-radius:0}
 [data-ui="pro"] .trava-marca{width:44px;height:44px}
+[data-ui="pro"] .trava-marca .bm-a{fill:var(--ink)} /* the lock screen is light: the logo goes dark */
 [data-ui="pro"] .linha-tempo ol{border-inline-start:1px solid var(--line)}
 
 /* =====================================================================
@@ -854,3 +855,5 @@ code,.mo-cod,.rc-ref{direction:ltr;unicode-bidi:isolate}
 :root:is([lang|="ar"],[lang|="ur"],[lang|="hi"],[lang|="bn"]) :is(h1,h2,h3,.bv-title,.stat b,.hp-sub){line-height:1.4}
 :root[lang|="ur"] body{line-height:1.8}
 :root[lang|="ur"] :is(h1,h2,h3,.bv-title){line-height:1.7}
+/* questions asked from the lock screen (forgot the PIN, key lost) appear above it */
+body.trava-aberta .modal{z-index:90}

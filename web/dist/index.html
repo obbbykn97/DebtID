@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MSdKF8GKX//CeRI01wHPQF94JDEpobAZ93GhxIU53nY=' 'sha256-XxOu1uKBGG+LMgjQ0YlhSDg1RpaPUvK2Aiu30bYTrVA=' 'sha256-Wr7I7Y0+uZt0hYsl3vxvJuEfOQDi5Nb8ADvWzRh6jhM=' 'sha256-vujJyeEBD5xoUmTtiiUokpzK1ZQ+/KmRLJAMMnAjWUo='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MSdKF8GKX//CeRI01wHPQF94JDEpobAZ93GhxIU53nY=' 'sha256-jELFzdeWx8XIkQjlu5t3ARZzbmxa3HtftRnM4Nw3cXQ=' 'sha256-sWKsahJXAUF7TsCRu3qHPmfpLW9VvuBg+0XBsmYR03Y=' 'sha256-zNukpiROg9VoFAAQnirraR1mskva3yffhYO+wqzIMHw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -797,6 +797,7 @@ body.travado{overflow:hidden}
 [data-ui="pro"] .graf-dica{border-radius:0}
 [data-ui="pro"] .forca i{border-radius:0}
 [data-ui="pro"] .trava-marca{width:44px;height:44px}
+[data-ui="pro"] .trava-marca .bm-a{fill:var(--ink)} /* the lock screen is light: the logo goes dark */
 [data-ui="pro"] .linha-tempo ol{border-inline-start:1px solid var(--line)}
 
 /* =====================================================================
@@ -882,6 +883,8 @@ code,.mo-cod,.rc-ref{direction:ltr;unicode-bidi:isolate}
 :root:is([lang|="ar"],[lang|="ur"],[lang|="hi"],[lang|="bn"]) :is(h1,h2,h3,.bv-title,.stat b,.hp-sub){line-height:1.4}
 :root[lang|="ur"] body{line-height:1.8}
 :root[lang|="ur"] :is(h1,h2,h3,.bv-title){line-height:1.7}
+/* questions asked from the lock screen (forgot the PIN, key lost) appear above it */
+body.trava-aberta .modal{z-index:90}
 </style>
 </head>
 <body>
@@ -1758,7 +1761,7 @@ const DebtIDTextos = {
 
     "aj.idCompleto": "ID completo, para conferir pessoalmente:",
     "aj.seguranca": "Trava do app",
-    "aj.segurancaIntro": "Com a trava, o DebtID pede um PIN ao abrir. Assim, quem pegar seu celular desbloqueado não assina empréstimos nem copia seu backup.",
+    "aj.segurancaIntro": "Com a trava, o DebtID pede um PIN ou o bloqueio do próprio celular ao abrir, e a chave de assinatura fica guardada criptografada. Assim, quem pegar seu celular desbloqueado não assina empréstimos nem copia seu backup.",
     "aj.contatos": "Contatos",
     "aj.contatosIntro": "Pessoas cujo ID você já conferiu. O DebtID reconhece cada uma pela chave e avisa se aparecer alguém com o mesmo nome e outra chave.",
     "aj.lembretes": "Lembretes de vencimento",
@@ -1908,16 +1911,23 @@ const DebtIDTextos = {
     "bk.lembreteT": "Hora de um backup novo", "bk.lembrete": "Seu último backup é de {data} e há registros novos desde então.",
     "bk.lembreteNuncaT": "Você ainda não tem backup", "bk.lembreteNunca": "Se perder este celular, perde o perfil e as provas. Um backup leva um minuto.",
     "bk.fazerAgora": "Fazer backup", "bk.depois": "Agora não",
-    "trava.titulo": "DebtID travado", "trava.confirmarT": "Confirme com seu PIN", "trava.texto": "Digite seu PIN para continuar.", "trava.pin": "PIN",
-    "trava.entrar": "Desbloquear", "trava.bio": "Usar digital ou rosto", "trava.bioTitulo": "Desbloquear o DebtID", "trava.bioSub": "Use sua digital ou seu rosto",
-    "trava.usarPin": "Usar PIN", "trava.errado": "PIN errado. Tentativas antes de esperar: {n}.", "trava.espere": "Muitas tentativas. Espere {s} s.",
+    "trava.titulo": "DebtID travado", "trava.confirmarT": "Confirme que é você", "trava.texto": "Digite seu PIN para continuar.", "trava.pin": "PIN",
+    "trava.entrar": "Desbloquear", "trava.bio": "Usar digital, rosto ou bloqueio de tela", "trava.bioTitulo": "Desbloquear o DebtID", "trava.bioSub": "Use a digital, o rosto ou o bloqueio de tela do celular",
+    "trava.errado": "PIN errado. Tentativas antes de esperar: {n}.", "trava.espere": "Muitas tentativas. Espere {s} s.",
     "trava.esqueciBtn": "Esqueci o PIN", "trava.esqueciT": "Esqueceu o PIN?",
     "trava.esqueci": "Por segurança, o único jeito de tirar a trava é apagar os dados deste aparelho. Depois, você restaura o backup com a senha dele. Sem backup, os registros se perdem.",
     "trava.esqueciOk": "Apagar e recomeçar",
-    "trava.desligada": "Trava desligada.", "trava.ligada": "Trava ligada. O app pede o PIN ao abrir, ao voltar depois de um tempo e antes de backups.",
+    "trava.desligada": "Trava desligada.", "trava.ligada": "Trava ligada. O app pede o PIN ao abrir, ao voltar depois de um tempo e antes de backups. A chave de assinatura fica guardada criptografada com o PIN.",
     "trava.criar": "Criar PIN", "trava.trocar": "Trocar PIN", "trava.remover": "Remover trava",
     "trava.tempo": "Travar ao sair do app", "trava.tempo0": "Na hora", "trava.tempo60": "Após 1 min", "trava.tempo300": "Após 5 min",
-    "trava.usarBio": "Desbloquear com digital ou rosto",
+    "trava.usarCelular": "Usar o bloqueio do celular",
+    "trava.celularT": "Usar o bloqueio do celular?",
+    "trava.celular": "O DebtID vai pedir a digital, o rosto ou o bloqueio de tela do celular (PIN, padrão ou senha). A chave de assinatura passa a ficar trancada pelo chip de segurança do celular. Se você tirar o bloqueio de tela do celular, essa chave se perde, então faça um backup antes.",
+    "trava.celularOk": "Ativar",
+    "trava.ligadaCelular": "Trava ligada com o bloqueio do celular. O app pede a digital, o rosto ou o bloqueio de tela ao abrir, ao voltar depois de um tempo e antes de backups. A chave de assinatura fica trancada pelo chip de segurança do celular.",
+    "trava.invalidaT": "A chave não abre mais",
+    "trava.invalida": "O bloqueio de tela do celular foi removido ou trocado, e a chave que estava trancada com ele se perdeu. Apague os dados deste aparelho e restaure o seu backup.",
+    "trava.semBloqueio": "Para usar o bloqueio do celular, ative antes um bloqueio de tela no Android (PIN, padrão ou senha).",
     "trava.novoT": "Criar PIN", "trava.novo": "Escolha um PIN de 4 a 12 números. Evite datas e sequências.",
     "trava.repetirT": "Repita o PIN", "trava.repetir": "Digite o mesmo PIN de novo.",
     "trava.pinInvalido": "O PIN precisa ter de 4 a 12 números.", "trava.pinFraco": "Esse PIN é fácil demais. Escolha outro.", "trava.pinDif": "Os PINs não são iguais.",
@@ -2154,7 +2164,7 @@ const DebtIDTextos = {
 
     "aj.idCompleto": "Full ID, to check in person:",
     "aj.seguranca": "App lock",
-    "aj.segurancaIntro": "With the lock on, DebtID asks for a PIN when it opens. Someone who picks up your unlocked phone can't sign loans or copy your backup.",
+    "aj.segurancaIntro": "With the lock on, DebtID asks for a PIN or the phone's own lock when it opens, and the signing key is stored encrypted. Someone who picks up your unlocked phone can't sign loans or copy your backup.",
     "aj.contatos": "Contacts",
     "aj.contatosIntro": "People whose ID you have checked. DebtID recognizes each one by their key and warns you if someone shows up with the same name and a different key.",
     "aj.lembretes": "Due-date reminders",
@@ -2304,16 +2314,23 @@ const DebtIDTextos = {
     "bk.lembreteT": "Time for a new backup", "bk.lembrete": "Your last backup is from {data}, and there are new records since then.",
     "bk.lembreteNuncaT": "You don't have a backup yet", "bk.lembreteNunca": "If you lose this phone, you lose your profile and your proof. A backup takes a minute.",
     "bk.fazerAgora": "Back up now", "bk.depois": "Not now",
-    "trava.titulo": "DebtID is locked", "trava.confirmarT": "Confirm with your PIN", "trava.texto": "Enter your PIN to continue.", "trava.pin": "PIN",
-    "trava.entrar": "Unlock", "trava.bio": "Use fingerprint or face", "trava.bioTitulo": "Unlock DebtID", "trava.bioSub": "Use your fingerprint or face",
-    "trava.usarPin": "Use PIN", "trava.errado": "Wrong PIN. Tries left before a wait: {n}.", "trava.espere": "Too many tries. Wait {s} s.",
+    "trava.titulo": "DebtID is locked", "trava.confirmarT": "Confirm it's you", "trava.texto": "Enter your PIN to continue.", "trava.pin": "PIN",
+    "trava.entrar": "Unlock", "trava.bio": "Use fingerprint, face or screen lock", "trava.bioTitulo": "Unlock DebtID", "trava.bioSub": "Use your fingerprint, face or the phone's screen lock",
+    "trava.errado": "Wrong PIN. Tries left before a wait: {n}.", "trava.espere": "Too many tries. Wait {s} s.",
     "trava.esqueciBtn": "I forgot my PIN", "trava.esqueciT": "Forgot your PIN?",
     "trava.esqueci": "For your safety, the only way to remove the lock is to erase the data on this device. Then restore your backup with its password. Without a backup, the records are lost.",
     "trava.esqueciOk": "Erase and start over",
-    "trava.desligada": "Lock is off.", "trava.ligada": "Lock is on. The app asks for the PIN when it opens, when you come back after a while and before backups.",
+    "trava.desligada": "Lock is off.", "trava.ligada": "Lock is on. The app asks for the PIN when it opens, when you come back after a while and before backups. The signing key is stored encrypted with the PIN.",
     "trava.criar": "Create PIN", "trava.trocar": "Change PIN", "trava.remover": "Remove lock",
     "trava.tempo": "Lock after leaving the app", "trava.tempo0": "Right away", "trava.tempo60": "After 1 min", "trava.tempo300": "After 5 min",
-    "trava.usarBio": "Unlock with fingerprint or face",
+    "trava.usarCelular": "Use the phone's lock",
+    "trava.celularT": "Use the phone's lock?",
+    "trava.celular": "DebtID will ask for your fingerprint, your face or the phone's screen lock (PIN, pattern or password). The signing key will be locked by the phone's security chip. If you remove the phone's screen lock, this key is lost, so make a backup first.",
+    "trava.celularOk": "Turn on",
+    "trava.ligadaCelular": "Lock is on, using the phone's lock. The app asks for your fingerprint, face or screen lock when it opens, when you come back after a while and before backups. The signing key is locked by the phone's security chip.",
+    "trava.invalidaT": "The key no longer opens",
+    "trava.invalida": "The phone's screen lock was removed or reset, and the key that was locked with it is gone. Erase the data on this device and restore your backup.",
+    "trava.semBloqueio": "To use the phone's lock, first set a screen lock on Android (PIN, pattern or password).",
     "trava.novoT": "Create PIN", "trava.novo": "Choose a PIN of 4 to 12 digits. Avoid dates and sequences.",
     "trava.repetirT": "Repeat the PIN", "trava.repetir": "Enter the same PIN again.",
     "trava.pinInvalido": "The PIN must have 4 to 12 digits.", "trava.pinFraco": "That PIN is too easy. Choose another one.", "trava.pinDif": "The PINs don't match.",
@@ -2551,7 +2568,7 @@ const DebtIDTextos = {
 
     "aj.idCompleto": "ID completo, para verificar en persona:",
     "aj.seguranca": "Bloqueo de la app",
-    "aj.segurancaIntro": "Con el bloqueo, DebtID pide un PIN al abrirse. Así, quien tome tu teléfono desbloqueado no puede firmar préstamos ni copiar tu copia de seguridad.",
+    "aj.segurancaIntro": "Con el bloqueo, DebtID pide un PIN o el bloqueo del propio teléfono al abrirse, y la clave de firma se guarda cifrada. Así, quien tome tu teléfono desbloqueado no puede firmar préstamos ni copiar tu copia de seguridad.",
     "aj.contatos": "Contactos",
     "aj.contatosIntro": "Personas cuyo ID ya verificaste. DebtID reconoce a cada una por su clave y avisa si aparece alguien con el mismo nombre y otra clave.",
     "aj.lembretes": "Recordatorios de vencimiento",
@@ -2701,16 +2718,23 @@ const DebtIDTextos = {
     "bk.lembreteT": "Es hora de una copia de seguridad nueva", "bk.lembrete": "Tu última copia de seguridad es del {data} y desde entonces hay registros nuevos.",
     "bk.lembreteNuncaT": "Todavía no tienes copia de seguridad", "bk.lembreteNunca": "Si pierdes este teléfono, pierdes tu perfil y tus pruebas. Una copia de seguridad lleva un minuto.",
     "bk.fazerAgora": "Hacer copia de seguridad", "bk.depois": "Ahora no",
-    "trava.titulo": "DebtID está bloqueado", "trava.confirmarT": "Confirma con tu PIN", "trava.texto": "Escribe tu PIN para continuar.", "trava.pin": "PIN",
-    "trava.entrar": "Desbloquear", "trava.bio": "Usar huella o rostro", "trava.bioTitulo": "Desbloquear DebtID", "trava.bioSub": "Usa tu huella o tu rostro",
-    "trava.usarPin": "Usar PIN", "trava.errado": "PIN incorrecto. Intentos antes de esperar: {n}.", "trava.espere": "Demasiados intentos. Espera {s} s.",
+    "trava.titulo": "DebtID está bloqueado", "trava.confirmarT": "Confirma que eres tú", "trava.texto": "Escribe tu PIN para continuar.", "trava.pin": "PIN",
+    "trava.entrar": "Desbloquear", "trava.bio": "Usar huella, rostro o bloqueo de pantalla", "trava.bioTitulo": "Desbloquear DebtID", "trava.bioSub": "Usa tu huella, tu rostro o el bloqueo de pantalla del teléfono",
+    "trava.errado": "PIN incorrecto. Intentos antes de esperar: {n}.", "trava.espere": "Demasiados intentos. Espera {s} s.",
     "trava.esqueciBtn": "Olvidé el PIN", "trava.esqueciT": "¿Olvidaste el PIN?",
     "trava.esqueci": "Por seguridad, la única forma de quitar el bloqueo es borrar los datos de este dispositivo. Después restauras la copia de seguridad con su contraseña. Sin copia de seguridad, los registros se pierden.",
     "trava.esqueciOk": "Borrar y empezar de nuevo",
-    "trava.desligada": "Bloqueo desactivado.", "trava.ligada": "Bloqueo activado. La app pide el PIN al abrirse, al volver después de un rato y antes de las copias de seguridad.",
+    "trava.desligada": "Bloqueo desactivado.", "trava.ligada": "Bloqueo activado. La app pide el PIN al abrirse, al volver después de un rato y antes de las copias de seguridad. La clave de firma se guarda cifrada con el PIN.",
     "trava.criar": "Crear PIN", "trava.trocar": "Cambiar PIN", "trava.remover": "Quitar bloqueo",
     "trava.tempo": "Bloquear al salir de la app", "trava.tempo0": "Al instante", "trava.tempo60": "Tras 1 min", "trava.tempo300": "Tras 5 min",
-    "trava.usarBio": "Desbloquear con huella o rostro",
+    "trava.usarCelular": "Usar el bloqueo del teléfono",
+    "trava.celularT": "¿Usar el bloqueo del teléfono?",
+    "trava.celular": "DebtID pedirá la huella, el rostro o el bloqueo de pantalla del teléfono (PIN, patrón o contraseña). La clave de firma quedará protegida por el chip de seguridad del teléfono. Si quitas el bloqueo de pantalla del teléfono, esa clave se pierde, así que haz antes una copia de seguridad.",
+    "trava.celularOk": "Activar",
+    "trava.ligadaCelular": "Bloqueo activado con el bloqueo del teléfono. La app pide la huella, el rostro o el bloqueo de pantalla al abrirse, al volver después de un rato y antes de las copias de seguridad. La clave de firma queda protegida por el chip de seguridad del teléfono.",
+    "trava.invalidaT": "La clave ya no se abre",
+    "trava.invalida": "Se quitó o se cambió el bloqueo de pantalla del teléfono, y la clave que estaba protegida con él se perdió. Borra los datos de este dispositivo y restaura tu copia de seguridad.",
+    "trava.semBloqueio": "Para usar el bloqueo del teléfono, primero activa un bloqueo de pantalla en Android (PIN, patrón o contraseña).",
     "trava.novoT": "Crear PIN", "trava.novo": "Elige un PIN de 4 a 12 números. Evita fechas y secuencias.",
     "trava.repetirT": "Repite el PIN", "trava.repetir": "Escribe el mismo PIN otra vez.",
     "trava.pinInvalido": "El PIN debe tener de 4 a 12 números.", "trava.pinFraco": "Ese PIN es demasiado fácil. Elige otro.", "trava.pinDif": "Los PIN no coinciden.",
@@ -2994,7 +3018,7 @@ DebtIDTextos.ar = {
 
   "aj.idCompleto": "المعرّف الكامل، للمطابقة وجهًا لوجه:",
   "aj.seguranca": "قفل التطبيق",
-  "aj.segurancaIntro": "عند تفعيل القفل يطلب DebtID رمز PIN عند الفتح. ومن يأخذ هاتفك وهو غير مقفل لا يستطيع توقيع قروض ولا نسخ نسختك الاحتياطية.",
+  "aj.segurancaIntro": "عند تفعيل القفل يطلب DebtID رمز PIN أو قفل الهاتف نفسه عند الفتح، ويُحفظ مفتاح التوقيع مشفّرًا. ومن يأخذ هاتفك وهو غير مقفل لا يستطيع توقيع قروض ولا نسخ نسختك الاحتياطية.",
   "aj.contatos": "جهات الاتصال",
   "aj.contatosIntro": "أشخاص طابقت معرّفاتهم. يتعرف DebtID على كل منهم من مفتاحه، وينبّهك إذا ظهر شخص بالاسم نفسه ومفتاح مختلف.",
   "aj.lembretes": "تذكيرات الاستحقاق",
@@ -3144,16 +3168,23 @@ DebtIDTextos.ar = {
   "bk.lembreteT": "حان وقت نسخة احتياطية جديدة", "bk.lembrete": "آخر نسخة احتياطية لديك من {data}، وأُضيفت سجلات جديدة منذ ذلك الحين.",
   "bk.lembreteNuncaT": "ليس لديك نسخة احتياطية بعد", "bk.lembreteNunca": "إذا فقدت هذا الهاتف، فقدت ملفك وأدلتك. النسخة الاحتياطية تأخذ دقيقة.",
   "bk.fazerAgora": "أنشئ نسخة الآن", "bk.depois": "ليس الآن",
-  "trava.titulo": "DebtID مقفل", "trava.confirmarT": "أكّد برمز PIN", "trava.texto": "أدخل رمز PIN للمتابعة.", "trava.pin": "رمز PIN",
-  "trava.entrar": "فتح القفل", "trava.bio": "استخدم البصمة أو الوجه", "trava.bioTitulo": "فتح قفل DebtID", "trava.bioSub": "استخدم بصمتك أو وجهك",
-  "trava.usarPin": "استخدم رمز PIN", "trava.errado": "رمز PIN خاطئ. المحاولات المتبقية قبل الانتظار: {n}.", "trava.espere": "محاولات كثيرة. انتظر {s} ث.",
+  "trava.titulo": "DebtID مقفل", "trava.confirmarT": "أكّد أنك أنت", "trava.texto": "أدخل رمز PIN للمتابعة.", "trava.pin": "رمز PIN",
+  "trava.entrar": "فتح القفل", "trava.bio": "استخدم البصمة أو الوجه أو قفل الشاشة", "trava.bioTitulo": "فتح قفل DebtID", "trava.bioSub": "استخدم بصمتك أو وجهك أو قفل شاشة الهاتف",
+  "trava.errado": "رمز PIN خاطئ. المحاولات المتبقية قبل الانتظار: {n}.", "trava.espere": "محاولات كثيرة. انتظر {s} ث.",
   "trava.esqueciBtn": "نسيت رمز PIN", "trava.esqueciT": "نسيت رمز PIN؟",
   "trava.esqueci": "حفاظًا على أمانك، الطريقة الوحيدة لإزالة القفل هي حذف البيانات من هذا الجهاز. بعدها استعد نسختك الاحتياطية بكلمة مرورها. ومن دون نسخة احتياطية تضيع السجلات.",
   "trava.esqueciOk": "احذف وابدأ من جديد",
-  "trava.desligada": "القفل غير مفعّل.", "trava.ligada": "القفل مفعّل. يطلب التطبيق رمز PIN عند الفتح، وعند العودة بعد فترة، وقبل النسخ الاحتياطي.",
+  "trava.desligada": "القفل غير مفعّل.", "trava.ligada": "القفل مفعّل. يطلب التطبيق رمز PIN عند الفتح، وعند العودة بعد فترة، وقبل النسخ الاحتياطي. ويُحفظ مفتاح التوقيع مشفّرًا برمز PIN.",
   "trava.criar": "إنشاء رمز PIN", "trava.trocar": "تغيير رمز PIN", "trava.remover": "إزالة القفل",
   "trava.tempo": "القفل بعد مغادرة التطبيق", "trava.tempo0": "فورًا", "trava.tempo60": "بعد دقيقة", "trava.tempo300": "بعد 5 دقائق",
-  "trava.usarBio": "فتح القفل بالبصمة أو الوجه",
+  "trava.usarCelular": "استخدام قفل الهاتف",
+  "trava.celularT": "استخدام قفل الهاتف؟",
+  "trava.celular": "سيطلب DebtID بصمتك أو وجهك أو قفل شاشة الهاتف (رمز PIN أو النمط أو كلمة المرور). وسيُقفَل مفتاح التوقيع بشريحة الأمان في الهاتف. إذا أزلت قفل شاشة الهاتف يضيع هذا المفتاح، فأنشئ نسخة احتياطية أولًا.",
+  "trava.celularOk": "تفعيل",
+  "trava.ligadaCelular": "القفل مفعّل بقفل الهاتف. يطلب التطبيق البصمة أو الوجه أو قفل الشاشة عند الفتح، وعند العودة بعد فترة، وقبل النسخ الاحتياطي. مفتاح التوقيع مقفل بشريحة الأمان في الهاتف.",
+  "trava.invalidaT": "المفتاح لم يعد يُفتح",
+  "trava.invalida": "أُزيل قفل شاشة الهاتف أو أُعيد ضبطه، فضاع المفتاح الذي كان مقفلًا به. احذف البيانات من هذا الجهاز واستعد نسختك الاحتياطية.",
+  "trava.semBloqueio": "لاستخدام قفل الهاتف، فعّل أولًا قفلًا للشاشة في Android (رمز PIN أو النمط أو كلمة المرور).",
   "trava.novoT": "إنشاء رمز PIN", "trava.novo": "اختر رمز PIN من 4 إلى 12 رقمًا. تجنّب التواريخ والتسلسلات.",
   "trava.repetirT": "أعد إدخال رمز PIN", "trava.repetir": "أدخل رمز PIN نفسه مرة أخرى.",
   "trava.pinInvalido": "يجب أن يتكون رمز PIN من 4 إلى 12 رقمًا.", "trava.pinFraco": "رمز PIN هذا سهل جدًا. اختر رمزًا آخر.", "trava.pinDif": "رمزا PIN غير متطابقين.",
@@ -3391,7 +3422,7 @@ DebtIDTextos.bn = {
 
   "aj.idCompleto": "পুরো ID, সামনাসামনি মিলিয়ে দেখার জন্য:",
   "aj.seguranca": "অ্যাপ লক",
-  "aj.segurancaIntro": "লক চালু থাকলে DebtID খোলার সময় PIN চায়। আপনার আনলক করা ফোন কারও হাতে পড়লেও তিনি ধারে স্বাক্ষর করতে বা আপনার ব্যাকআপ কপি করতে পারবেন না।",
+  "aj.segurancaIntro": "লক চালু থাকলে DebtID খোলার সময় PIN বা ফোনের নিজের লক চায়, আর স্বাক্ষর-চাবি এনক্রিপ্ট করে রাখা হয়। আপনার আনলক করা ফোন কারও হাতে পড়লেও তিনি ধারে স্বাক্ষর করতে বা আপনার ব্যাকআপ কপি করতে পারবেন না।",
   "aj.contatos": "পরিচিতি",
   "aj.contatosIntro": "যাঁদের ID আপনি মিলিয়ে দেখেছেন। DebtID প্রত্যেককে তাঁর চাবি দিয়ে চেনে, আর একই নামে অন্য চাবি নিয়ে কেউ এলে আপনাকে সতর্ক করে।",
   "aj.lembretes": "পরিশোধের তারিখের রিমাইন্ডার",
@@ -3541,16 +3572,23 @@ DebtIDTextos.bn = {
   "bk.lembreteT": "নতুন ব্যাকআপ নেওয়ার সময়", "bk.lembrete": "আপনার শেষ ব্যাকআপ {data} তারিখের, আর তারপর নতুন রেকর্ড যোগ হয়েছে।",
   "bk.lembreteNuncaT": "আপনার এখনো কোনো ব্যাকআপ নেই", "bk.lembreteNunca": "এই ফোন হারালে আপনার প্রোফাইল আর প্রমাণও হারাবেন। ব্যাকআপ নিতে এক মিনিট লাগে।",
   "bk.fazerAgora": "এখনই ব্যাকআপ নিন", "bk.depois": "পরে",
-  "trava.titulo": "DebtID লক করা আছে", "trava.confirmarT": "আপনার PIN দিয়ে নিশ্চিত করুন", "trava.texto": "চালিয়ে যেতে আপনার PIN দিন।", "trava.pin": "PIN",
-  "trava.entrar": "আনলক করুন", "trava.bio": "আঙুলের ছাপ বা মুখ ব্যবহার করুন", "trava.bioTitulo": "DebtID আনলক করুন", "trava.bioSub": "আপনার আঙুলের ছাপ বা মুখ ব্যবহার করুন",
-  "trava.usarPin": "PIN ব্যবহার করুন", "trava.errado": "ভুল PIN। অপেক্ষার আগে বাকি চেষ্টা: {n}।", "trava.espere": "অনেকবার চেষ্টা হয়েছে। {s} সেকেন্ড অপেক্ষা করুন।",
+  "trava.titulo": "DebtID লক করা আছে", "trava.confirmarT": "নিশ্চিত করুন যে এটি আপনি", "trava.texto": "চালিয়ে যেতে আপনার PIN দিন।", "trava.pin": "PIN",
+  "trava.entrar": "আনলক করুন", "trava.bio": "আঙুলের ছাপ, মুখ বা স্ক্রিন লক ব্যবহার করুন", "trava.bioTitulo": "DebtID আনলক করুন", "trava.bioSub": "আপনার আঙুলের ছাপ, মুখ বা ফোনের স্ক্রিন লক ব্যবহার করুন",
+  "trava.errado": "ভুল PIN। অপেক্ষার আগে বাকি চেষ্টা: {n}।", "trava.espere": "অনেকবার চেষ্টা হয়েছে। {s} সেকেন্ড অপেক্ষা করুন।",
   "trava.esqueciBtn": "PIN মনে নেই", "trava.esqueciT": "PIN ভুলে গেছেন?",
   "trava.esqueci": "নিরাপত্তার জন্য লক সরানোর একমাত্র উপায় হলো এই ডিভাইসের ডেটা মুছে ফেলা। তারপর পাসওয়ার্ড দিয়ে আপনার ব্যাকআপ ফিরিয়ে আনুন। ব্যাকআপ না থাকলে রেকর্ড হারিয়ে যাবে।",
   "trava.esqueciOk": "মুছে নতুন করে শুরু করুন",
-  "trava.desligada": "লক বন্ধ আছে।", "trava.ligada": "লক চালু আছে। অ্যাপ খোলার সময়, কিছুক্ষণ পরে ফিরলে এবং ব্যাকআপের আগে PIN চায়।",
+  "trava.desligada": "লক বন্ধ আছে।", "trava.ligada": "লক চালু আছে। অ্যাপ খোলার সময়, কিছুক্ষণ পরে ফিরলে এবং ব্যাকআপের আগে PIN চায়। স্বাক্ষর-চাবি PIN দিয়ে এনক্রিপ্ট করে রাখা হয়।",
   "trava.criar": "PIN তৈরি করুন", "trava.trocar": "PIN বদলান", "trava.remover": "লক সরান",
   "trava.tempo": "অ্যাপ ছাড়ার পরে লক করুন", "trava.tempo0": "সঙ্গে সঙ্গে", "trava.tempo60": "১ মিনিট পরে", "trava.tempo300": "৫ মিনিট পরে",
-  "trava.usarBio": "আঙুলের ছাপ বা মুখ দিয়ে আনলক করুন",
+  "trava.usarCelular": "ফোনের লক ব্যবহার করুন",
+  "trava.celularT": "ফোনের লক ব্যবহার করবেন?",
+  "trava.celular": "DebtID আপনার আঙুলের ছাপ, মুখ বা ফোনের স্ক্রিন লক (PIN, প্যাটার্ন বা পাসওয়ার্ড) চাইবে। স্বাক্ষর-চাবি ফোনের নিরাপত্তা চিপ দিয়ে তালাবদ্ধ থাকবে। ফোনের স্ক্রিন লক সরিয়ে দিলে এই চাবি হারিয়ে যাবে, তাই আগে ব্যাকআপ নিন।",
+  "trava.celularOk": "চালু করুন",
+  "trava.ligadaCelular": "ফোনের লক দিয়ে অ্যাপ লক চালু আছে। অ্যাপ খোলার সময়, কিছুক্ষণ পরে ফিরলে এবং ব্যাকআপের আগে আঙুলের ছাপ, মুখ বা স্ক্রিন লক চায়। স্বাক্ষর-চাবি ফোনের নিরাপত্তা চিপ দিয়ে তালাবদ্ধ থাকে।",
+  "trava.invalidaT": "চাবি আর খুলছে না",
+  "trava.invalida": "ফোনের স্ক্রিন লক সরানো বা বদলানো হয়েছে, আর তার সঙ্গে তালাবদ্ধ চাবিটি হারিয়ে গেছে। এই ডিভাইসের ডেটা মুছে আপনার ব্যাকআপ ফিরিয়ে আনুন।",
+  "trava.semBloqueio": "ফোনের লক ব্যবহার করতে আগে Android-এ একটি স্ক্রিন লক (PIN, প্যাটার্ন বা পাসওয়ার্ড) চালু করুন।",
   "trava.novoT": "PIN তৈরি করুন", "trava.novo": "৪ থেকে ১২ অঙ্কের একটি PIN বেছে নিন। তারিখ আর ক্রমিক সংখ্যা এড়িয়ে চলুন।",
   "trava.repetirT": "PIN আবার দিন", "trava.repetir": "একই PIN আরেকবার দিন।",
   "trava.pinInvalido": "PIN-এ ৪ থেকে ১২টি অঙ্ক থাকতে হবে।", "trava.pinFraco": "এই PIN খুব সহজ। অন্য একটি বেছে নিন।", "trava.pinDif": "PIN মিলছে না।",
@@ -3788,7 +3826,7 @@ DebtIDTextos.de = {
 
   "aj.idCompleto": "Vollständige ID, zum persönlichen Abgleich:",
   "aj.seguranca": "App-Sperre",
-  "aj.segurancaIntro": "Mit der Sperre fragt DebtID beim Öffnen nach einer PIN. Wer dein entsperrtes Handy in die Hand bekommt, kann dann weder Darlehen unterschreiben noch dein Backup kopieren.",
+  "aj.segurancaIntro": "Mit der Sperre fragt DebtID beim Öffnen nach einer PIN oder der Displaysperre des Handys, und der Signaturschlüssel wird verschlüsselt gespeichert. Wer dein entsperrtes Handy in die Hand bekommt, kann dann weder Darlehen unterschreiben noch dein Backup kopieren.",
   "aj.contatos": "Kontakte",
   "aj.contatosIntro": "Personen, deren ID du geprüft hast. DebtID erkennt jede an ihrem Schlüssel und warnt dich, wenn jemand mit demselben Namen und einem anderen Schlüssel auftaucht.",
   "aj.lembretes": "Erinnerungen an Fälligkeiten",
@@ -3938,16 +3976,23 @@ DebtIDTextos.de = {
   "bk.lembreteT": "Zeit für ein neues Backup", "bk.lembrete": "Dein letztes Backup ist vom {data}, und seitdem gibt es neue Einträge.",
   "bk.lembreteNuncaT": "Du hast noch kein Backup", "bk.lembreteNunca": "Wenn du dieses Handy verlierst, verlierst du dein Profil und deine Belege. Ein Backup dauert eine Minute.",
   "bk.fazerAgora": "Jetzt sichern", "bk.depois": "Später",
-  "trava.titulo": "DebtID ist gesperrt", "trava.confirmarT": "Mit deiner PIN bestätigen", "trava.texto": "Gib deine PIN ein, um fortzufahren.", "trava.pin": "PIN",
-  "trava.entrar": "Entsperren", "trava.bio": "Fingerabdruck oder Gesicht verwenden", "trava.bioTitulo": "DebtID entsperren", "trava.bioSub": "Verwende deinen Fingerabdruck oder dein Gesicht",
-  "trava.usarPin": "PIN verwenden", "trava.errado": "Falsche PIN. Versuche bis zur Wartezeit: {n}.", "trava.espere": "Zu viele Versuche. Warte {s} s.",
+  "trava.titulo": "DebtID ist gesperrt", "trava.confirmarT": "Bestätige, dass du es bist", "trava.texto": "Gib deine PIN ein, um fortzufahren.", "trava.pin": "PIN",
+  "trava.entrar": "Entsperren", "trava.bio": "Fingerabdruck, Gesicht oder Displaysperre verwenden", "trava.bioTitulo": "DebtID entsperren", "trava.bioSub": "Verwende deinen Fingerabdruck, dein Gesicht oder die Displaysperre des Handys",
+  "trava.errado": "Falsche PIN. Versuche bis zur Wartezeit: {n}.", "trava.espere": "Zu viele Versuche. Warte {s} s.",
   "trava.esqueciBtn": "Ich habe meine PIN vergessen", "trava.esqueciT": "PIN vergessen?",
   "trava.esqueci": "Zu deiner Sicherheit lässt sich die Sperre nur entfernen, indem die Daten auf diesem Gerät gelöscht werden. Stelle danach dein Backup mit seinem Passwort wieder her. Ohne Backup gehen die Einträge verloren.",
   "trava.esqueciOk": "Löschen und neu anfangen",
-  "trava.desligada": "Die Sperre ist aus.", "trava.ligada": "Die Sperre ist an. Die App fragt nach der PIN beim Öffnen, wenn du nach einer Weile zurückkommst und vor Backups.",
+  "trava.desligada": "Die Sperre ist aus.", "trava.ligada": "Die Sperre ist an. Die App fragt nach der PIN beim Öffnen, wenn du nach einer Weile zurückkommst und vor Backups. Der Signaturschlüssel wird mit der PIN verschlüsselt gespeichert.",
   "trava.criar": "PIN erstellen", "trava.trocar": "PIN ändern", "trava.remover": "Sperre entfernen",
   "trava.tempo": "Sperren nach Verlassen der App", "trava.tempo0": "Sofort", "trava.tempo60": "Nach 1 Min.", "trava.tempo300": "Nach 5 Min.",
-  "trava.usarBio": "Mit Fingerabdruck oder Gesicht entsperren",
+  "trava.usarCelular": "Displaysperre des Handys verwenden",
+  "trava.celularT": "Displaysperre des Handys verwenden?",
+  "trava.celular": "DebtID fragt dann nach deinem Fingerabdruck, deinem Gesicht oder der Displaysperre des Handys (PIN, Muster oder Passwort). Der Signaturschlüssel wird vom Sicherheitschip des Handys verschlossen. Wenn du die Displaysperre des Handys entfernst, geht dieser Schlüssel verloren. Erstelle also vorher ein Backup.",
+  "trava.celularOk": "Aktivieren",
+  "trava.ligadaCelular": "Die Sperre ist an und nutzt die Displaysperre des Handys. Die App fragt beim Öffnen, wenn du nach einer Weile zurückkommst und vor Backups nach Fingerabdruck, Gesicht oder Displaysperre. Der Signaturschlüssel ist vom Sicherheitschip des Handys verschlossen.",
+  "trava.invalidaT": "Der Schlüssel lässt sich nicht mehr öffnen",
+  "trava.invalida": "Die Displaysperre des Handys wurde entfernt oder zurückgesetzt, und der damit verschlossene Schlüssel ist verloren. Lösche die Daten auf diesem Gerät und stelle dein Backup wieder her.",
+  "trava.semBloqueio": "Um die Displaysperre des Handys zu nutzen, richte zuerst eine Displaysperre in Android ein (PIN, Muster oder Passwort).",
   "trava.novoT": "PIN erstellen", "trava.novo": "Wähle eine PIN mit 4 bis 12 Ziffern. Vermeide Daten und Zahlenfolgen.",
   "trava.repetirT": "PIN wiederholen", "trava.repetir": "Gib dieselbe PIN noch einmal ein.",
   "trava.pinInvalido": "Die PIN muss 4 bis 12 Ziffern haben.", "trava.pinFraco": "Diese PIN ist zu einfach. Wähle eine andere.", "trava.pinDif": "Die PINs stimmen nicht überein.",
@@ -4185,7 +4230,7 @@ DebtIDTextos.fr = {
 
   "aj.idCompleto": "ID complet, à vérifier en personne :",
   "aj.seguranca": "Verrouillage de l'application",
-  "aj.segurancaIntro": "Avec le verrouillage, DebtID demande un code PIN à l'ouverture. Quelqu'un qui prend votre téléphone déverrouillé ne peut ni signer de prêts ni copier votre sauvegarde.",
+  "aj.segurancaIntro": "Avec le verrouillage, DebtID demande un code PIN ou le verrouillage du téléphone à l'ouverture, et la clé de signature est enregistrée chiffrée. Quelqu'un qui prend votre téléphone déverrouillé ne peut ni signer de prêts ni copier votre sauvegarde.",
   "aj.contatos": "Contacts",
   "aj.contatosIntro": "Les personnes dont vous avez vérifié l'ID. DebtID reconnaît chacune par sa clé et vous prévient si quelqu'un apparaît avec le même nom et une autre clé.",
   "aj.lembretes": "Rappels d'échéance",
@@ -4335,16 +4380,23 @@ DebtIDTextos.fr = {
   "bk.lembreteT": "C'est le moment d'une nouvelle sauvegarde", "bk.lembrete": "Votre dernière sauvegarde date du {data}, et il y a de nouveaux registres depuis.",
   "bk.lembreteNuncaT": "Vous n'avez pas encore de sauvegarde", "bk.lembreteNunca": "Si vous perdez ce téléphone, vous perdez votre profil et vos preuves. Une sauvegarde prend une minute.",
   "bk.fazerAgora": "Sauvegarder maintenant", "bk.depois": "Plus tard",
-  "trava.titulo": "DebtID est verrouillé", "trava.confirmarT": "Confirmez avec votre PIN", "trava.texto": "Saisissez votre PIN pour continuer.", "trava.pin": "PIN",
-  "trava.entrar": "Déverrouiller", "trava.bio": "Utiliser l'empreinte ou le visage", "trava.bioTitulo": "Déverrouiller DebtID", "trava.bioSub": "Utilisez votre empreinte ou votre visage",
-  "trava.usarPin": "Utiliser le PIN", "trava.errado": "PIN incorrect. Essais restants avant une attente : {n}.", "trava.espere": "Trop d'essais. Attendez {s} s.",
+  "trava.titulo": "DebtID est verrouillé", "trava.confirmarT": "Confirmez que c'est bien vous", "trava.texto": "Saisissez votre PIN pour continuer.", "trava.pin": "PIN",
+  "trava.entrar": "Déverrouiller", "trava.bio": "Utiliser l'empreinte, le visage ou le verrouillage d'écran", "trava.bioTitulo": "Déverrouiller DebtID", "trava.bioSub": "Utilisez votre empreinte, votre visage ou le verrouillage d'écran du téléphone",
+  "trava.errado": "PIN incorrect. Essais restants avant une attente : {n}.", "trava.espere": "Trop d'essais. Attendez {s} s.",
   "trava.esqueciBtn": "J'ai oublié mon PIN", "trava.esqueciT": "PIN oublié ?",
   "trava.esqueci": "Pour votre sécurité, la seule façon de retirer le verrouillage est d'effacer les données de cet appareil. Restaurez ensuite votre sauvegarde avec son mot de passe. Sans sauvegarde, les registres sont perdus.",
   "trava.esqueciOk": "Effacer et recommencer",
-  "trava.desligada": "Le verrouillage est désactivé.", "trava.ligada": "Le verrouillage est activé. L'application demande le PIN à l'ouverture, quand vous revenez après un moment et avant les sauvegardes.",
+  "trava.desligada": "Le verrouillage est désactivé.", "trava.ligada": "Le verrouillage est activé. L'application demande le PIN à l'ouverture, quand vous revenez après un moment et avant les sauvegardes. La clé de signature est enregistrée chiffrée avec le PIN.",
   "trava.criar": "Créer un PIN", "trava.trocar": "Changer le PIN", "trava.remover": "Retirer le verrouillage",
   "trava.tempo": "Verrouiller après avoir quitté l'application", "trava.tempo0": "Immédiatement", "trava.tempo60": "Après 1 min", "trava.tempo300": "Après 5 min",
-  "trava.usarBio": "Déverrouiller avec l'empreinte ou le visage",
+  "trava.usarCelular": "Utiliser le verrouillage du téléphone",
+  "trava.celularT": "Utiliser le verrouillage du téléphone ?",
+  "trava.celular": "DebtID demandera votre empreinte, votre visage ou le verrouillage d'écran du téléphone (code, schéma ou mot de passe). La clé de signature sera protégée par la puce de sécurité du téléphone. Si vous retirez le verrouillage d'écran du téléphone, cette clé est perdue : faites d'abord une sauvegarde.",
+  "trava.celularOk": "Activer",
+  "trava.ligadaCelular": "Verrouillage activé avec le verrouillage du téléphone. L'application demande l'empreinte, le visage ou le verrouillage d'écran à l'ouverture, quand vous revenez après un moment et avant les sauvegardes. La clé de signature est protégée par la puce de sécurité du téléphone.",
+  "trava.invalidaT": "La clé ne s'ouvre plus",
+  "trava.invalida": "Le verrouillage d'écran du téléphone a été retiré ou réinitialisé, et la clé qu'il protégeait est perdue. Effacez les données de cet appareil et restaurez votre sauvegarde.",
+  "trava.semBloqueio": "Pour utiliser le verrouillage du téléphone, activez d'abord un verrouillage d'écran dans Android (code, schéma ou mot de passe).",
   "trava.novoT": "Créer un PIN", "trava.novo": "Choisissez un PIN de 4 à 12 chiffres. Évitez les dates et les suites.",
   "trava.repetirT": "Répétez le PIN", "trava.repetir": "Saisissez de nouveau le même PIN.",
   "trava.pinInvalido": "Le PIN doit avoir de 4 à 12 chiffres.", "trava.pinFraco": "Ce PIN est trop facile. Choisissez-en un autre.", "trava.pinDif": "Les PIN ne correspondent pas.",
@@ -4582,7 +4634,7 @@ DebtIDTextos.hi = {
 
   "aj.idCompleto": "पूरी ID, आमने-सामने जाँचने के लिए:",
   "aj.seguranca": "ऐप लॉक",
-  "aj.segurancaIntro": "लॉक चालू होने पर DebtID खुलते समय PIN माँगता है। आपका अनलॉक फ़ोन किसी के हाथ लग जाए, तब भी वह उधार पर हस्ताक्षर नहीं कर पाएगा और न ही आपका बैकअप कॉपी कर पाएगा।",
+  "aj.segurancaIntro": "लॉक चालू होने पर DebtID खुलते समय PIN या फ़ोन का अपना लॉक माँगता है, और हस्ताक्षर कुंजी एन्क्रिप्ट करके रखी जाती है। आपका अनलॉक फ़ोन किसी के हाथ लग जाए, तब भी वह उधार पर हस्ताक्षर नहीं कर पाएगा और न ही आपका बैकअप कॉपी कर पाएगा।",
   "aj.contatos": "संपर्क",
   "aj.contatosIntro": "वे लोग जिनकी ID आप जाँच चुके हैं। DebtID हर व्यक्ति को उसकी कुंजी से पहचानता है और अगर कोई उसी नाम पर दूसरी कुंजी के साथ आए तो आपको चेतावनी देता है।",
   "aj.lembretes": "देय तिथि के रिमाइंडर",
@@ -4732,16 +4784,23 @@ DebtIDTextos.hi = {
   "bk.lembreteT": "नया बैकअप बनाने का समय", "bk.lembrete": "आपका आखिरी बैकअप {data} का है, और उसके बाद नए रिकॉर्ड जुड़े हैं।",
   "bk.lembreteNuncaT": "आपके पास अभी कोई बैकअप नहीं", "bk.lembreteNunca": "यह फ़ोन खो गया तो आपकी प्रोफ़ाइल और सबूत भी खो जाएँगे। बैकअप में बस एक मिनट लगता है।",
   "bk.fazerAgora": "अभी बैकअप लें", "bk.depois": "बाद में",
-  "trava.titulo": "DebtID लॉक है", "trava.confirmarT": "अपने PIN से पुष्टि करें", "trava.texto": "आगे बढ़ने के लिए अपना PIN डालें।", "trava.pin": "PIN",
-  "trava.entrar": "अनलॉक करें", "trava.bio": "फ़िंगरप्रिंट या चेहरा इस्तेमाल करें", "trava.bioTitulo": "DebtID अनलॉक करें", "trava.bioSub": "अपना फ़िंगरप्रिंट या चेहरा इस्तेमाल करें",
-  "trava.usarPin": "PIN इस्तेमाल करें", "trava.errado": "गलत PIN। इंतज़ार से पहले बची कोशिशें: {n}।", "trava.espere": "बहुत ज़्यादा कोशिशें। {s} सेकंड रुकें।",
+  "trava.titulo": "DebtID लॉक है", "trava.confirmarT": "पुष्टि करें कि यह आप हैं", "trava.texto": "आगे बढ़ने के लिए अपना PIN डालें।", "trava.pin": "PIN",
+  "trava.entrar": "अनलॉक करें", "trava.bio": "फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक इस्तेमाल करें", "trava.bioTitulo": "DebtID अनलॉक करें", "trava.bioSub": "अपना फ़िंगरप्रिंट, चेहरा या फ़ोन का स्क्रीन लॉक इस्तेमाल करें",
+  "trava.errado": "गलत PIN। इंतज़ार से पहले बची कोशिशें: {n}।", "trava.espere": "बहुत ज़्यादा कोशिशें। {s} सेकंड रुकें।",
   "trava.esqueciBtn": "PIN याद नहीं", "trava.esqueciT": "PIN भूल गए?",
   "trava.esqueci": "आपकी सुरक्षा के लिए लॉक हटाने का एक ही तरीका है: इस डिवाइस का डेटा मिटाना। उसके बाद अपना बैकअप उसके पासवर्ड से वापस लाएँ। बैकअप के बिना रिकॉर्ड खो जाएँगे।",
   "trava.esqueciOk": "मिटाएँ और नए सिरे से शुरू करें",
-  "trava.desligada": "लॉक बंद है।", "trava.ligada": "लॉक चालू है। ऐप खुलते समय, कुछ देर बाद लौटने पर और बैकअप से पहले PIN माँगता है।",
+  "trava.desligada": "लॉक बंद है।", "trava.ligada": "लॉक चालू है। ऐप खुलते समय, कुछ देर बाद लौटने पर और बैकअप से पहले PIN माँगता है। हस्ताक्षर कुंजी PIN से एन्क्रिप्ट करके रखी जाती है।",
   "trava.criar": "PIN बनाएँ", "trava.trocar": "PIN बदलें", "trava.remover": "लॉक हटाएँ",
   "trava.tempo": "ऐप छोड़ने के बाद लॉक करें", "trava.tempo0": "तुरंत", "trava.tempo60": "1 मिनट बाद", "trava.tempo300": "5 मिनट बाद",
-  "trava.usarBio": "फ़िंगरप्रिंट या चेहरे से अनलॉक करें",
+  "trava.usarCelular": "फ़ोन का लॉक इस्तेमाल करें",
+  "trava.celularT": "फ़ोन का लॉक इस्तेमाल करें?",
+  "trava.celular": "DebtID आपका फ़िंगरप्रिंट, चेहरा या फ़ोन का स्क्रीन लॉक (PIN, पैटर्न या पासवर्ड) माँगेगा। हस्ताक्षर कुंजी फ़ोन की सुरक्षा चिप से बंद रहेगी। अगर आप फ़ोन का स्क्रीन लॉक हटा देते हैं, तो यह कुंजी खो जाएगी, इसलिए पहले बैकअप बना लें।",
+  "trava.celularOk": "चालू करें",
+  "trava.ligadaCelular": "फ़ोन के लॉक के साथ ऐप लॉक चालू है। ऐप खुलते समय, कुछ देर बाद लौटने पर और बैकअप से पहले फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक माँगता है। हस्ताक्षर कुंजी फ़ोन की सुरक्षा चिप से बंद रहती है।",
+  "trava.invalidaT": "कुंजी अब नहीं खुलती",
+  "trava.invalida": "फ़ोन का स्क्रीन लॉक हटा दिया गया या बदल दिया गया, और उससे बंद कुंजी खो गई। इस डिवाइस का डेटा मिटाएँ और अपना बैकअप वापस लाएँ।",
+  "trava.semBloqueio": "फ़ोन का लॉक इस्तेमाल करने के लिए पहले Android में स्क्रीन लॉक (PIN, पैटर्न या पासवर्ड) चालू करें।",
   "trava.novoT": "PIN बनाएँ", "trava.novo": "4 से 12 अंकों का PIN चुनें। तारीखों और क्रम वाले अंकों से बचें।",
   "trava.repetirT": "PIN दोबारा डालें", "trava.repetir": "वही PIN फिर से डालें।",
   "trava.pinInvalido": "PIN में 4 से 12 अंक होने चाहिए।", "trava.pinFraco": "यह PIN बहुत आसान है। कोई दूसरा चुनें।", "trava.pinDif": "PIN मेल नहीं खाते।",
@@ -4979,7 +5038,7 @@ DebtIDTextos.id = {
 
   "aj.idCompleto": "ID lengkap, untuk diperiksa langsung:",
   "aj.seguranca": "Kunci aplikasi",
-  "aj.segurancaIntro": "Dengan kunci aktif, DebtID meminta PIN saat dibuka. Orang yang memegang ponsel Anda dalam keadaan tidak terkunci tidak bisa menandatangani pinjaman atau menyalin cadangan Anda.",
+  "aj.segurancaIntro": "Dengan kunci aktif, DebtID meminta PIN atau kunci layar ponsel saat dibuka, dan kunci tanda tangan disimpan terenkripsi. Orang yang memegang ponsel Anda dalam keadaan tidak terkunci tidak bisa menandatangani pinjaman atau menyalin cadangan Anda.",
   "aj.contatos": "Kontak",
   "aj.contatosIntro": "Orang yang ID-nya sudah Anda periksa. DebtID mengenali masing-masing dari kuncinya dan memperingatkan Anda jika muncul orang dengan nama yang sama dan kunci yang berbeda.",
   "aj.lembretes": "Pengingat jatuh tempo",
@@ -5129,16 +5188,23 @@ DebtIDTextos.id = {
   "bk.lembreteT": "Waktunya membuat cadangan baru", "bk.lembrete": "Cadangan terakhir Anda dari {data}, dan sejak itu ada catatan baru.",
   "bk.lembreteNuncaT": "Anda belum punya cadangan", "bk.lembreteNunca": "Jika ponsel ini hilang, profil dan bukti Anda ikut hilang. Membuat cadangan hanya butuh satu menit.",
   "bk.fazerAgora": "Cadangkan sekarang", "bk.depois": "Nanti saja",
-  "trava.titulo": "DebtID terkunci", "trava.confirmarT": "Konfirmasi dengan PIN Anda", "trava.texto": "Masukkan PIN Anda untuk melanjutkan.", "trava.pin": "PIN",
-  "trava.entrar": "Buka kunci", "trava.bio": "Gunakan sidik jari atau wajah", "trava.bioTitulo": "Buka kunci DebtID", "trava.bioSub": "Gunakan sidik jari atau wajah Anda",
-  "trava.usarPin": "Gunakan PIN", "trava.errado": "PIN salah. Sisa percobaan sebelum harus menunggu: {n}.", "trava.espere": "Terlalu banyak percobaan. Tunggu {s} dtk.",
+  "trava.titulo": "DebtID terkunci", "trava.confirmarT": "Konfirmasi bahwa ini Anda", "trava.texto": "Masukkan PIN Anda untuk melanjutkan.", "trava.pin": "PIN",
+  "trava.entrar": "Buka kunci", "trava.bio": "Gunakan sidik jari, wajah, atau kunci layar", "trava.bioTitulo": "Buka kunci DebtID", "trava.bioSub": "Gunakan sidik jari, wajah, atau kunci layar ponsel Anda",
+  "trava.errado": "PIN salah. Sisa percobaan sebelum harus menunggu: {n}.", "trava.espere": "Terlalu banyak percobaan. Tunggu {s} dtk.",
   "trava.esqueciBtn": "Saya lupa PIN", "trava.esqueciT": "Lupa PIN?",
   "trava.esqueci": "Demi keamanan, satu-satunya cara melepas kunci adalah menghapus data di perangkat ini. Setelah itu, pulihkan cadangan Anda dengan kata sandinya. Tanpa cadangan, catatan akan hilang.",
   "trava.esqueciOk": "Hapus dan mulai lagi",
-  "trava.desligada": "Kunci nonaktif.", "trava.ligada": "Kunci aktif. Aplikasi meminta PIN saat dibuka, saat Anda kembali setelah beberapa waktu, dan sebelum membuat cadangan.",
+  "trava.desligada": "Kunci nonaktif.", "trava.ligada": "Kunci aktif. Aplikasi meminta PIN saat dibuka, saat Anda kembali setelah beberapa waktu, dan sebelum membuat cadangan. Kunci tanda tangan disimpan terenkripsi dengan PIN.",
   "trava.criar": "Buat PIN", "trava.trocar": "Ganti PIN", "trava.remover": "Lepas kunci",
   "trava.tempo": "Kunci setelah keluar dari aplikasi", "trava.tempo0": "Langsung", "trava.tempo60": "Setelah 1 mnt", "trava.tempo300": "Setelah 5 mnt",
-  "trava.usarBio": "Buka kunci dengan sidik jari atau wajah",
+  "trava.usarCelular": "Gunakan kunci layar ponsel",
+  "trava.celularT": "Gunakan kunci layar ponsel?",
+  "trava.celular": "DebtID akan meminta sidik jari, wajah, atau kunci layar ponsel (PIN, pola, atau sandi). Kunci tanda tangan akan dikunci oleh chip keamanan ponsel. Jika Anda menghapus kunci layar ponsel, kunci ini hilang, jadi buat cadangan dulu.",
+  "trava.celularOk": "Aktifkan",
+  "trava.ligadaCelular": "Kunci aktif dengan kunci layar ponsel. Aplikasi meminta sidik jari, wajah, atau kunci layar saat dibuka, saat Anda kembali setelah beberapa waktu, dan sebelum membuat cadangan. Kunci tanda tangan dikunci oleh chip keamanan ponsel.",
+  "trava.invalidaT": "Kunci tidak bisa dibuka lagi",
+  "trava.invalida": "Kunci layar ponsel telah dihapus atau diatur ulang, dan kunci yang terkunci dengannya hilang. Hapus data di perangkat ini dan pulihkan cadangan Anda.",
+  "trava.semBloqueio": "Untuk memakai kunci layar ponsel, aktifkan dulu kunci layar di Android (PIN, pola, atau sandi).",
   "trava.novoT": "Buat PIN", "trava.novo": "Pilih PIN 4 sampai 12 angka. Hindari tanggal dan urutan.",
   "trava.repetirT": "Ulangi PIN", "trava.repetir": "Masukkan PIN yang sama sekali lagi.",
   "trava.pinInvalido": "PIN harus terdiri dari 4 sampai 12 angka.", "trava.pinFraco": "PIN itu terlalu mudah. Pilih yang lain.", "trava.pinDif": "PIN tidak cocok.",
@@ -5376,7 +5442,7 @@ DebtIDTextos.ru = {
 
   "aj.idCompleto": "Полный ID для сверки при встрече:",
   "aj.seguranca": "Блокировка приложения",
-  "aj.segurancaIntro": "С блокировкой DebtID просит PIN-код при открытии. Тот, кто возьмёт ваш разблокированный телефон, не сможет подписать заём или скопировать вашу резервную копию.",
+  "aj.segurancaIntro": "С блокировкой DebtID просит PIN-код или блокировку самого телефона при открытии, а ключ подписи хранится в зашифрованном виде. Тот, кто возьмёт ваш разблокированный телефон, не сможет подписать заём или скопировать вашу резервную копию.",
   "aj.contatos": "Контакты",
   "aj.contatosIntro": "Люди, чей ID вы уже сверили. DebtID узнаёт каждого по ключу и предупредит, если появится кто-то с тем же именем и другим ключом.",
   "aj.lembretes": "Напоминания о сроках",
@@ -5526,16 +5592,23 @@ DebtIDTextos.ru = {
   "bk.lembreteT": "Пора сделать новую копию", "bk.lembrete": "Ваша последняя копия от {data}, а с тех пор появились новые записи.",
   "bk.lembreteNuncaT": "У вас ещё нет резервной копии", "bk.lembreteNunca": "Если вы потеряете этот телефон, вы потеряете профиль и доказательства. Резервная копия занимает минуту.",
   "bk.fazerAgora": "Сделать копию сейчас", "bk.depois": "Не сейчас",
-  "trava.titulo": "DebtID заблокирован", "trava.confirmarT": "Подтвердите PIN-кодом", "trava.texto": "Введите PIN-код, чтобы продолжить.", "trava.pin": "PIN-код",
-  "trava.entrar": "Разблокировать", "trava.bio": "Отпечаток пальца или лицо", "trava.bioTitulo": "Разблокировать DebtID", "trava.bioSub": "Используйте отпечаток пальца или лицо",
-  "trava.usarPin": "Ввести PIN-код", "trava.errado": "Неверный PIN-код. Осталось попыток до паузы: {n}.", "trava.espere": "Слишком много попыток. Подождите {s} с.",
+  "trava.titulo": "DebtID заблокирован", "trava.confirmarT": "Подтвердите, что это вы", "trava.texto": "Введите PIN-код, чтобы продолжить.", "trava.pin": "PIN-код",
+  "trava.entrar": "Разблокировать", "trava.bio": "Отпечаток, лицо или блокировка экрана", "trava.bioTitulo": "Разблокировать DebtID", "trava.bioSub": "Используйте отпечаток пальца, лицо или блокировку экрана телефона",
+  "trava.errado": "Неверный PIN-код. Осталось попыток до паузы: {n}.", "trava.espere": "Слишком много попыток. Подождите {s} с.",
   "trava.esqueciBtn": "Я забыл(а) PIN-код", "trava.esqueciT": "Забыли PIN-код?",
   "trava.esqueci": "В целях безопасности снять блокировку можно, только удалив данные с этого устройства. Потом восстановите резервную копию с её паролем. Без резервной копии записи будут потеряны.",
   "trava.esqueciOk": "Удалить и начать заново",
-  "trava.desligada": "Блокировка выключена.", "trava.ligada": "Блокировка включена. Приложение просит PIN-код при открытии, при возвращении после перерыва и перед резервным копированием.",
+  "trava.desligada": "Блокировка выключена.", "trava.ligada": "Блокировка включена. Приложение просит PIN-код при открытии, при возвращении после перерыва и перед резервным копированием. Ключ подписи хранится зашифрованным этим PIN-кодом.",
   "trava.criar": "Создать PIN-код", "trava.trocar": "Сменить PIN-код", "trava.remover": "Снять блокировку",
   "trava.tempo": "Блокировать после выхода из приложения", "trava.tempo0": "Сразу", "trava.tempo60": "Через 1 мин", "trava.tempo300": "Через 5 мин",
-  "trava.usarBio": "Разблокировка отпечатком пальца или лицом",
+  "trava.usarCelular": "Использовать блокировку телефона",
+  "trava.celularT": "Использовать блокировку телефона?",
+  "trava.celular": "DebtID будет запрашивать отпечаток пальца, лицо или блокировку экрана телефона (PIN-код, графический ключ или пароль). Ключ подписи будет защищён чипом безопасности телефона. Если вы снимете блокировку экрана телефона, этот ключ пропадёт, поэтому сначала сделайте резервную копию.",
+  "trava.celularOk": "Включить",
+  "trava.ligadaCelular": "Блокировка включена через блокировку телефона. Приложение запрашивает отпечаток, лицо или блокировку экрана при открытии, при возвращении после перерыва и перед резервным копированием. Ключ подписи защищён чипом безопасности телефона.",
+  "trava.invalidaT": "Ключ больше не открывается",
+  "trava.invalida": "Блокировку экрана телефона сняли или сбросили, и ключ, защищённый ею, пропал. Удалите данные с этого устройства и восстановите резервную копию.",
+  "trava.semBloqueio": "Чтобы использовать блокировку телефона, сначала включите блокировку экрана в Android (PIN-код, графический ключ или пароль).",
   "trava.novoT": "Создать PIN-код", "trava.novo": "Придумайте PIN-код из 4–12 цифр. Избегайте дат и последовательностей.",
   "trava.repetirT": "Повторите PIN-код", "trava.repetir": "Введите тот же PIN-код ещё раз.",
   "trava.pinInvalido": "PIN-код должен содержать от 4 до 12 цифр.", "trava.pinFraco": "Этот PIN-код слишком простой. Выберите другой.", "trava.pinDif": "PIN-коды не совпадают.",
@@ -5773,7 +5846,7 @@ DebtIDTextos.ur = {
 
   "aj.idCompleto": "پوری ID، آمنے سامنے ملانے کے لیے:",
   "aj.seguranca": "ایپ لاک",
-  "aj.segurancaIntro": "لاک آن ہو تو DebtID کھلتے وقت PIN مانگتا ہے۔ آپ کا ان لاک فون کسی کے ہاتھ لگ جائے تب بھی وہ قرض پر دستخط نہیں کر سکے گا اور نہ آپ کا بیک اپ کاپی کر سکے گا۔",
+  "aj.segurancaIntro": "لاک آن ہو تو DebtID کھلتے وقت PIN یا فون کا اپنا لاک مانگتا ہے، اور دستخطی کلید خفیہ کر کے رکھی جاتی ہے۔ آپ کا ان لاک فون کسی کے ہاتھ لگ جائے تب بھی وہ قرض پر دستخط نہیں کر سکے گا اور نہ آپ کا بیک اپ کاپی کر سکے گا۔",
   "aj.contatos": "رابطے",
   "aj.contatosIntro": "وہ لوگ جن کی ID آپ ملا چکے ہیں۔ DebtID ہر شخص کو اس کی کلید سے پہچانتا ہے، اور اگر کوئی اسی نام سے دوسری کلید کے ساتھ آئے تو آپ کو خبردار کرتا ہے۔",
   "aj.lembretes": "آخری تاریخ کی یاد دہانی",
@@ -5923,16 +5996,23 @@ DebtIDTextos.ur = {
   "bk.lembreteT": "نیا بیک اپ بنانے کا وقت", "bk.lembrete": "آپ کا آخری بیک اپ {data} کا ہے، اور اس کے بعد نئے ریکارڈ شامل ہوئے ہیں۔",
   "bk.lembreteNuncaT": "آپ کے پاس ابھی کوئی بیک اپ نہیں", "bk.lembreteNunca": "یہ فون کھو گیا تو آپ کی پروفائل اور ثبوت بھی کھو جائیں گے۔ بیک اپ میں بس ایک منٹ لگتا ہے۔",
   "bk.fazerAgora": "ابھی بیک اپ لیں", "bk.depois": "بعد میں",
-  "trava.titulo": "DebtID لاک ہے", "trava.confirmarT": "اپنے PIN سے تصدیق کریں", "trava.texto": "آگے بڑھنے کے لیے اپنا PIN درج کریں۔", "trava.pin": "PIN",
-  "trava.entrar": "ان لاک کریں", "trava.bio": "فنگر پرنٹ یا چہرہ استعمال کریں", "trava.bioTitulo": "DebtID ان لاک کریں", "trava.bioSub": "اپنا فنگر پرنٹ یا چہرہ استعمال کریں",
-  "trava.usarPin": "PIN استعمال کریں", "trava.errado": "غلط PIN۔ انتظار سے پہلے باقی کوششیں: {n}۔", "trava.espere": "بہت زیادہ کوششیں۔ {s} سیکنڈ انتظار کریں۔",
+  "trava.titulo": "DebtID لاک ہے", "trava.confirmarT": "تصدیق کریں کہ یہ آپ ہیں", "trava.texto": "آگے بڑھنے کے لیے اپنا PIN درج کریں۔", "trava.pin": "PIN",
+  "trava.entrar": "ان لاک کریں", "trava.bio": "فنگر پرنٹ، چہرہ یا اسکرین لاک استعمال کریں", "trava.bioTitulo": "DebtID ان لاک کریں", "trava.bioSub": "اپنا فنگر پرنٹ، چہرہ یا فون کا اسکرین لاک استعمال کریں",
+  "trava.errado": "غلط PIN۔ انتظار سے پہلے باقی کوششیں: {n}۔", "trava.espere": "بہت زیادہ کوششیں۔ {s} سیکنڈ انتظار کریں۔",
   "trava.esqueciBtn": "PIN یاد نہیں", "trava.esqueciT": "PIN بھول گئے؟",
   "trava.esqueci": "آپ کی حفاظت کے لیے لاک ہٹانے کا ایک ہی طریقہ ہے: اس آلے کا ڈیٹا مٹانا۔ اس کے بعد اپنا بیک اپ اس کے پاس ورڈ سے بحال کریں۔ بیک اپ کے بغیر ریکارڈ کھو جائیں گے۔",
   "trava.esqueciOk": "مٹائیں اور نئے سرے سے شروع کریں",
-  "trava.desligada": "لاک بند ہے۔", "trava.ligada": "لاک آن ہے۔ ایپ کھلتے وقت، کچھ دیر بعد واپس آنے پر اور بیک اپ سے پہلے PIN مانگتی ہے۔",
+  "trava.desligada": "لاک بند ہے۔", "trava.ligada": "لاک آن ہے۔ ایپ کھلتے وقت، کچھ دیر بعد واپس آنے پر اور بیک اپ سے پہلے PIN مانگتی ہے۔ دستخطی کلید PIN سے خفیہ کر کے رکھی جاتی ہے۔",
   "trava.criar": "PIN بنائیں", "trava.trocar": "PIN بدلیں", "trava.remover": "لاک ہٹائیں",
   "trava.tempo": "ایپ چھوڑنے کے بعد لاک کریں", "trava.tempo0": "فوراً", "trava.tempo60": "1 منٹ بعد", "trava.tempo300": "5 منٹ بعد",
-  "trava.usarBio": "فنگر پرنٹ یا چہرے سے ان لاک کریں",
+  "trava.usarCelular": "فون کا لاک استعمال کریں",
+  "trava.celularT": "فون کا لاک استعمال کریں؟",
+  "trava.celular": "DebtID آپ کا فنگر پرنٹ، چہرہ یا فون کا اسکرین لاک (PIN، پیٹرن یا پاس ورڈ) مانگے گا۔ دستخطی کلید فون کی حفاظتی چپ سے بند رہے گی۔ اگر آپ فون کا اسکرین لاک ہٹا دیں تو یہ کلید ضائع ہو جائے گی، اس لیے پہلے بیک اپ بنا لیں۔",
+  "trava.celularOk": "آن کریں",
+  "trava.ligadaCelular": "فون کے لاک کے ساتھ ایپ لاک آن ہے۔ ایپ کھلتے وقت، کچھ دیر بعد واپس آنے پر اور بیک اپ سے پہلے فنگر پرنٹ، چہرہ یا اسکرین لاک مانگتی ہے۔ دستخطی کلید فون کی حفاظتی چپ سے بند رہتی ہے۔",
+  "trava.invalidaT": "کلید اب نہیں کھلتی",
+  "trava.invalida": "فون کا اسکرین لاک ہٹا دیا گیا یا بدل دیا گیا، اور اس سے بند کلید ضائع ہو گئی۔ اس آلے کا ڈیٹا مٹائیں اور اپنا بیک اپ بحال کریں۔",
+  "trava.semBloqueio": "فون کا لاک استعمال کرنے کے لیے پہلے Android میں اسکرین لاک (PIN، پیٹرن یا پاس ورڈ) آن کریں۔",
   "trava.novoT": "PIN بنائیں", "trava.novo": "4 سے 12 ہندسوں کا PIN چنیں۔ تاریخوں اور ترتیب وار ہندسوں سے بچیں۔",
   "trava.repetirT": "PIN دوبارہ درج کریں", "trava.repetir": "وہی PIN ایک بار پھر درج کریں۔",
   "trava.pinInvalido": "PIN میں 4 سے 12 ہندسے ہونے چاہییں۔", "trava.pinFraco": "یہ PIN بہت آسان ہے۔ کوئی اور چنیں۔", "trava.pinDif": "PIN میل نہیں کھاتے۔",
@@ -6170,7 +6250,7 @@ DebtIDTextos.zh = {
 
   "aj.idCompleto": "完整 ID，用于当面核对：",
   "aj.seguranca": "应用锁",
-  "aj.segurancaIntro": "开启应用锁后，打开 DebtID 需要输入 PIN 码。即使有人拿到你解锁的手机，也无法签署借款或复制你的备份。",
+  "aj.segurancaIntro": "开启应用锁后，打开 DebtID 需要输入 PIN 码或验证手机锁屏，签名密钥也会加密保存。即使有人拿到你解锁的手机，也无法签署借款或复制你的备份。",
   "aj.contatos": "联系人",
   "aj.contatosIntro": "你已核对过 ID 的人。DebtID 通过密钥识别每个人，如果有人用同样的名字和不同的密钥出现，会提醒你。",
   "aj.lembretes": "到期提醒",
@@ -6320,16 +6400,23 @@ DebtIDTextos.zh = {
   "bk.lembreteT": "该备份了", "bk.lembrete": "你的最近一次备份是 {data}，之后又有了新记录。",
   "bk.lembreteNuncaT": "你还没有备份", "bk.lembreteNunca": "如果丢了这部手机，你的资料和证明也会一起丢失。备份只需要一分钟。",
   "bk.fazerAgora": "立即备份", "bk.depois": "以后再说",
-  "trava.titulo": "DebtID 已锁定", "trava.confirmarT": "用 PIN 码确认", "trava.texto": "请输入 PIN 码继续。", "trava.pin": "PIN 码",
-  "trava.entrar": "解锁", "trava.bio": "使用指纹或面容", "trava.bioTitulo": "解锁 DebtID", "trava.bioSub": "使用你的指纹或面容",
-  "trava.usarPin": "使用 PIN 码", "trava.errado": "PIN 码错误。还可尝试 {n} 次，之后需等待。", "trava.espere": "尝试次数过多。请等待 {s} 秒。",
+  "trava.titulo": "DebtID 已锁定", "trava.confirmarT": "确认是你本人", "trava.texto": "请输入 PIN 码继续。", "trava.pin": "PIN 码",
+  "trava.entrar": "解锁", "trava.bio": "使用指纹、面容或锁屏", "trava.bioTitulo": "解锁 DebtID", "trava.bioSub": "使用你的指纹、面容或手机锁屏",
+  "trava.errado": "PIN 码错误。还可尝试 {n} 次，之后需等待。", "trava.espere": "尝试次数过多。请等待 {s} 秒。",
   "trava.esqueciBtn": "我忘了 PIN 码", "trava.esqueciT": "忘记 PIN 码？",
   "trava.esqueci": "为了安全，解除锁定的唯一方法是删除此设备上的数据。之后用备份密码恢复你的备份。没有备份的话，记录会丢失。",
   "trava.esqueciOk": "删除并重新开始",
-  "trava.desligada": "应用锁已关闭。", "trava.ligada": "应用锁已开启。打开应用、离开一段时间后返回以及备份前，都会要求输入 PIN 码。",
+  "trava.desligada": "应用锁已关闭。", "trava.ligada": "应用锁已开启。打开应用、离开一段时间后返回以及备份前，都会要求输入 PIN 码。签名密钥用 PIN 码加密保存。",
   "trava.criar": "创建 PIN 码", "trava.trocar": "更改 PIN 码", "trava.remover": "关闭应用锁",
   "trava.tempo": "离开应用后锁定", "trava.tempo0": "立即", "trava.tempo60": "1 分钟后", "trava.tempo300": "5 分钟后",
-  "trava.usarBio": "用指纹或面容解锁",
+  "trava.usarCelular": "使用手机锁屏",
+  "trava.celularT": "使用手机锁屏？",
+  "trava.celular": "DebtID 将要求验证你的指纹、面容或手机锁屏（PIN 码、图案或密码）。签名密钥将由手机的安全芯片锁住。如果你取消手机锁屏，这把密钥就会丢失，所以请先备份。",
+  "trava.celularOk": "开启",
+  "trava.ligadaCelular": "应用锁已开启，使用手机锁屏。打开应用、离开一段时间后返回以及备份前，都会要求验证指纹、面容或锁屏。签名密钥由手机的安全芯片锁住。",
+  "trava.invalidaT": "密钥无法再打开",
+  "trava.invalida": "手机锁屏已被取消或重置，用它锁住的密钥已经丢失。请删除此设备上的数据，然后恢复你的备份。",
+  "trava.semBloqueio": "要使用手机锁屏，请先在 Android 中设置锁屏（PIN 码、图案或密码）。",
   "trava.novoT": "创建 PIN 码", "trava.novo": "设置 4 到 12 位数字的 PIN 码。避免使用日期和连续数字。",
   "trava.repetirT": "再次输入 PIN 码", "trava.repetir": "请再输入一次相同的 PIN 码。",
   "trava.pinInvalido": "PIN 码必须是 4 到 12 位数字。", "trava.pinFraco": "这个 PIN 码太简单了。请换一个。", "trava.pinDif": "两次 PIN 码不一致。",
@@ -7257,6 +7344,58 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return dif === 0;
   }
 
+  /* =================== the signing key under the app lock ===================
+     With the lock on, the private key (the "d" of the JWK) is stored encrypted with a random
+     data key. That data key is stored wrapped: with the PIN (PBKDF2, 600,000 rounds), or by the
+     Android Keystore, which only opens it after the fingerprint, the face or the phone's screen
+     lock. While the app is unlocked, the data key and the private key live only in memory. */
+  const TAG_CHAVE = enc.encode('DebtID/chave');
+  const ITER_PIN = 600000;
+  const aesGcm = async (bytes, uso) => subtle().importKey('raw', bytes, 'AES-GCM', false, [uso]);
+  async function cifrarCom(chave, dados, aad) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv, additionalData: aad }, await aesGcm(chave, 'encrypt'), dados));
+    return { iv: b64url(iv), ct: b64url(ct) };
+  }
+  async function decifrarCom(chave, caixa, aad) {
+    try {
+      return new Uint8Array(await subtle().decrypt({ name: 'AES-GCM', iv: deB64url(caixa.iv), additionalData: aad }, await aesGcm(chave, 'decrypt'), deB64url(caixa.ct)));
+    } catch (e) {
+      return null; // wrong key or changed data
+    }
+  }
+  const novaChaveDados = () => crypto.getRandomValues(new Uint8Array(32));
+  async function chaveDoPin(pin, sal, iteracoes) {
+    const base = await subtle().importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await subtle().deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: iteracoes }, base, 256));
+  }
+  /** Wraps the data key with the PIN: { sal, it, iv, ct }. */
+  async function embrulharComPin(pin, chaveDados) {
+    const sal = crypto.getRandomValues(new Uint8Array(16));
+    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(await chaveDoPin(pin, sal, ITER_PIN), chaveDados, TAG_CHAVE)) };
+  }
+  /** The data key, or null when the PIN is wrong. */
+  async function abrirComPin(pin, emb) {
+    if (!emb || !emb.sal || !emb.ct) return null;
+    return decifrarCom(await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN), emb, TAG_CHAVE);
+  }
+  /** The profile as stored with the lock on: the private key encrypted, tied to the public key. */
+  async function protegerPerfil(perfil, chaveDados) {
+    const { d, ...publica } = perfil.jwk;
+    if (!d) return perfil.dCifrado ? perfil : null;
+    return { ...perfil, jwk: publica, dCifrado: await cifrarCom(chaveDados, enc.encode(d), enc.encode(perfil.pub)) };
+  }
+  /** The profile ready to sign again, or null when the data key does not open it. */
+  async function abrirPerfil(perfil, chaveDados) {
+    if (perfil.jwk && perfil.jwk.d) return perfil;
+    if (!perfil.dCifrado) return null;
+    const d = await decifrarCom(chaveDados, perfil.dCifrado, enc.encode(perfil.pub));
+    if (!d) return null;
+    const { dCifrado, ...resto } = perfil;
+    return { ...resto, jwk: { ...perfil.jwk, d: new TextDecoder().decode(d) } };
+  }
+  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil, b64: b64url, deB64: deB64url };
+
   /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
   const QR = (() => {
     const NIVEL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] }; // [table index, format bits]
@@ -7808,7 +7947,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
-    exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, QR,
+    exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };
 })();
@@ -8131,20 +8270,78 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   }
   const inicial = nome => (nome.trim()[0] || '?').toUpperCase(); // the letter shown in an avatar
 
-  /* ---------------- app lock (PIN, and fingerprint or face in the Android app) ----------------
+  /* ---------------- app lock (a PIN, or the phone's own lock in the Android app) ----------------
      The lock covers the screen when the app opens and when it comes back after some time away.
-     Backups, restoring and erasing the data also ask for the PIN. */
-  let trava = lerJSON(K.trava, null); // { sal, hash, bio, tempo (seconds away before locking) }
-  if (trava && (!trava.sal || !trava.hash)) trava = null;
+     Backups, restoring and erasing the data also ask for it. With the lock on, the signing key is
+     stored encrypted (see chaveTrava in core.js): its data key opens with the PIN, or, in the
+     Android app, with the fingerprint, the face or the phone's screen lock (Android Keystore). */
+  // { v: 2, modo: 'pin' | 'celular', pin: data key wrapped with the PIN, celular: { iv, ct } from the Keystore, tempo }
+  // (the first version kept only a PIN hash, { sal, hash, bio, tempo }: it moves to v2 at the next PIN)
+  let trava = lerJSON(K.trava, null);
+  const travaValida = x => !!x && ((x.v === 2 && ((x.modo === 'pin' && x.pin) || (x.modo === 'celular' && x.celular))) || !!(x.sal && x.hash));
+  if (!travaValida(trava)) trava = null;
+  let chaveDados = null; // the data key, only in memory and only while unlocked
   let travado = false, escondidoEm = null, fimTrava = null, timerEspera = null;
   const tempoTrava = () => (trava && Number.isFinite(trava.tempo) ? trava.tempo : 60);
-  const bioDisponivel = () => { const a = app(); try { return !!(a && a.biometria && a.biometria() === 'ok'); } catch { return false; } };
+  const modoCelular = () => !!(trava && trava.modo === 'celular');
   const errosTrava = () => { const e = lerJSON(K.travaErros, null); return e && typeof e.n === 'number' ? e : { n: 0, ate: 0 }; };
   const esperaTrava = () => Math.max(0, (errosTrava().ate || 0) - Date.now());
   const zerarErrosTrava = () => gravarJSON(K.travaErros, { n: 0, ate: 0 });
+
+  // The Android Keystore (Android 11+): "ok", "sem-bloqueio" (the phone has no screen lock) or "indisponivel".
+  const estadoCofre = () => { const a = app(); try { return a && a.cofre ? a.cofre() : 'indisponivel'; } catch { return 'indisponivel'; } };
+  const b64Padrao = bytes => btoa(String.fromCharCode(...bytes));
+  const deB64Padrao = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  // Asks the app to wrap or open the data key; the phone shows its own prompt. Answers { r, dados }.
+  // While the prompt is open (the screen lock may cover the app), leaving the app does not lock it.
+  let promptAberto = false;
+  function cofre(acao, ...args) {
+    return new Promise(res => {
+      const a = app();
+      if (!a || !a[acao]) { res({ r: 'erro' }); return; }
+      promptAberto = true;
+      window.__debtidCofre = (r, dados) => { window.__debtidCofre = null; promptAberto = false; escondidoEm = null; res({ r, dados }); };
+      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { window.__debtidCofre = null; promptAberto = false; res({ r: 'erro' }); }
+    });
+  }
+  const apagarCofre = () => { const a = app(); try { if (a && a.cofreApagar) a.cofreApagar(); } catch { /* nothing to erase */ } };
+
+  // Saves the profile; with the lock on, the private key goes encrypted.
+  async function guardarPerfil() {
+    if (!perfil) return false;
+    const guardado = trava && trava.v === 2 && chaveDados ? await D.chaveTrava.protegerPerfil(perfil, chaveDados) : perfil;
+    return gravarJSON(K.perfil, guardado || perfil);
+  }
+  // With the data key, the profile can sign again.
+  async function abrirSessao(chave) {
+    if (perfil) {
+      const aberto = await D.chaveTrava.abrirPerfil(perfil, chave);
+      if (!aberto) return false;
+      perfil = aberto;
+    }
+    chaveDados = chave;
+    return true;
+  }
+  async function ligarTravaPin(pin, tempo = 60) {
+    const chave = chaveDados || D.chaveTrava.novaChaveDados();
+    const novo = { v: 2, modo: 'pin', pin: await D.chaveTrava.embrulharComPin(pin, chave), tempo };
+    if (modoCelular()) apagarCofre();
+    trava = novo; chaveDados = chave;
+    gravarJSON(K.trava, trava);
+    await guardarPerfil();
+  }
+  async function pinCerto(pin) {
+    if (trava.v === 2) {
+      const chave = await D.chaveTrava.abrirComPin(pin, trava.pin);
+      return !!chave && abrirSessao(chave);
+    }
+    if (!(await D.conferirPin(pin, trava))) return false;
+    await ligarTravaPin(pin, tempoTrava()); // first version: from now on the key is encrypted with this PIN
+    return true;
+  }
   async function testarPin(pin) {
     if (esperaTrava() > 0) return { ok: false };
-    if (await D.conferirPin(pin, trava)) { zerarErrosTrava(); return { ok: true }; }
+    if (await pinCerto(pin)) { zerarErrosTrava(); return { ok: true }; }
     const e = errosTrava(); e.n++;
     // after 5 wrong PINs: wait 30 s, then twice as long after each new mistake (at most 15 min)
     if (e.n >= 5) e.ate = Date.now() + Math.min(900, 30 * 2 ** (e.n - 5)) * 1000;
@@ -8164,21 +8361,23 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   }
   function mostrarTrava(modo, texto) {
     return new Promise(res => {
-      const caixa = $('#trava'), abrir = modo === 'abrir';
+      const caixa = $('#trava'), abrir = modo === 'abrir', celular = modoCelular();
       $('#travaTitulo').textContent = t(abrir ? 'trava.titulo' : 'trava.confirmarT');
-      $('#travaTexto').textContent = texto || t('trava.texto');
+      $('#travaTexto').textContent = celular ? t('trava.bioSub') : (texto || t('trava.texto'));
       $('#travaCancelar').hidden = abrir;
-      $('#travaEsqueci').hidden = !abrir;
-      const bio = !!(trava && trava.bio && bioDisponivel());
-      $('#travaBio').hidden = !bio;
+      $('#travaEsqueci').hidden = !abrir || celular;
+      $('#formTrava').hidden = celular;
+      $('#travaBio').hidden = !celular;
       $('#f-pin').value = ''; $('#travaErro').textContent = '';
       caixa.hidden = false;
+      document.body.classList.add('trava-aberta');
       if (abrir) {
         document.body.classList.add('travado');
         $$('.page, .tabbar').forEach(el => el.setAttribute('aria-hidden', 'true'));
       }
       fimTrava = ok => {
         caixa.hidden = true; fimTrava = null; clearTimeout(timerEspera);
+        document.body.classList.remove('trava-aberta');
         if (abrir) {
           travado = false;
           document.body.classList.remove('travado');
@@ -8186,31 +8385,48 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         }
         res(ok);
       };
-      atualizarEspera();
-      setTimeout(() => { if (!$('#f-pin').disabled) $('#f-pin').focus(); }, 40);
-      if (bio && abrir) usarBio();
+      if (celular) {
+        setTimeout(usarCelular, 60);
+      } else {
+        atualizarEspera();
+        setTimeout(() => { if (!$('#f-pin').disabled) $('#f-pin').focus(); }, 40);
+      }
     });
   }
   async function bloquear() {
     if (!trava || travado) return;
-    if (fimTrava) fimTrava(false); // a PIN question that was open gives way to the full lock
+    if (fimTrava) fimTrava(false); // a question that was open gives way to the full lock
+    if (!$('#modal').hidden) $('#modalCancelar').click(); // and so does an open dialog
     travado = true;
+    // the private key leaves memory: only the encrypted copy stays
+    const guardado = lerJSON(K.perfil, null);
+    if (trava.v === 2 && guardado && guardado.dCifrado) perfil = guardado;
+    chaveDados = null;
     await mostrarTrava('abrir');
   }
-  // Asks for the PIN before a sensitive action. Without a lock set up, it just goes ahead.
+  // Asks for the PIN (or the phone's lock) before a sensitive action. Without a lock, it just goes ahead.
   async function pedirPin(texto) {
     if (!trava) return true;
     if (travado) return false;
     return mostrarTrava('confirmar', texto);
   }
-  function usarBio() {
-    const a = app();
-    if (!a || !a.autenticar) return;
-    window.__debtidBio = r => {
-      window.__debtidBio = null;
-      if (r === 'ok' && fimTrava) { zerarErrosTrava(); fimTrava(true); }
-    };
-    try { a.autenticar(t('trava.bioTitulo'), t('trava.bioSub'), t('trava.usarPin')); } catch { window.__debtidBio = null; }
+  async function usarCelular() {
+    if (!fimTrava || !modoCelular()) return;
+    const r = await cofre('cofreAbrir', trava.celular.iv, trava.celular.ct);
+    if (r.r === 'ok') {
+      let chave = null;
+      try { chave = deB64Padrao(r.dados); } catch { chave = null; }
+      if (chave && (await abrirSessao(chave)) && fimTrava) { zerarErrosTrava(); fimTrava(true); }
+      return;
+    }
+    if (r.r === 'invalida') {
+      // the phone's screen lock was removed or reset, and the Keystore threw the key away
+      const ok = await perguntar({ titulo: t('trava.invalidaT'), texto: t('trava.invalida'), ok: t('trava.esqueciOk'), perigo: true });
+      if (!ok) return;
+      apagarTudo();
+      if (fimTrava) fimTrava(true);
+      irPara('boas-vindas');
+    }
   }
   $('#formTrava').addEventListener('submit', async e => {
     e.preventDefault();
@@ -8227,7 +8443,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!$('#f-pin').disabled) $('#f-pin').focus();
   });
   $('#travaCancelar').addEventListener('click', () => { if (fimTrava) fimTrava(false); });
-  $('#travaBio').addEventListener('click', usarBio);
+  $('#travaBio').addEventListener('click', usarCelular);
   $('#travaEsqueci').addEventListener('click', async () => {
     const ok = await perguntar({ titulo: t('trava.esqueciT'), texto: t('trava.esqueci'), ok: t('trava.esqueciOk'), perigo: true });
     if (!ok) return;
@@ -8236,6 +8452,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     irPara('boas-vindas');
   });
   function aoEsconder() {
+    if (promptAberto) return;
     if (escondidoEm == null) escondidoEm = Date.now();
     if (trava && tempoTrava() === 0) bloquear();
   }
@@ -9695,7 +9912,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const nome = limparNome($('#f-nome-ajuste').value);
     if (nome.length < 2) return toast(t('toast.digiteNome'));
     perfil = { ...perfil, nome: nome.slice(0, 80) };
-    gravarJSON(K.perfil, perfil); renderAjustes(); toast(t('toast.nomeAtualizado'));
+    guardarPerfil(); renderAjustes(); toast(t('toast.nomeAtualizado'));
   });
   const mostrar = (id, sim) => { $(id).hidden = !sim; };
 
@@ -9703,19 +9920,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function renderTravaAjustes() {
     const el = $('#travaAjustes');
     if (!trava) {
-      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button></div>`;
+      const cofreEstado = estadoCofre();
+      const celular = cofreEstado === 'indisponivel' ? ''
+        : `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
+      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>` +
+        (cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '');
       return;
     }
-    const tempo = tempoTrava(), bio = bioDisponivel();
-    el.innerHTML = `<p class="hint">${t('trava.ligada')}</p>
+    const tempo = tempoTrava(), celular = modoCelular();
+    el.innerHTML = `<p class="hint">${t(celular ? 'trava.ligadaCelular' : 'trava.ligada')}</p>
       <div class="ajuste"><h4 id="t-trava-tempo">${t('trava.tempo')}</h4>
         <div class="seg" role="radiogroup" aria-labelledby="t-trava-tempo">
           ${[0, 60, 300].map(s => `<input type="radio" name="travaTempo" id="tt-${s}" value="${s}"${tempo === s ? ' checked' : ''}><label for="tt-${s}">${t('trava.tempo' + s)}</label>`).join('')}
         </div></div>
-      ${bio ? `<label class="check"><input type="checkbox" id="travaBioCheck"${trava.bio ? ' checked' : ''}><span>${t('trava.usarBio')}</span></label>` : ''}
-      <div class="btns"><button class="btn" type="button" data-acao="trava-trocar">${t('trava.trocar')}</button><button class="btn btn-ghost" type="button" data-acao="trava-remover">${t('trava.remover')}</button></div>`;
-    const chk = $('#travaBioCheck');
-    if (chk) chk.addEventListener('change', () => { trava = { ...trava, bio: chk.checked }; gravarJSON(K.trava, trava); });
+      <div class="btns">${celular ? '' : `<button class="btn" type="button" data-acao="trava-trocar">${t('trava.trocar')}</button>`}<button class="btn btn-ghost" type="button" data-acao="trava-remover">${t('trava.remover')}</button></div>`;
   }
   async function novoPin() {
     const p1 = await perguntar({ titulo: t('trava.novoT'), texto: t('trava.novo'), ok: t('modal.continuar'), campo: { rotulo: t('trava.pin'), max: 12, senha: true } });
@@ -9731,18 +9949,36 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (acao === 'trava-criar') {
       const pin = await novoPin();
       if (!pin) return;
-      trava = { ...(await D.hashPin(pin)), bio: false, tempo: 60 };
-      gravarJSON(K.trava, trava); zerarErrosTrava();
-      renderTravaAjustes(); toast(t('trava.criada'));
+      await ligarTravaPin(pin);
+      zerarErrosTrava(); renderTravaAjustes(); toast(t('trava.criada'));
+    } else if (acao === 'trava-celular') {
+      if (estadoCofre() !== 'ok') return;
+      const ok = await perguntar({ titulo: t('trava.celularT'), texto: t('trava.celular'), ok: t('trava.celularOk') });
+      if (!ok) return;
+      const chave = chaveDados || D.chaveTrava.novaChaveDados();
+      const r = await cofre('cofreGuardar', b64Padrao(chave));
+      if (r.r !== 'ok') { if (r.r !== 'cancelado') toastErro(new D.ChaveErro('GENERICO')); return; }
+      let caixa = null;
+      try { caixa = JSON.parse(r.dados); } catch { caixa = null; }
+      if (!caixa || !caixa.iv || !caixa.ct) { toastErro(new D.ChaveErro('GENERICO')); return; }
+      trava = { v: 2, modo: 'celular', celular: { iv: caixa.iv, ct: caixa.ct }, tempo: 60 };
+      chaveDados = chave;
+      gravarJSON(K.trava, trava);
+      await guardarPerfil();
+      zerarErrosTrava(); renderTravaAjustes(); toast(t('trava.criada'));
     } else if (acao === 'trava-trocar') {
       if (!(await pedirPin(t('trava.pedirTrocar')))) return;
       const pin = await novoPin();
       if (!pin) return;
-      trava = { ...trava, ...(await D.hashPin(pin)) };
-      gravarJSON(K.trava, trava); renderTravaAjustes(); toast(t('trava.trocada'));
+      await ligarTravaPin(pin, tempoTrava()); // the same data key, wrapped with the new PIN
+      renderTravaAjustes(); toast(t('trava.trocada'));
     } else if (acao === 'trava-remover') {
       if (!(await pedirPin(t('trava.pedirRemover')))) return;
+      const eraCelular = modoCelular();
       trava = null; gravarTexto(K.trava, null); gravarTexto(K.travaErros, null);
+      await guardarPerfil(); // stored without encryption again
+      chaveDados = null;
+      if (eraCelular) apagarCofre();
       renderTravaAjustes(); toast(t('trava.removida'));
     }
   }
@@ -9918,6 +10154,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (s1.length < 10) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaCurtaT'), t('bk.senhaCurta')); return; }
     if (D.forcaSenha(s1) < 1) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaFracaT'), t('bk.senhaFraca')); return; }
     if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
+    if (!perfil || !perfil.jwk || !perfil.jwk.d) { $('#msgBackup').innerHTML = alertaErro(new D.ChaveErro('GENERICO')); return; } // locked: no key to save
     const btn = e.submitter || $('#formBackup button[type="submit"]'); btn.disabled = true;
     $('#msgBackup').innerHTML = `<p class="hint">${t('bk.gerando')}</p>`;
     try {
@@ -9947,7 +10184,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       }
       if (perfil && !(await pedirPin(t('trava.pedirRestaurar')))) return;
       perfil = { ...obj.perfil };
-      gravarJSON(K.perfil, perfil);
+      await guardarPerfil();
       const entrada = Array.isArray(obj.registros) ? obj.registros.filter(r => r && r.codigo) : [];
       await migrarRegistros(entrada);
       for (const r of entrada) {
@@ -9979,7 +10216,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   });
   function apagarTudo() {
     [K.perfil, K.regs, K.contatos, K.trava, K.travaErros, K.backupEm, K.backupAdiado].forEach(k => gravarTexto(k, null));
-    perfil = null; registros = []; contatos = []; trava = null; atual = null;
+    perfil = null; registros = []; contatos = []; trava = null; atual = null; chaveDados = null;
+    apagarCofre();
     agendarLembretesVazio();
   }
   const agendarLembretesVazio = () => { const a = app(); if (a && a.lembretes) { try { a.lembretes('[]'); } catch { /* ignore */ } } };

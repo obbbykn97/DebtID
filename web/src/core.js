@@ -908,6 +908,58 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return dif === 0;
   }
 
+  /* =================== the signing key under the app lock ===================
+     With the lock on, the private key (the "d" of the JWK) is stored encrypted with a random
+     data key. That data key is stored wrapped: with the PIN (PBKDF2, 600,000 rounds), or by the
+     Android Keystore, which only opens it after the fingerprint, the face or the phone's screen
+     lock. While the app is unlocked, the data key and the private key live only in memory. */
+  const TAG_CHAVE = enc.encode('DebtID/chave');
+  const ITER_PIN = 600000;
+  const aesGcm = async (bytes, uso) => subtle().importKey('raw', bytes, 'AES-GCM', false, [uso]);
+  async function cifrarCom(chave, dados, aad) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv, additionalData: aad }, await aesGcm(chave, 'encrypt'), dados));
+    return { iv: b64url(iv), ct: b64url(ct) };
+  }
+  async function decifrarCom(chave, caixa, aad) {
+    try {
+      return new Uint8Array(await subtle().decrypt({ name: 'AES-GCM', iv: deB64url(caixa.iv), additionalData: aad }, await aesGcm(chave, 'decrypt'), deB64url(caixa.ct)));
+    } catch (e) {
+      return null; // wrong key or changed data
+    }
+  }
+  const novaChaveDados = () => crypto.getRandomValues(new Uint8Array(32));
+  async function chaveDoPin(pin, sal, iteracoes) {
+    const base = await subtle().importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await subtle().deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: iteracoes }, base, 256));
+  }
+  /** Wraps the data key with the PIN: { sal, it, iv, ct }. */
+  async function embrulharComPin(pin, chaveDados) {
+    const sal = crypto.getRandomValues(new Uint8Array(16));
+    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(await chaveDoPin(pin, sal, ITER_PIN), chaveDados, TAG_CHAVE)) };
+  }
+  /** The data key, or null when the PIN is wrong. */
+  async function abrirComPin(pin, emb) {
+    if (!emb || !emb.sal || !emb.ct) return null;
+    return decifrarCom(await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN), emb, TAG_CHAVE);
+  }
+  /** The profile as stored with the lock on: the private key encrypted, tied to the public key. */
+  async function protegerPerfil(perfil, chaveDados) {
+    const { d, ...publica } = perfil.jwk;
+    if (!d) return perfil.dCifrado ? perfil : null;
+    return { ...perfil, jwk: publica, dCifrado: await cifrarCom(chaveDados, enc.encode(d), enc.encode(perfil.pub)) };
+  }
+  /** The profile ready to sign again, or null when the data key does not open it. */
+  async function abrirPerfil(perfil, chaveDados) {
+    if (perfil.jwk && perfil.jwk.d) return perfil;
+    if (!perfil.dCifrado) return null;
+    const d = await decifrarCom(chaveDados, perfil.dCifrado, enc.encode(perfil.pub));
+    if (!d) return null;
+    const { dCifrado, ...resto } = perfil;
+    return { ...resto, jwk: { ...perfil.jwk, d: new TextDecoder().decode(d) } };
+  }
+  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil, b64: b64url, deB64: deB64url };
+
   /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
   const QR = (() => {
     const NIVEL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] }; // [table index, format bits]
@@ -1459,7 +1511,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
     criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
-    exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, QR,
+    exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };
 })();

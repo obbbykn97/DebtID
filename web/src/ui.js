@@ -314,20 +314,78 @@
   }
   const inicial = nome => (nome.trim()[0] || '?').toUpperCase(); // the letter shown in an avatar
 
-  /* ---------------- app lock (PIN, and fingerprint or face in the Android app) ----------------
+  /* ---------------- app lock (a PIN, or the phone's own lock in the Android app) ----------------
      The lock covers the screen when the app opens and when it comes back after some time away.
-     Backups, restoring and erasing the data also ask for the PIN. */
-  let trava = lerJSON(K.trava, null); // { sal, hash, bio, tempo (seconds away before locking) }
-  if (trava && (!trava.sal || !trava.hash)) trava = null;
+     Backups, restoring and erasing the data also ask for it. With the lock on, the signing key is
+     stored encrypted (see chaveTrava in core.js): its data key opens with the PIN, or, in the
+     Android app, with the fingerprint, the face or the phone's screen lock (Android Keystore). */
+  // { v: 2, modo: 'pin' | 'celular', pin: data key wrapped with the PIN, celular: { iv, ct } from the Keystore, tempo }
+  // (the first version kept only a PIN hash, { sal, hash, bio, tempo }: it moves to v2 at the next PIN)
+  let trava = lerJSON(K.trava, null);
+  const travaValida = x => !!x && ((x.v === 2 && ((x.modo === 'pin' && x.pin) || (x.modo === 'celular' && x.celular))) || !!(x.sal && x.hash));
+  if (!travaValida(trava)) trava = null;
+  let chaveDados = null; // the data key, only in memory and only while unlocked
   let travado = false, escondidoEm = null, fimTrava = null, timerEspera = null;
   const tempoTrava = () => (trava && Number.isFinite(trava.tempo) ? trava.tempo : 60);
-  const bioDisponivel = () => { const a = app(); try { return !!(a && a.biometria && a.biometria() === 'ok'); } catch { return false; } };
+  const modoCelular = () => !!(trava && trava.modo === 'celular');
   const errosTrava = () => { const e = lerJSON(K.travaErros, null); return e && typeof e.n === 'number' ? e : { n: 0, ate: 0 }; };
   const esperaTrava = () => Math.max(0, (errosTrava().ate || 0) - Date.now());
   const zerarErrosTrava = () => gravarJSON(K.travaErros, { n: 0, ate: 0 });
+
+  // The Android Keystore (Android 11+): "ok", "sem-bloqueio" (the phone has no screen lock) or "indisponivel".
+  const estadoCofre = () => { const a = app(); try { return a && a.cofre ? a.cofre() : 'indisponivel'; } catch { return 'indisponivel'; } };
+  const b64Padrao = bytes => btoa(String.fromCharCode(...bytes));
+  const deB64Padrao = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  // Asks the app to wrap or open the data key; the phone shows its own prompt. Answers { r, dados }.
+  // While the prompt is open (the screen lock may cover the app), leaving the app does not lock it.
+  let promptAberto = false;
+  function cofre(acao, ...args) {
+    return new Promise(res => {
+      const a = app();
+      if (!a || !a[acao]) { res({ r: 'erro' }); return; }
+      promptAberto = true;
+      window.__debtidCofre = (r, dados) => { window.__debtidCofre = null; promptAberto = false; escondidoEm = null; res({ r, dados }); };
+      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { window.__debtidCofre = null; promptAberto = false; res({ r: 'erro' }); }
+    });
+  }
+  const apagarCofre = () => { const a = app(); try { if (a && a.cofreApagar) a.cofreApagar(); } catch { /* nothing to erase */ } };
+
+  // Saves the profile; with the lock on, the private key goes encrypted.
+  async function guardarPerfil() {
+    if (!perfil) return false;
+    const guardado = trava && trava.v === 2 && chaveDados ? await D.chaveTrava.protegerPerfil(perfil, chaveDados) : perfil;
+    return gravarJSON(K.perfil, guardado || perfil);
+  }
+  // With the data key, the profile can sign again.
+  async function abrirSessao(chave) {
+    if (perfil) {
+      const aberto = await D.chaveTrava.abrirPerfil(perfil, chave);
+      if (!aberto) return false;
+      perfil = aberto;
+    }
+    chaveDados = chave;
+    return true;
+  }
+  async function ligarTravaPin(pin, tempo = 60) {
+    const chave = chaveDados || D.chaveTrava.novaChaveDados();
+    const novo = { v: 2, modo: 'pin', pin: await D.chaveTrava.embrulharComPin(pin, chave), tempo };
+    if (modoCelular()) apagarCofre();
+    trava = novo; chaveDados = chave;
+    gravarJSON(K.trava, trava);
+    await guardarPerfil();
+  }
+  async function pinCerto(pin) {
+    if (trava.v === 2) {
+      const chave = await D.chaveTrava.abrirComPin(pin, trava.pin);
+      return !!chave && abrirSessao(chave);
+    }
+    if (!(await D.conferirPin(pin, trava))) return false;
+    await ligarTravaPin(pin, tempoTrava()); // first version: from now on the key is encrypted with this PIN
+    return true;
+  }
   async function testarPin(pin) {
     if (esperaTrava() > 0) return { ok: false };
-    if (await D.conferirPin(pin, trava)) { zerarErrosTrava(); return { ok: true }; }
+    if (await pinCerto(pin)) { zerarErrosTrava(); return { ok: true }; }
     const e = errosTrava(); e.n++;
     // after 5 wrong PINs: wait 30 s, then twice as long after each new mistake (at most 15 min)
     if (e.n >= 5) e.ate = Date.now() + Math.min(900, 30 * 2 ** (e.n - 5)) * 1000;
@@ -347,21 +405,23 @@
   }
   function mostrarTrava(modo, texto) {
     return new Promise(res => {
-      const caixa = $('#trava'), abrir = modo === 'abrir';
+      const caixa = $('#trava'), abrir = modo === 'abrir', celular = modoCelular();
       $('#travaTitulo').textContent = t(abrir ? 'trava.titulo' : 'trava.confirmarT');
-      $('#travaTexto').textContent = texto || t('trava.texto');
+      $('#travaTexto').textContent = celular ? t('trava.bioSub') : (texto || t('trava.texto'));
       $('#travaCancelar').hidden = abrir;
-      $('#travaEsqueci').hidden = !abrir;
-      const bio = !!(trava && trava.bio && bioDisponivel());
-      $('#travaBio').hidden = !bio;
+      $('#travaEsqueci').hidden = !abrir || celular;
+      $('#formTrava').hidden = celular;
+      $('#travaBio').hidden = !celular;
       $('#f-pin').value = ''; $('#travaErro').textContent = '';
       caixa.hidden = false;
+      document.body.classList.add('trava-aberta');
       if (abrir) {
         document.body.classList.add('travado');
         $$('.page, .tabbar').forEach(el => el.setAttribute('aria-hidden', 'true'));
       }
       fimTrava = ok => {
         caixa.hidden = true; fimTrava = null; clearTimeout(timerEspera);
+        document.body.classList.remove('trava-aberta');
         if (abrir) {
           travado = false;
           document.body.classList.remove('travado');
@@ -369,31 +429,48 @@
         }
         res(ok);
       };
-      atualizarEspera();
-      setTimeout(() => { if (!$('#f-pin').disabled) $('#f-pin').focus(); }, 40);
-      if (bio && abrir) usarBio();
+      if (celular) {
+        setTimeout(usarCelular, 60);
+      } else {
+        atualizarEspera();
+        setTimeout(() => { if (!$('#f-pin').disabled) $('#f-pin').focus(); }, 40);
+      }
     });
   }
   async function bloquear() {
     if (!trava || travado) return;
-    if (fimTrava) fimTrava(false); // a PIN question that was open gives way to the full lock
+    if (fimTrava) fimTrava(false); // a question that was open gives way to the full lock
+    if (!$('#modal').hidden) $('#modalCancelar').click(); // and so does an open dialog
     travado = true;
+    // the private key leaves memory: only the encrypted copy stays
+    const guardado = lerJSON(K.perfil, null);
+    if (trava.v === 2 && guardado && guardado.dCifrado) perfil = guardado;
+    chaveDados = null;
     await mostrarTrava('abrir');
   }
-  // Asks for the PIN before a sensitive action. Without a lock set up, it just goes ahead.
+  // Asks for the PIN (or the phone's lock) before a sensitive action. Without a lock, it just goes ahead.
   async function pedirPin(texto) {
     if (!trava) return true;
     if (travado) return false;
     return mostrarTrava('confirmar', texto);
   }
-  function usarBio() {
-    const a = app();
-    if (!a || !a.autenticar) return;
-    window.__debtidBio = r => {
-      window.__debtidBio = null;
-      if (r === 'ok' && fimTrava) { zerarErrosTrava(); fimTrava(true); }
-    };
-    try { a.autenticar(t('trava.bioTitulo'), t('trava.bioSub'), t('trava.usarPin')); } catch { window.__debtidBio = null; }
+  async function usarCelular() {
+    if (!fimTrava || !modoCelular()) return;
+    const r = await cofre('cofreAbrir', trava.celular.iv, trava.celular.ct);
+    if (r.r === 'ok') {
+      let chave = null;
+      try { chave = deB64Padrao(r.dados); } catch { chave = null; }
+      if (chave && (await abrirSessao(chave)) && fimTrava) { zerarErrosTrava(); fimTrava(true); }
+      return;
+    }
+    if (r.r === 'invalida') {
+      // the phone's screen lock was removed or reset, and the Keystore threw the key away
+      const ok = await perguntar({ titulo: t('trava.invalidaT'), texto: t('trava.invalida'), ok: t('trava.esqueciOk'), perigo: true });
+      if (!ok) return;
+      apagarTudo();
+      if (fimTrava) fimTrava(true);
+      irPara('boas-vindas');
+    }
   }
   $('#formTrava').addEventListener('submit', async e => {
     e.preventDefault();
@@ -410,7 +487,7 @@
     if (!$('#f-pin').disabled) $('#f-pin').focus();
   });
   $('#travaCancelar').addEventListener('click', () => { if (fimTrava) fimTrava(false); });
-  $('#travaBio').addEventListener('click', usarBio);
+  $('#travaBio').addEventListener('click', usarCelular);
   $('#travaEsqueci').addEventListener('click', async () => {
     const ok = await perguntar({ titulo: t('trava.esqueciT'), texto: t('trava.esqueci'), ok: t('trava.esqueciOk'), perigo: true });
     if (!ok) return;
@@ -419,6 +496,7 @@
     irPara('boas-vindas');
   });
   function aoEsconder() {
+    if (promptAberto) return;
     if (escondidoEm == null) escondidoEm = Date.now();
     if (trava && tempoTrava() === 0) bloquear();
   }
@@ -1878,7 +1956,7 @@
     const nome = limparNome($('#f-nome-ajuste').value);
     if (nome.length < 2) return toast(t('toast.digiteNome'));
     perfil = { ...perfil, nome: nome.slice(0, 80) };
-    gravarJSON(K.perfil, perfil); renderAjustes(); toast(t('toast.nomeAtualizado'));
+    guardarPerfil(); renderAjustes(); toast(t('toast.nomeAtualizado'));
   });
   const mostrar = (id, sim) => { $(id).hidden = !sim; };
 
@@ -1886,19 +1964,20 @@
   function renderTravaAjustes() {
     const el = $('#travaAjustes');
     if (!trava) {
-      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button></div>`;
+      const cofreEstado = estadoCofre();
+      const celular = cofreEstado === 'indisponivel' ? ''
+        : `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
+      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>` +
+        (cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '');
       return;
     }
-    const tempo = tempoTrava(), bio = bioDisponivel();
-    el.innerHTML = `<p class="hint">${t('trava.ligada')}</p>
+    const tempo = tempoTrava(), celular = modoCelular();
+    el.innerHTML = `<p class="hint">${t(celular ? 'trava.ligadaCelular' : 'trava.ligada')}</p>
       <div class="ajuste"><h4 id="t-trava-tempo">${t('trava.tempo')}</h4>
         <div class="seg" role="radiogroup" aria-labelledby="t-trava-tempo">
           ${[0, 60, 300].map(s => `<input type="radio" name="travaTempo" id="tt-${s}" value="${s}"${tempo === s ? ' checked' : ''}><label for="tt-${s}">${t('trava.tempo' + s)}</label>`).join('')}
         </div></div>
-      ${bio ? `<label class="check"><input type="checkbox" id="travaBioCheck"${trava.bio ? ' checked' : ''}><span>${t('trava.usarBio')}</span></label>` : ''}
-      <div class="btns"><button class="btn" type="button" data-acao="trava-trocar">${t('trava.trocar')}</button><button class="btn btn-ghost" type="button" data-acao="trava-remover">${t('trava.remover')}</button></div>`;
-    const chk = $('#travaBioCheck');
-    if (chk) chk.addEventListener('change', () => { trava = { ...trava, bio: chk.checked }; gravarJSON(K.trava, trava); });
+      <div class="btns">${celular ? '' : `<button class="btn" type="button" data-acao="trava-trocar">${t('trava.trocar')}</button>`}<button class="btn btn-ghost" type="button" data-acao="trava-remover">${t('trava.remover')}</button></div>`;
   }
   async function novoPin() {
     const p1 = await perguntar({ titulo: t('trava.novoT'), texto: t('trava.novo'), ok: t('modal.continuar'), campo: { rotulo: t('trava.pin'), max: 12, senha: true } });
@@ -1914,18 +1993,36 @@
     if (acao === 'trava-criar') {
       const pin = await novoPin();
       if (!pin) return;
-      trava = { ...(await D.hashPin(pin)), bio: false, tempo: 60 };
-      gravarJSON(K.trava, trava); zerarErrosTrava();
-      renderTravaAjustes(); toast(t('trava.criada'));
+      await ligarTravaPin(pin);
+      zerarErrosTrava(); renderTravaAjustes(); toast(t('trava.criada'));
+    } else if (acao === 'trava-celular') {
+      if (estadoCofre() !== 'ok') return;
+      const ok = await perguntar({ titulo: t('trava.celularT'), texto: t('trava.celular'), ok: t('trava.celularOk') });
+      if (!ok) return;
+      const chave = chaveDados || D.chaveTrava.novaChaveDados();
+      const r = await cofre('cofreGuardar', b64Padrao(chave));
+      if (r.r !== 'ok') { if (r.r !== 'cancelado') toastErro(new D.ChaveErro('GENERICO')); return; }
+      let caixa = null;
+      try { caixa = JSON.parse(r.dados); } catch { caixa = null; }
+      if (!caixa || !caixa.iv || !caixa.ct) { toastErro(new D.ChaveErro('GENERICO')); return; }
+      trava = { v: 2, modo: 'celular', celular: { iv: caixa.iv, ct: caixa.ct }, tempo: 60 };
+      chaveDados = chave;
+      gravarJSON(K.trava, trava);
+      await guardarPerfil();
+      zerarErrosTrava(); renderTravaAjustes(); toast(t('trava.criada'));
     } else if (acao === 'trava-trocar') {
       if (!(await pedirPin(t('trava.pedirTrocar')))) return;
       const pin = await novoPin();
       if (!pin) return;
-      trava = { ...trava, ...(await D.hashPin(pin)) };
-      gravarJSON(K.trava, trava); renderTravaAjustes(); toast(t('trava.trocada'));
+      await ligarTravaPin(pin, tempoTrava()); // the same data key, wrapped with the new PIN
+      renderTravaAjustes(); toast(t('trava.trocada'));
     } else if (acao === 'trava-remover') {
       if (!(await pedirPin(t('trava.pedirRemover')))) return;
+      const eraCelular = modoCelular();
       trava = null; gravarTexto(K.trava, null); gravarTexto(K.travaErros, null);
+      await guardarPerfil(); // stored without encryption again
+      chaveDados = null;
+      if (eraCelular) apagarCofre();
       renderTravaAjustes(); toast(t('trava.removida'));
     }
   }
@@ -2101,6 +2198,7 @@
     if (s1.length < 10) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaCurtaT'), t('bk.senhaCurta')); return; }
     if (D.forcaSenha(s1) < 1) { $('#msgBackup').innerHTML = alertaHTML(t('bk.senhaFracaT'), t('bk.senhaFraca')); return; }
     if (s1 !== s2) { $('#msgBackup').innerHTML = alertaHTML(t('bk.difT'), t('bk.dif')); return; }
+    if (!perfil || !perfil.jwk || !perfil.jwk.d) { $('#msgBackup').innerHTML = alertaErro(new D.ChaveErro('GENERICO')); return; } // locked: no key to save
     const btn = e.submitter || $('#formBackup button[type="submit"]'); btn.disabled = true;
     $('#msgBackup').innerHTML = `<p class="hint">${t('bk.gerando')}</p>`;
     try {
@@ -2130,7 +2228,7 @@
       }
       if (perfil && !(await pedirPin(t('trava.pedirRestaurar')))) return;
       perfil = { ...obj.perfil };
-      gravarJSON(K.perfil, perfil);
+      await guardarPerfil();
       const entrada = Array.isArray(obj.registros) ? obj.registros.filter(r => r && r.codigo) : [];
       await migrarRegistros(entrada);
       for (const r of entrada) {
@@ -2162,7 +2260,8 @@
   });
   function apagarTudo() {
     [K.perfil, K.regs, K.contatos, K.trava, K.travaErros, K.backupEm, K.backupAdiado].forEach(k => gravarTexto(k, null));
-    perfil = null; registros = []; contatos = []; trava = null; atual = null;
+    perfil = null; registros = []; contatos = []; trava = null; atual = null; chaveDados = null;
+    apagarCofre();
     agendarLembretesVazio();
   }
   const agendarLembretesVazio = () => { const a = app(); if (a && a.lembretes) { try { a.lembretes('[]'); } catch { /* ignore */ } } };

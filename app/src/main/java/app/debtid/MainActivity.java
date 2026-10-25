@@ -1,7 +1,6 @@
 package app.debtid;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ClipData;
@@ -13,12 +12,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricPrompt;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
@@ -40,7 +36,6 @@ import org.json.JSONObject;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executor;
 
 /**
  * DebtID is a WebView that loads the bundled page (assets/index.html).
@@ -251,18 +246,31 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> applySystemBars(top, darkIconsTop, bottom, darkIconsBottom));
         }
 
-        /** "ok" when a fingerprint or face is set up; "nenhuma" when not; "indisponivel" before Android 10. */
+        /** The Android Keystore for the signing key (Android 11+): "ok", "sem-bloqueio" (no screen lock) or "indisponivel". */
         @JavascriptInterface
-        public String biometria() {
-            if (Build.VERSION.SDK_INT < 29) return "indisponivel";
-            return Biometria.disponivel(MainActivity.this) ? "ok" : "nenhuma";
+        public String cofre() {
+            if (Build.VERSION.SDK_INT < 30) return "indisponivel";
+            return Cofre.estado(MainActivity.this);
         }
 
-        /** Asks for the fingerprint or face; the answer goes to window.__debtidBio("ok"|"cancelado"|"erro"). */
+        /** Wraps the data key (base64) after the fingerprint, face or screen lock; answers window.__debtidCofre("ok", '{"iv":..,"ct":..}'). */
         @JavascriptInterface
-        public void autenticar(final String titulo, final String subtitulo, final String cancelar) {
-            if (Build.VERSION.SDK_INT < 29) { returnBio("erro"); return; }
-            runOnUiThread(() -> Biometria.autenticar(MainActivity.this, titulo, subtitulo, cancelar));
+        public void cofreGuardar(final String titulo, final String subtitulo, final String dados) {
+            if (Build.VERSION.SDK_INT < 30) { returnCofre("erro", null); return; }
+            runOnUiThread(() -> Cofre.guardar(MainActivity.this, titulo, subtitulo, dados));
+        }
+
+        /** Opens the data key; answers window.__debtidCofre("ok", base64) or "cancelado", "invalida", "erro". */
+        @JavascriptInterface
+        public void cofreAbrir(final String titulo, final String subtitulo, final String iv, final String ct) {
+            if (Build.VERSION.SDK_INT < 30) { returnCofre("erro", null); return; }
+            runOnUiThread(() -> Cofre.abrir(MainActivity.this, titulo, subtitulo, iv, ct));
+        }
+
+        /** Erases the Keystore key (the lock was removed or the data erased). */
+        @JavascriptInterface
+        public void cofreApagar() {
+            if (Build.VERSION.SDK_INT >= 30) Cofre.apagar();
         }
 
         /** The next due-date reminders: a JSON list of { id, quando (ms), titulo, texto }, plus channel texts. */
@@ -421,8 +429,9 @@ public class MainActivity extends Activity {
                 + (error == null ? "null" : JSONObject.quote(error)) + ")");
     }
 
-    void returnBio(String resultado) {
-        runOnUiThread(() -> js("window.__debtidBio && window.__debtidBio(" + JSONObject.quote(resultado) + ")"));
+    void returnCofre(String resultado, String dados) {
+        runOnUiThread(() -> js("window.__debtidCofre && window.__debtidCofre(" + JSONObject.quote(resultado) + ", "
+                + (dados == null ? "null" : JSONObject.quote(dados)) + ")"));
     }
 
     private void returnNotif(boolean ok) {
@@ -431,47 +440,6 @@ public class MainActivity extends Activity {
 
     private void returnArquivo(String resultado) {
         js("window.__debtidArquivo && window.__debtidArquivo(" + resultado + ")");
-    }
-
-    /** Fingerprint or face unlock (Android 10+), with the system's own prompt. */
-    @TargetApi(29)
-    private static final class Biometria {
-        @SuppressWarnings("deprecation")
-        static boolean disponivel(Context context) {
-            BiometricManager bm = (BiometricManager) context.getSystemService(Context.BIOMETRIC_SERVICE);
-            if (bm == null) return false;
-            int r = Build.VERSION.SDK_INT >= 30
-                    ? bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-                    : bm.canAuthenticate();
-            return r == BiometricManager.BIOMETRIC_SUCCESS;
-        }
-
-        static void autenticar(final MainActivity activity, String titulo, String subtitulo, String cancelar) {
-            Executor executor = activity.getMainExecutor();
-            BiometricPrompt.Builder builder = new BiometricPrompt.Builder(activity)
-                    .setTitle(titulo == null || titulo.isEmpty() ? "DebtID" : titulo)
-                    .setNegativeButton(cancelar == null || cancelar.isEmpty() ? "PIN" : cancelar, executor,
-                            (dialog, which) -> activity.returnBio("cancelado"));
-            if (subtitulo != null && !subtitulo.isEmpty()) builder.setSubtitle(subtitulo);
-            if (Build.VERSION.SDK_INT >= 30) {
-                builder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK);
-            }
-            try {
-                builder.build().authenticate(new CancellationSignal(), executor, new BiometricPrompt.AuthenticationCallback() {
-                    @Override
-                    public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
-                        activity.returnBio("ok");
-                    }
-
-                    @Override
-                    public void onAuthenticationError(int errorCode, CharSequence errString) {
-                        activity.returnBio("erro");
-                    }
-                });
-            } catch (Exception e) {
-                activity.returnBio("erro");
-            }
-        }
     }
 
     @SuppressWarnings("deprecation")
