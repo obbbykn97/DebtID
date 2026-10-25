@@ -322,7 +322,12 @@
   // { v: 2, modo: 'pin' | 'celular', pin: data key wrapped with the PIN, celular: { iv, ct } from the Keystore, tempo }
   // (the first version kept only a PIN hash, { sal, hash, bio, tempo }: it moves to v2 at the next PIN)
   let trava = lerJSON(K.trava, null);
-  const travaValida = x => !!x && ((x.v === 2 && ((x.modo === 'pin' && x.pin) || (x.modo === 'celular' && x.celular))) || !!(x.sal && x.hash));
+  function travaValida(x) {
+    if (!x) return false;
+    if (x.v === 2 && x.modo === 'pin' && x.pin) return true;
+    if (x.v === 2 && x.modo === 'celular' && x.celular) return true;
+    return !!(x.sal && x.hash); // the first version
+  }
   if (!travaValida(trava)) trava = null;
   let chaveDados = null; // the data key, only in memory and only while unlocked
   let travado = false, escondidoEm = null, fimTrava = null, timerEspera = null;
@@ -343,9 +348,10 @@
     return new Promise(res => {
       const a = app();
       if (!a || !a[acao]) { res({ r: 'erro' }); return; }
+      const encerrar = () => { window.__debtidCofre = null; promptAberto = false; };
       promptAberto = true;
-      window.__debtidCofre = (r, dados) => { window.__debtidCofre = null; promptAberto = false; escondidoEm = null; res({ r, dados }); };
-      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { window.__debtidCofre = null; promptAberto = false; res({ r: 'erro' }); }
+      window.__debtidCofre = (r, dados) => { encerrar(); escondidoEm = null; res({ r, dados }); };
+      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { encerrar(); res({ r: 'erro' }); }
     });
   }
   const apagarCofre = () => { const a = app(); try { if (a && a.cofreApagar) a.cofreApagar(); } catch { /* nothing to erase */ } };
@@ -377,7 +383,8 @@
   async function pinCerto(pin) {
     if (trava.v === 2) {
       const chave = await D.chaveTrava.abrirComPin(pin, trava.pin);
-      return !!chave && abrirSessao(chave);
+      if (!chave) return false;
+      return abrirSessao(chave);
     }
     if (!(await D.conferirPin(pin, trava))) return false;
     await ligarTravaPin(pin, tempoTrava()); // first version: from now on the key is encrypted with this PIN
@@ -459,18 +466,20 @@
     const r = await cofre('cofreAbrir', trava.celular.iv, trava.celular.ct);
     if (r.r === 'ok') {
       let chave = null;
-      try { chave = deB64Padrao(r.dados); } catch { chave = null; }
+      try { chave = deB64Padrao(r.dados); } catch { /* not base64: no key */ }
       if (chave && (await abrirSessao(chave)) && fimTrava) { zerarErrosTrava(); fimTrava(true); }
       return;
     }
-    if (r.r === 'invalida') {
-      // the phone's screen lock was removed or reset, and the Keystore threw the key away
-      const ok = await perguntar({ titulo: t('trava.invalidaT'), texto: t('trava.invalida'), ok: t('trava.esqueciOk'), perigo: true });
-      if (!ok) return;
-      apagarTudo();
-      if (fimTrava) fimTrava(true);
-      irPara('boas-vindas');
-    }
+    // the phone's screen lock was removed or reset, and the Keystore threw the key away
+    if (r.r === 'invalida') await apagarERecomecar(t('trava.invalidaT'), t('trava.invalida'));
+  }
+  // Without the key (PIN forgotten, or the Keystore key lost), the way out is to erase this device's data.
+  async function apagarERecomecar(titulo, texto) {
+    const ok = await perguntar({ titulo, texto, ok: t('trava.esqueciOk'), perigo: true });
+    if (!ok) return;
+    apagarTudo();
+    if (fimTrava) fimTrava(true);
+    irPara('boas-vindas');
   }
   $('#formTrava').addEventListener('submit', async e => {
     e.preventDefault();
@@ -488,13 +497,7 @@
   });
   $('#travaCancelar').addEventListener('click', () => { if (fimTrava) fimTrava(false); });
   $('#travaBio').addEventListener('click', usarCelular);
-  $('#travaEsqueci').addEventListener('click', async () => {
-    const ok = await perguntar({ titulo: t('trava.esqueciT'), texto: t('trava.esqueci'), ok: t('trava.esqueciOk'), perigo: true });
-    if (!ok) return;
-    apagarTudo();
-    if (fimTrava) fimTrava(true);
-    irPara('boas-vindas');
-  });
+  $('#travaEsqueci').addEventListener('click', () => apagarERecomecar(t('trava.esqueciT'), t('trava.esqueci')));
   function aoEsconder() {
     if (promptAberto) return;
     if (escondidoEm == null) escondidoEm = Date.now();
@@ -1965,10 +1968,12 @@
     const el = $('#travaAjustes');
     if (!trava) {
       const cofreEstado = estadoCofre();
-      const celular = cofreEstado === 'indisponivel' ? ''
-        : `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
-      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>` +
-        (cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '');
+      let celular = '';
+      if (cofreEstado !== 'indisponivel') {
+        celular = `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
+      }
+      const semBloqueio = cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '';
+      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>${semBloqueio}`;
       return;
     }
     const tempo = tempoTrava(), celular = modoCelular();
@@ -2001,9 +2006,11 @@
       if (!ok) return;
       const chave = chaveDados || D.chaveTrava.novaChaveDados();
       const r = await cofre('cofreGuardar', b64Padrao(chave));
-      if (r.r !== 'ok') { if (r.r !== 'cancelado') toastErro(new D.ChaveErro('GENERICO')); return; }
-      let caixa = null;
-      try { caixa = JSON.parse(r.dados); } catch { caixa = null; }
+      if (r.r === 'cancelado') return;
+      let caixa = null; // { iv, ct } from the Keystore
+      if (r.r === 'ok') {
+        try { caixa = JSON.parse(r.dados); } catch { /* not JSON */ }
+      }
       if (!caixa || !caixa.iv || !caixa.ct) { toastErro(new D.ChaveErro('GENERICO')); return; }
       trava = { v: 2, modo: 'celular', celular: { iv: caixa.iv, ct: caixa.ct }, tempo: 60 };
       chaveDados = chave;

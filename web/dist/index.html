@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MSdKF8GKX//CeRI01wHPQF94JDEpobAZ93GhxIU53nY=' 'sha256-jELFzdeWx8XIkQjlu5t3ARZzbmxa3HtftRnM4Nw3cXQ=' 'sha256-sWKsahJXAUF7TsCRu3qHPmfpLW9VvuBg+0XBsmYR03Y=' 'sha256-zNukpiROg9VoFAAQnirraR1mskva3yffhYO+wqzIMHw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-hlDL6VTSaiYS0r4HRISi13TV3AKhZX+7A64Z1u/jMBk=' 'sha256-QYyYERPNQDUQXf5wqZlkgd7eWLDxRaIUaX/W/3gObjU=' 'sha256-NQryJda1Z+snHWcaMy6CqTOlnZF2c5kITUjNS32LvIM='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -20,7 +20,7 @@
   if (n === 'in') n = 'id'; // older Android name for Indonesian
   if (!idiomas.test(l)) l = idiomas.test(n) ? n : 'en';
   d.setAttribute('data-lang', l);
-  d.lang = l === 'pt' ? 'pt-BR' : l === 'zh' ? 'zh-CN' : l;
+  d.lang = { pt: 'pt-BR', zh: 'zh-CN' }[l] || l;
   if (l === 'ar' || l === 'ur') d.dir = 'rtl';
   if (l !== 'pt') d.className += ' i18n-espera'; // page text is written in Portuguese: hide it until it is translated
 })();
@@ -857,8 +857,8 @@ body.travado{overflow:hidden}
 /* ---------------- languages ---------------- */
 /* language pickers: cards in the onboarding, a grid in Settings */
 .ui-opcoes-idiomas{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.idioma-op{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:0;align-items:center;padding:10px 12px;border-radius:16px}
-.idioma-op .lang-tag{grid-row:span 2;width:42px;height:30px;aspect-ratio:auto;border-radius:8px;font-size:14px}
+.idioma-op{display:grid;grid-template-columns:auto 1fr;gap:0 10px;align-items:center;padding:10px 12px;border-radius:16px}
+.idioma-op .lang-tag{grid-row:span 2;width:42px;height:30px;border-radius:8px;font-size:14px}
 .idioma-op b{margin:0;font-size:16px;line-height:1.3}
 .idioma-op small{grid-column:2}
 .idiomas{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
@@ -868,8 +868,7 @@ body.travado{overflow:hidden}
 .idiomas input:checked+label{background:var(--ink);color:var(--card)}
 .idiomas input:focus-visible+label{outline:3px solid var(--peri);outline-offset:1px}
 [data-ui="pro"] .idiomas label{border-width:1px;border-color:var(--rule);border-radius:0;font-weight:600}
-[data-ui="pro"] .idiomas input:checked+label{border-color:var(--ink);background:var(--ink);color:var(--bg)}
-[data-ui="pro"] .idioma-op{border-radius:0}
+[data-ui="pro"] .idiomas input:checked+label{border-color:var(--ink);color:var(--bg)}
 [data-ui="pro"] .idioma-op .lang-tag{border-radius:0}
 
 /* right-to-left languages (Arabic, Urdu): the layout mirrors through logical properties; arrows turn around */
@@ -2791,7 +2790,7 @@ const DebtIDIdioma = (() => {
     raiz.classList.remove('i18n-espera');
     return atual;
   }
-  return { t, aplicar, atual: () => atual, tag: () => info(atual).tag, rtl: () => !!info(atual).rtl };
+  return { t, aplicar, atual: () => atual, rtl: () => !!info(atual).rtl };
 })();
 
 /* DebtID: UI strings in Arabic (Modern Standard Arabic). Same keys, {placeholders} and HTML tags as web/src/i18n.js. */
@@ -7372,12 +7371,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   /** Wraps the data key with the PIN: { sal, it, iv, ct }. */
   async function embrulharComPin(pin, chaveDados) {
     const sal = crypto.getRandomValues(new Uint8Array(16));
-    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(await chaveDoPin(pin, sal, ITER_PIN), chaveDados, TAG_CHAVE)) };
+    const chavePin = await chaveDoPin(pin, sal, ITER_PIN);
+    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(chavePin, chaveDados, TAG_CHAVE)) };
   }
   /** The data key, or null when the PIN is wrong. */
   async function abrirComPin(pin, emb) {
     if (!emb || !emb.sal || !emb.ct) return null;
-    return decifrarCom(await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN), emb, TAG_CHAVE);
+    const chavePin = await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN);
+    return decifrarCom(chavePin, emb, TAG_CHAVE);
   }
   /** The profile as stored with the lock on: the private key encrypted, tied to the public key. */
   async function protegerPerfil(perfil, chaveDados) {
@@ -7394,7 +7395,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const { dCifrado, ...resto } = perfil;
     return { ...resto, jwk: { ...perfil.jwk, d: new TextDecoder().decode(d) } };
   }
-  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil, b64: b64url, deB64: deB64url };
+  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil };
 
   /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
   const QR = (() => {
@@ -7685,10 +7686,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (MOEDAS.BTC[k]) return;
     let dn = null;
     try { dn = new Intl.DisplayNames([LOC[k].tag], { type: 'currency' }); } catch (e) { /* older browser: English names */ }
-    const [btc, eth, usdt] = CRIPTO_NOMES[k];
+    const [BTC, ETH, USDT] = CRIPTO_NOMES[k], cripto = { BTC, ETH, USDT };
     for (const codigo of CODIGOS_MOEDAS) {
       const m = MOEDAS[codigo];
-      let nome = { BTC: btc, ETH: eth, USDT: usdt }[codigo] || null;
+      let nome = cripto[codigo];
       if (!nome) {
         try { nome = dn ? dn.of(codigo) : null; } catch (e) { /* code unknown to Intl */ }
         if (!nome || nome.toUpperCase() === codigo) nome = m.en.nome;
@@ -7763,19 +7764,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       return n + ' ' + (n === 1 ? L.dia : L.dias);
     },
     data: dia => {
-      if (L.intl) return dtf({ day: '2-digit', month: '2-digit', year: 'numeric' }).format(dataUTC(dia));
       const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: '2-digit', month: '2-digit', year: 'numeric' }).format(x);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}, ${x.getUTCFullYear()}`
                              : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`;
     },
     dataCurta: dia => {
-      if (L.intl) return dtf({ day: 'numeric', month: 'short' }).format(dataUTC(dia));
       const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: 'numeric', month: 'short' }).format(x);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}` : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`;
     },
     dataExtenso: dia => {
-      if (L.intl) return dtf({ day: 'numeric', month: 'long', year: 'numeric' }).format(dataUTC(dia));
-      const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
+      const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: 'numeric', month: 'long', year: 'numeric' }).format(x);
+      const dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
       if (idioma === 'en') return `${m} ${dd}, ${x.getUTCFullYear()}`;
       return `${dd === 1 && idioma === 'pt' ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
     },
@@ -7783,8 +7785,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
       const fuso = `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
       if (L.intl) {
-        const hora = dtf({ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-        return hora.format(x) + ' ' + isolar(fuso);
+        const dataHora = dtf({ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        return dataHora.format(x) + ' ' + isolar(fuso);
       }
       const dia = Math.floor((ts + tz * 900) / 86400);
       return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ${fuso}`;
@@ -7888,7 +7890,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const mult = 10 ** m.casas, casas = v % mult ? m.casas : 0;
     if (/^[A-Z]{3}$/.test(m.codigo)) {
       try {
-        return isolarFrase(new Intl.NumberFormat(L.tag, { style: 'currency', currency: m.codigo, currencyDisplay: 'name', minimumFractionDigits: casas, maximumFractionDigits: casas }).format(v / mult));
+        const comNome = new Intl.NumberFormat(L.tag, { style: 'currency', currency: m.codigo, currencyDisplay: 'name', minimumFractionDigits: casas, maximumFractionDigits: casas });
+        return isolarFrase(comNome.format(v / mult));
       } catch (e) { /* currency unknown to Intl: digits and code below */ }
     }
     return isolarFrase(numMoeda(v, m.casas, casas) + ' ' + m.codigo);
@@ -7918,12 +7921,18 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   /* =================== typed numbers (lenient parsing) ===================
      Accepts both "1.250,50" and "1,250.50". When only one kind of separator appears, the
      current language decides: the decimal mark is "," in Portuguese and "." in English. */
-  // digits typed on Arabic, Urdu, Hindi, Bengali or full-width keyboards, and their separators
-  const ALGARISMOS = [0x660, 0x6F0, 0x966, 0x9E6, 0xFF10];
-  const latinos = s => s.replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\uFF10-\uFF19]/g, c => {
-    const x = c.charCodeAt(0), base = ALGARISMOS.find(b => x >= b && x <= b + 9);
-    return String(x - base);
-  }).replace(/[\u066B\uFF0E]/g, '.').replace(/[\u066C\uFF0C]/g, ',');
+  // Digits typed on Arabic, Urdu, Hindi, Bengali or full-width keyboards, and their separators,
+  // become Latin digits, "." and ",".
+  const ZEROS = [0x660, 0x6F0, 0x966, 0x9E6, 0xFF10]; // the "0" of each of those digit sets
+  function latinos(s) {
+    return s
+      .replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\uFF10-\uFF19]/g, c => {
+        const x = c.charCodeAt(0);
+        return String(x - ZEROS.find(zero => x >= zero && x <= zero + 9));
+      })
+      .replace(/[\u066B\uFF0E]/g, '.')  // Arabic decimal separator, full-width full stop
+      .replace(/[\u066C\uFF0C]/g, ','); // Arabic thousands separator, full-width comma
+  }
   function lerNumero(bruto, milhar) {
     let s = latinos(String(bruto)).replace(/[R$\s%\u066A ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;
@@ -8278,7 +8287,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   // { v: 2, modo: 'pin' | 'celular', pin: data key wrapped with the PIN, celular: { iv, ct } from the Keystore, tempo }
   // (the first version kept only a PIN hash, { sal, hash, bio, tempo }: it moves to v2 at the next PIN)
   let trava = lerJSON(K.trava, null);
-  const travaValida = x => !!x && ((x.v === 2 && ((x.modo === 'pin' && x.pin) || (x.modo === 'celular' && x.celular))) || !!(x.sal && x.hash));
+  function travaValida(x) {
+    if (!x) return false;
+    if (x.v === 2 && x.modo === 'pin' && x.pin) return true;
+    if (x.v === 2 && x.modo === 'celular' && x.celular) return true;
+    return !!(x.sal && x.hash); // the first version
+  }
   if (!travaValida(trava)) trava = null;
   let chaveDados = null; // the data key, only in memory and only while unlocked
   let travado = false, escondidoEm = null, fimTrava = null, timerEspera = null;
@@ -8299,9 +8313,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     return new Promise(res => {
       const a = app();
       if (!a || !a[acao]) { res({ r: 'erro' }); return; }
+      const encerrar = () => { window.__debtidCofre = null; promptAberto = false; };
       promptAberto = true;
-      window.__debtidCofre = (r, dados) => { window.__debtidCofre = null; promptAberto = false; escondidoEm = null; res({ r, dados }); };
-      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { window.__debtidCofre = null; promptAberto = false; res({ r: 'erro' }); }
+      window.__debtidCofre = (r, dados) => { encerrar(); escondidoEm = null; res({ r, dados }); };
+      try { a[acao](t('trava.bioTitulo'), t('trava.bioSub'), ...args); } catch { encerrar(); res({ r: 'erro' }); }
     });
   }
   const apagarCofre = () => { const a = app(); try { if (a && a.cofreApagar) a.cofreApagar(); } catch { /* nothing to erase */ } };
@@ -8333,7 +8348,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   async function pinCerto(pin) {
     if (trava.v === 2) {
       const chave = await D.chaveTrava.abrirComPin(pin, trava.pin);
-      return !!chave && abrirSessao(chave);
+      if (!chave) return false;
+      return abrirSessao(chave);
     }
     if (!(await D.conferirPin(pin, trava))) return false;
     await ligarTravaPin(pin, tempoTrava()); // first version: from now on the key is encrypted with this PIN
@@ -8415,18 +8431,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const r = await cofre('cofreAbrir', trava.celular.iv, trava.celular.ct);
     if (r.r === 'ok') {
       let chave = null;
-      try { chave = deB64Padrao(r.dados); } catch { chave = null; }
+      try { chave = deB64Padrao(r.dados); } catch { /* not base64: no key */ }
       if (chave && (await abrirSessao(chave)) && fimTrava) { zerarErrosTrava(); fimTrava(true); }
       return;
     }
-    if (r.r === 'invalida') {
-      // the phone's screen lock was removed or reset, and the Keystore threw the key away
-      const ok = await perguntar({ titulo: t('trava.invalidaT'), texto: t('trava.invalida'), ok: t('trava.esqueciOk'), perigo: true });
-      if (!ok) return;
-      apagarTudo();
-      if (fimTrava) fimTrava(true);
-      irPara('boas-vindas');
-    }
+    // the phone's screen lock was removed or reset, and the Keystore threw the key away
+    if (r.r === 'invalida') await apagarERecomecar(t('trava.invalidaT'), t('trava.invalida'));
+  }
+  // Without the key (PIN forgotten, or the Keystore key lost), the way out is to erase this device's data.
+  async function apagarERecomecar(titulo, texto) {
+    const ok = await perguntar({ titulo, texto, ok: t('trava.esqueciOk'), perigo: true });
+    if (!ok) return;
+    apagarTudo();
+    if (fimTrava) fimTrava(true);
+    irPara('boas-vindas');
   }
   $('#formTrava').addEventListener('submit', async e => {
     e.preventDefault();
@@ -8444,13 +8462,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   });
   $('#travaCancelar').addEventListener('click', () => { if (fimTrava) fimTrava(false); });
   $('#travaBio').addEventListener('click', usarCelular);
-  $('#travaEsqueci').addEventListener('click', async () => {
-    const ok = await perguntar({ titulo: t('trava.esqueciT'), texto: t('trava.esqueci'), ok: t('trava.esqueciOk'), perigo: true });
-    if (!ok) return;
-    apagarTudo();
-    if (fimTrava) fimTrava(true);
-    irPara('boas-vindas');
-  });
+  $('#travaEsqueci').addEventListener('click', () => apagarERecomecar(t('trava.esqueciT'), t('trava.esqueci')));
   function aoEsconder() {
     if (promptAberto) return;
     if (escondidoEm == null) escondidoEm = Date.now();
@@ -9921,10 +9933,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const el = $('#travaAjustes');
     if (!trava) {
       const cofreEstado = estadoCofre();
-      const celular = cofreEstado === 'indisponivel' ? ''
-        : `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
-      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>` +
-        (cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '');
+      let celular = '';
+      if (cofreEstado !== 'indisponivel') {
+        celular = `<button class="btn" type="button" data-acao="trava-celular"${cofreEstado === 'ok' ? '' : ' disabled'}>${ico('digital')}${t('trava.usarCelular')}</button>`;
+      }
+      const semBloqueio = cofreEstado === 'sem-bloqueio' ? `<p class="hint">${t('trava.semBloqueio')}</p>` : '';
+      el.innerHTML = `<p class="hint">${t('trava.desligada')}</p><div class="btns"><button class="btn btn-alt" type="button" data-acao="trava-criar">${ico('cadeado')}${t('trava.criar')}</button>${celular}</div>${semBloqueio}`;
       return;
     }
     const tempo = tempoTrava(), celular = modoCelular();
@@ -9957,9 +9971,11 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (!ok) return;
       const chave = chaveDados || D.chaveTrava.novaChaveDados();
       const r = await cofre('cofreGuardar', b64Padrao(chave));
-      if (r.r !== 'ok') { if (r.r !== 'cancelado') toastErro(new D.ChaveErro('GENERICO')); return; }
-      let caixa = null;
-      try { caixa = JSON.parse(r.dados); } catch { caixa = null; }
+      if (r.r === 'cancelado') return;
+      let caixa = null; // { iv, ct } from the Keystore
+      if (r.r === 'ok') {
+        try { caixa = JSON.parse(r.dados); } catch { /* not JSON */ }
+      }
       if (!caixa || !caixa.iv || !caixa.ct) { toastErro(new D.ChaveErro('GENERICO')); return; }
       trava = { v: 2, modo: 'celular', celular: { iv: caixa.iv, ct: caixa.ct }, tempo: 60 };
       chaveDados = chave;

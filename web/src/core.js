@@ -936,12 +936,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   /** Wraps the data key with the PIN: { sal, it, iv, ct }. */
   async function embrulharComPin(pin, chaveDados) {
     const sal = crypto.getRandomValues(new Uint8Array(16));
-    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(await chaveDoPin(pin, sal, ITER_PIN), chaveDados, TAG_CHAVE)) };
+    const chavePin = await chaveDoPin(pin, sal, ITER_PIN);
+    return { sal: b64url(sal), it: ITER_PIN, ...(await cifrarCom(chavePin, chaveDados, TAG_CHAVE)) };
   }
   /** The data key, or null when the PIN is wrong. */
   async function abrirComPin(pin, emb) {
     if (!emb || !emb.sal || !emb.ct) return null;
-    return decifrarCom(await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN), emb, TAG_CHAVE);
+    const chavePin = await chaveDoPin(pin, deB64url(emb.sal), emb.it || ITER_PIN);
+    return decifrarCom(chavePin, emb, TAG_CHAVE);
   }
   /** The profile as stored with the lock on: the private key encrypted, tied to the public key. */
   async function protegerPerfil(perfil, chaveDados) {
@@ -958,7 +960,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const { dCifrado, ...resto } = perfil;
     return { ...resto, jwk: { ...perfil.jwk, d: new TextDecoder().decode(d) } };
   }
-  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil, b64: b64url, deB64: deB64url };
+  const chaveTrava = { novaChaveDados, embrulharComPin, abrirComPin, protegerPerfil, abrirPerfil };
 
   /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
   const QR = (() => {
@@ -1249,10 +1251,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (MOEDAS.BTC[k]) return;
     let dn = null;
     try { dn = new Intl.DisplayNames([LOC[k].tag], { type: 'currency' }); } catch (e) { /* older browser: English names */ }
-    const [btc, eth, usdt] = CRIPTO_NOMES[k];
+    const [BTC, ETH, USDT] = CRIPTO_NOMES[k], cripto = { BTC, ETH, USDT };
     for (const codigo of CODIGOS_MOEDAS) {
       const m = MOEDAS[codigo];
-      let nome = { BTC: btc, ETH: eth, USDT: usdt }[codigo] || null;
+      let nome = cripto[codigo];
       if (!nome) {
         try { nome = dn ? dn.of(codigo) : null; } catch (e) { /* code unknown to Intl */ }
         if (!nome || nome.toUpperCase() === codigo) nome = m.en.nome;
@@ -1327,19 +1329,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       return n + ' ' + (n === 1 ? L.dia : L.dias);
     },
     data: dia => {
-      if (L.intl) return dtf({ day: '2-digit', month: '2-digit', year: 'numeric' }).format(dataUTC(dia));
       const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: '2-digit', month: '2-digit', year: 'numeric' }).format(x);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}, ${x.getUTCFullYear()}`
                              : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}/${x.getUTCFullYear()}`;
     },
     dataCurta: dia => {
-      if (L.intl) return dtf({ day: 'numeric', month: 'short' }).format(dataUTC(dia));
       const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: 'numeric', month: 'short' }).format(x);
       return idioma === 'en' ? `${curto(x.getUTCMonth())} ${x.getUTCDate()}` : `${p2(x.getUTCDate())}/${p2(x.getUTCMonth() + 1)}`;
     },
     dataExtenso: dia => {
-      if (L.intl) return dtf({ day: 'numeric', month: 'long', year: 'numeric' }).format(dataUTC(dia));
-      const x = dataUTC(dia), dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
+      const x = dataUTC(dia);
+      if (L.intl) return dtf({ day: 'numeric', month: 'long', year: 'numeric' }).format(x);
+      const dd = x.getUTCDate(), m = L.meses[x.getUTCMonth()];
       if (idioma === 'en') return `${m} ${dd}, ${x.getUTCFullYear()}`;
       return `${dd === 1 && idioma === 'pt' ? '1º' : dd} de ${m} de ${x.getUTCFullYear()}`;
     },
@@ -1347,8 +1350,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       const x = new Date((ts + tz * 900) * 1000), off = tz * 15, a = Math.abs(off);
       const fuso = `(UTC${off < 0 ? '−' : '+'}${p2(Math.floor(a / 60))}:${p2(a % 60)})`;
       if (L.intl) {
-        const hora = dtf({ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-        return hora.format(x) + ' ' + isolar(fuso);
+        const dataHora = dtf({ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        return dataHora.format(x) + ' ' + isolar(fuso);
       }
       const dia = Math.floor((ts + tz * 900) / 86400);
       return `${fmt.data(dia)} ${L.as} ${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())} ${fuso}`;
@@ -1452,7 +1455,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const mult = 10 ** m.casas, casas = v % mult ? m.casas : 0;
     if (/^[A-Z]{3}$/.test(m.codigo)) {
       try {
-        return isolarFrase(new Intl.NumberFormat(L.tag, { style: 'currency', currency: m.codigo, currencyDisplay: 'name', minimumFractionDigits: casas, maximumFractionDigits: casas }).format(v / mult));
+        const comNome = new Intl.NumberFormat(L.tag, { style: 'currency', currency: m.codigo, currencyDisplay: 'name', minimumFractionDigits: casas, maximumFractionDigits: casas });
+        return isolarFrase(comNome.format(v / mult));
       } catch (e) { /* currency unknown to Intl: digits and code below */ }
     }
     return isolarFrase(numMoeda(v, m.casas, casas) + ' ' + m.codigo);
@@ -1482,12 +1486,18 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   /* =================== typed numbers (lenient parsing) ===================
      Accepts both "1.250,50" and "1,250.50". When only one kind of separator appears, the
      current language decides: the decimal mark is "," in Portuguese and "." in English. */
-  // digits typed on Arabic, Urdu, Hindi, Bengali or full-width keyboards, and their separators
-  const ALGARISMOS = [0x660, 0x6F0, 0x966, 0x9E6, 0xFF10];
-  const latinos = s => s.replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\uFF10-\uFF19]/g, c => {
-    const x = c.charCodeAt(0), base = ALGARISMOS.find(b => x >= b && x <= b + 9);
-    return String(x - base);
-  }).replace(/[\u066B\uFF0E]/g, '.').replace(/[\u066C\uFF0C]/g, ',');
+  // Digits typed on Arabic, Urdu, Hindi, Bengali or full-width keyboards, and their separators,
+  // become Latin digits, "." and ",".
+  const ZEROS = [0x660, 0x6F0, 0x966, 0x9E6, 0xFF10]; // the "0" of each of those digit sets
+  function latinos(s) {
+    return s
+      .replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\uFF10-\uFF19]/g, c => {
+        const x = c.charCodeAt(0);
+        return String(x - ZEROS.find(zero => x >= zero && x <= zero + 9));
+      })
+      .replace(/[\u066B\uFF0E]/g, '.')  // Arabic decimal separator, full-width full stop
+      .replace(/[\u066C\uFF0C]/g, ','); // Arabic thousands separator, full-width comma
+  }
   function lerNumero(bruto, milhar) {
     let s = latinos(String(bruto)).replace(/[R$\s%\u066A ]/g, '');
     if (!s || !/^\d[\d.,]*$|^[.,]\d+$/.test(s)) return NaN;

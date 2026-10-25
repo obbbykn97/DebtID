@@ -33,7 +33,7 @@ HEAD = '''<!doctype html>
   if (n === 'in') n = 'id'; // older Android name for Indonesian
   if (!idiomas.test(l)) l = idiomas.test(n) ? n : 'en';
   d.setAttribute('data-lang', l);
-  d.lang = l === 'pt' ? 'pt-BR' : l === 'zh' ? 'zh-CN' : l;
+  d.lang = { pt: 'pt-BR', zh: 'zh-CN' }[l] || l;
   if (l === 'ar' || l === 'ur') d.dir = 'rtl';
   if (l !== 'pt') d.className += ' i18n-espera'; // page text is written in Portuguese: hide it until it is translated
 })();

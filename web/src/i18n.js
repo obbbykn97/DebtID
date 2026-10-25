@@ -1258,5 +1258,5 @@ const DebtIDIdioma = (() => {
     raiz.classList.remove('i18n-espera');
     return atual;
   }
-  return { t, aplicar, atual: () => atual, tag: () => info(atual).tag, rtl: () => !!info(atual).rtl };
+  return { t, aplicar, atual: () => atual, rtl: () => !!info(atual).rtl };
 })();
