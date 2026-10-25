@@ -1634,7 +1634,8 @@ const DebtID = (() => {
   const MODOS = ['total', 'mes', 'ano'];
   const PAPEIS = ['credor', 'devedor'];
   // valor and totals are in the currency's smallest unit (cents, satoshis...) and must stay below 2^53
-  const LIMITES = { valor: 1e15, taxa: 10000000, dias: 36500, nomeBytes: 320 };
+  // obsBytes: note on the loan (UTF-8 bytes) · parcelas: most installments · multa: late fee (percent × 10,000)
+  const LIMITES = { valor: 1e15, taxa: 10000000, dias: 36500, nomeBytes: 320, obsBytes: 280, parcelas: 120, multa: 1000000 };
 
   const enc = new TextEncoder();
   const dec = new TextDecoder('utf-8', { fatal: true });
@@ -1925,9 +1926,9 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       } while (b & 128);
       return n;
     }
-    texto() {
+    texto(max = LIMITES.nomeBytes) {
       const len = this.num();
-      if (len < 1 || len > LIMITES.nomeBytes) throw new ChaveErro('CORROMPIDA');
+      if (len < 1 || len > max) throw new ChaveErro('CORROMPIDA');
       let s;
       try { s = dec.decode(this.bytes(len)); } catch (e) { throw new ChaveErro('CORROMPIDA'); }
       if (!s.trim()) throw new ChaveErro('CORROMPIDA');
@@ -2041,6 +2042,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (d.valor < 1 || d.valor > LIMITES.valor || d.taxa > LIMITES.taxa || d.dp - d.de > LIMITES.dias ||
         d.de > 120000 || d.ts > 8e9 || d.tz < -60 || d.tz > 60) throw new ChaveErro('CORROMPIDA');
     if (d.total != null && !Number.isSafeInteger(d.total)) throw new ChaveErro('CORROMPIDA');
+    // each installment needs its own day and at least one unit of the currency
+    if (d.parcelas > 1 && (d.parcelas > d.dp - d.de || (d.total != null && d.total < d.parcelas))) throw new ChaveErro('CORROMPIDA');
   }
 
   /* =================== signing keys (ECDSA P-256) =================== */
@@ -2082,6 +2085,22 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const h = hex(await sha256(pub33)).slice(0, 12).toUpperCase();
     return `${h.slice(0, 4)}-${h.slice(4, 8)}-${h.slice(8, 12)}`;
   }
+  // Full ID (96 bits, 6 groups): starts with the short ID. Copying it would take ~2^96 tries,
+  // so comparing it in person is safe even against someone who can afford to copy the short ID.
+  async function idLongoDe(pub33) {
+    const h = hex(await sha256(pub33)).slice(0, 24).toUpperCase();
+    return h.match(/.{4}/g).join('-');
+  }
+
+  // ECDSA signatures have two valid forms (s and n − s). New codes always use the low one and
+  // refuse the other, so a code cannot be rewritten into a second, different-looking valid code.
+  const ORDEM = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
+  const sDe = sig => bigDe(sig.slice(32, 64));
+  const sBaixo = sig => sDe(sig) <= ORDEM / 2n;
+  function normalizarS(sig) {
+    if (sBaixo(sig)) return sig;
+    return juntar(sig.slice(0, 32), bytesDe(ORDEM - sDe(sig), 32));
+  }
 
   const cacheChaves = new WeakMap();
   async function chavePrivada(perfil) {
@@ -2099,7 +2118,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   }
   const pubDoPerfil = perfil => deB64url(perfil.pub);
   async function assinar(perfil, msg) {
-    return new Uint8Array(await subtle().sign(ALG_ASSINAR, await chavePrivada(perfil), msg));
+    return normalizarS(new Uint8Array(await subtle().sign(ALG_ASSINAR, await chavePrivada(perfil), msg)));
   }
   async function confere(pub33, msg, sig) {
     try {
@@ -2110,14 +2129,25 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
   }
 
-  /* =================== signed codes (v2: reais; v3: any currency) =================== */
+  /* =================== signed codes (v2: reais; v3: any currency; v4: extras and receipts) =================== */
   // [version][type] + P (loan) + issuer signature (+ C (confirmation) + confirmer signature)
   // v3 adds the currency code and its number of decimals right after the flags.
-  const VERSAO = 3, PROPOSTA = 1, VALIDADO = 2;
+  // v4 adds, after the issuer's key, one byte saying which extras follow, then the extras:
+  //   1 a note ("for the car repair") · 2 number of installments · 4 late fee and late interest
+  //   8 the other person's key (only that person can confirm)
+  // v4 also has receipts, signed by the creditor: [4][3] + R + signature (see escreverR).
+  // Older codes keep opening exactly as before.
+  const VERSAO = 4, PROPOSTA = 1, VALIDADO = 2, RECIBO = 3;
   const TAGS = {
     2: { p: enc.encode('DebtID/v2/proposta'), c: enc.encode('DebtID/v2/confirma') },
-    3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') }
+    3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') },
+    4: { p: enc.encode('DebtID/v4/proposta'), c: enc.encode('DebtID/v4/confirma'), r: enc.encode('DebtID/v4/recibo') }
   };
+  const TAG_HASH = enc.encode('DebtID/emprestimo');
+  const EXTRA = { obs: 1, parcelas: 2, atraso: 4, outro: 8 };
+  const TIPOS_RECIBO = ['pagamento', 'quitacao', 'cancelamento'];
+  const hexParaBytes = h => Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 16));
+  const bytesObs = s => enc.encode(s).length;
 
   function escreverP(d, versao) {
     const e = new Escritor();
@@ -2128,6 +2158,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     e.num(d.ts); e.num(d.tz + 64); e.num(d.total);
     e.texto(d.nomeEmissor); e.texto(d.nomeOutro);
     e.bytes(d.pubEmissor);
+    if (versao >= 4) {
+      const atraso = d.multa > 0 || d.mora > 0;
+      e.byte((d.obs ? EXTRA.obs : 0) | (d.parcelas > 1 ? EXTRA.parcelas : 0) | (atraso ? EXTRA.atraso : 0) | (d.pubOutro ? EXTRA.outro : 0));
+      if (d.obs) e.texto(d.obs);
+      if (d.parcelas > 1) e.num(d.parcelas);
+      if (atraso) { e.num(d.multa || 0); e.num(d.mora || 0); }
+      if (d.pubOutro) e.bytes(d.pubOutro);
+    }
     return e.fim();
   }
   function lerP(L, versao) {
@@ -2145,7 +2183,25 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const ts = L.num(), tz = L.num() - 64, total = L.num();
     const nomeEmissor = L.texto(), nomeOutro = L.texto();
     const pubEmissor = L.bytes(33);
-    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor };
+    let obs = '', parcelas = 1, multa = 0, mora = 0, pubOutro = null;
+    if (versao >= 4) {
+      const x = L.byte();
+      if (x > 15) throw new ChaveErro('CORROMPIDA');
+      if (x & EXTRA.obs) obs = L.texto(LIMITES.obsBytes);
+      if (x & EXTRA.parcelas) {
+        parcelas = L.num();
+        if (parcelas < 2 || parcelas > LIMITES.parcelas) throw new ChaveErro('CORROMPIDA');
+      }
+      if (x & EXTRA.atraso) {
+        multa = L.num(); mora = L.num();
+        if (!(multa || mora) || multa > LIMITES.multa || mora > LIMITES.taxa) throw new ChaveErro('CORROMPIDA');
+      }
+      if (x & EXTRA.outro) {
+        pubOutro = L.bytes(33);
+        if (iguais(pubOutro, pubEmissor)) throw new ChaveErro('CORROMPIDA');
+      }
+    }
+    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor, obs, parcelas, multa, mora, pubOutro };
     validarDados(d);
     conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
@@ -2165,19 +2221,37 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const dt = new Date();
     return { ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) };
   };
+  // A loan's fingerprint: the same for its proposal and its validated code; receipts point to it.
+  const hashDe = async (versao, pBytes) => hex((await sha256(juntar(TAG_HASH, [versao], pBytes))).slice(0, 16));
 
   // dados: { papel ('credor'|'devedor' — the issuer's role), nomeOutro, moeda (code, default BRL),
-  //          valor (smallest unit of that currency), taxa, modo, composto, de, dp }
+  //          valor (smallest unit of that currency), taxa, modo, composto, de, dp,
+  //          obs (optional note), parcelas (optional, 2+), multa and mora (optional, percent × 10,000),
+  //          pubOutro (optional: the other person's key, base64url, from your contacts) }
   async function criarProposta(perfil, dados) {
     const { ts, tz } = agora();
     const moeda = dados.moeda || 'BRL';
     if (!CODIGO_MOEDA_VALIDO.test(moeda)) throw new RangeError('moeda inválida');
+    const obs = String(dados.obs || '').normalize('NFC').replace(/\s+/g, ' ').trim();
+    if (bytesObs(obs) > LIMITES.obsBytes) throw new RangeError('observação longa demais');
+    const parcelas = dados.parcelas > 1 ? dados.parcelas : 1;
+    if (!Number.isSafeInteger(parcelas) || parcelas > LIMITES.parcelas) throw new RangeError('parcelas');
+    const multa = dados.multa || 0, mora = dados.mora || 0;
+    if (!Number.isSafeInteger(multa) || multa < 0 || multa > LIMITES.multa || !Number.isSafeInteger(mora) || mora < 0 || mora > LIMITES.taxa) throw new RangeError('encargos');
+    const minha = pubDoPerfil(perfil);
+    let pubOutro = null;
+    if (dados.pubOutro) {
+      pubOutro = typeof dados.pubOutro === 'string' ? deB64url(dados.pubOutro) : Uint8Array.from(dados.pubOutro);
+      descomprimir(pubOutro); // throws if it is not a valid key
+      if (iguais(pubOutro, minha)) throw new ChaveErro('PROPRIA');
+    }
     const d = {
       id: crypto.getRandomValues(new Uint8Array(6)),
       modo: dados.modo, composto: !!dados.composto && dados.modo !== 'total', papel: dados.papel,
       moeda, casas: infoMoeda(moeda).casas,
       valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
-      ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: pubDoPerfil(perfil)
+      ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: minha,
+      obs, parcelas, multa, mora, pubOutro
     };
     d.total = calcular(d).total;
     validarDados(d);
@@ -2192,26 +2266,29 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (m.tipo !== 'proposta') throw new ChaveErro('NAO_E_PROPOSTA');
     const minha = pubDoPerfil(perfil);
     if (iguais(minha, m.bruto.p.pubEmissor)) throw new ChaveErro('PROPRIA');
+    if (m.bruto.p.pubOutro && !iguais(minha, m.bruto.p.pubOutro)) throw new ChaveErro('OUTRA_PESSOA');
     const { ts, tz } = agora();
     const c = escreverC({ ts, tz, nome: perfil.nome, pub: minha });
-    const v = m.bruto.versao; // a v2 proposal is confirmed as v2: the signatures cover its exact bytes
+    const v = m.bruto.versao; // a v2/v3 proposal is confirmed in its own version: the signatures cover its exact bytes
     const sig2 = await assinar(perfil, juntar(TAGS[v].c, m.bruto.pBytes, m.bruto.sig1, c));
     return embalar(juntar([v, VALIDADO], m.bruto.pBytes, m.bruto.sig1, c, sig2));
   }
 
-  // Reads any code (v1 or v2), checks the signatures and builds a model for display.
+  // Reads any code (v1 to v4: loans and receipts), checks the signatures and builds a model for display.
   async function lerCodigo(txt) {
     const { dados, codigo } = desembalar(txt);
     if (dados[0] === 1) {
       const { d, credor, devedor } = lerV1(dados);
       return {
-        tipo: 'v1', codigo, idHex: null, ref: codigo.slice(-4), dados: { ...d, moeda: 'BRL', casas: 2 }, calc: calcular(d), emissor: null,
+        tipo: 'v1', codigo, idHex: null, hash: null, ref: codigo.slice(-4),
+        dados: { ...d, moeda: 'BRL', casas: 2, obs: '', parcelas: 1, multa: 0, mora: 0 }, calc: calcular(d), emissor: null,
         credor: { nome: credor, assinou: false }, devedor: { nome: devedor, assinou: false }
       };
     }
     const versao = dados[0];
     if (!TAGS[versao]) throw new ChaveErro('VERSAO');
     const tipo = dados[1];
+    if (tipo === RECIBO && versao >= 4) return lerRecibo(dados, codigo);
     if (tipo !== PROPOSTA && tipo !== VALIDADO) throw new ChaveErro('VERSAO');
     const L = new Leitor(dados);
     L.i = 2;
@@ -2223,20 +2300,30 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       sig2 = L.bytes(64);
     }
     if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
+    if (versao >= 4 && (!sBaixo(sig1) || (sig2 && !sBaixo(sig2)))) throw new ChaveErro('ASSINATURA');
     if (!(await confere(d.pubEmissor, juntar(TAGS[versao].p, pBytes), sig1))) throw new ChaveErro('ASSINATURA');
     if (c) {
       if (iguais(c.pub, d.pubEmissor)) throw new ChaveErro('PROPRIA');
+      if (d.pubOutro && !iguais(c.pub, d.pubOutro)) throw new ChaveErro('OUTRA_PESSOA');
       if (!(await confere(c.pub, juntar(TAGS[versao].c, pBytes, sig1, cBytes), sig2))) throw new ChaveErro('ASSINATURA');
     }
-    const idEmissor = await idDe(d.pubEmissor);
-    const parteEmissor = { nome: d.nomeEmissor, id: idEmissor, pub: b64url(d.pubEmissor), assinou: true, ts: d.ts, tz: d.tz };
+    const parteEmissor = {
+      nome: d.nomeEmissor, id: await idDe(d.pubEmissor), idLongo: await idLongoDe(d.pubEmissor),
+      pub: b64url(d.pubEmissor), assinou: true, ts: d.ts, tz: d.tz
+    };
     const parteOutra = c
-      ? { nome: c.nome, id: await idDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
-      : { nome: d.nomeOutro, assinou: false };
-    const dadosExibir = { moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total };
+      ? { nome: c.nome, id: await idDe(c.pub), idLongo: await idLongoDe(c.pub), pub: b64url(c.pub), assinou: true, ts: c.ts, tz: c.tz, nomeInformado: d.nomeOutro }
+      : d.pubOutro
+        ? { nome: d.nomeOutro, id: await idDe(d.pubOutro), idLongo: await idLongoDe(d.pubOutro), pub: b64url(d.pubOutro), assinou: false, fixo: true }
+        : { nome: d.nomeOutro, assinou: false };
+    const dadosExibir = {
+      moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total,
+      obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora
+    };
     const idHex = hex(d.id).toUpperCase();
     return {
       tipo: c ? 'validado' : 'proposta', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`,
+      hash: await hashDe(versao, pBytes), versao,
       dados: dadosExibir, calc: conferirTotal(d, d.total), emissor: d.papel,
       credor: d.papel === 'credor' ? parteEmissor : parteOutra,
       devedor: d.papel === 'devedor' ? parteEmissor : parteOutra,
@@ -2245,19 +2332,142 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     };
   }
 
+  /* =================== receipts (payment, settlement, cancellation) =================== */
+  // Only the creditor signs a receipt: it is the creditor who gives up the right to charge, so the
+  // debtor keeps the receipt as proof. A cancellation (a loan entered by mistake) works the same way.
+  // R: loan fingerprint (16) · loan id (6) · kind · currency · decimals · amount · payment day ·
+  //    moment · random (4, so two equal payments still get different receipts) · creditor name · key
+  function escreverR(r) {
+    const e = new Escritor();
+    e.bytes(r.hash); e.bytes(r.id); e.byte(TIPOS_RECIBO.indexOf(r.tipo));
+    e.texto(r.moeda); e.byte(r.casas);
+    e.num(r.valor); e.num(r.dia); e.num(r.ts); e.num(r.tz + 64);
+    e.bytes(r.rid); e.texto(r.nome); e.bytes(r.pub);
+    return e.fim();
+  }
+  // m: a loan model (from lerCodigo) where this profile is the creditor and has signed.
+  // tipo: 'pagamento' (valor ≥ 1) · 'quitacao' (valor = the last payment, may be 0) · 'cancelamento' (valor 0)
+  async function criarRecibo(perfil, m, { tipo, valor = 0, dia }) {
+    if (!m || (m.tipo !== 'proposta' && m.tipo !== 'validado')) throw new ChaveErro('NAO_E_EMPRESTIMO');
+    const minha = pubDoPerfil(perfil);
+    if (!m.credor.pub || m.credor.pub !== b64url(minha)) throw new ChaveErro('NAO_CREDOR');
+    if (!TIPOS_RECIBO.includes(tipo)) throw new RangeError('tipo de recibo');
+    if (tipo === 'cancelamento') valor = 0;
+    if (!Number.isSafeInteger(valor) || valor < (tipo === 'pagamento' ? 1 : 0) || valor > LIMITES.valor) throw new RangeError('valor');
+    if (!Number.isSafeInteger(dia) || dia < m.dados.de || dia > 120000) throw new RangeError('data');
+    const { ts, tz } = agora();
+    const r = {
+      hash: hexParaBytes(m.hash), id: hexParaBytes(m.idHex), tipo, moeda: m.dados.moeda, casas: m.dados.casas,
+      valor, dia, ts, tz, rid: crypto.getRandomValues(new Uint8Array(4)), nome: perfil.nome, pub: minha
+    };
+    const rb = escreverR(r);
+    const sig = await assinar(perfil, juntar(TAGS[4].r, rb));
+    return embalar(juntar([4, RECIBO], rb, sig));
+  }
+  async function lerRecibo(dados, codigo) {
+    const L = new Leitor(dados);
+    L.i = 2;
+    const ini = L.i;
+    const hash = L.bytes(16), id = L.bytes(6), tipo = TIPOS_RECIBO[L.byte()];
+    if (!tipo) throw new ChaveErro('CORROMPIDA');
+    const moeda = L.texto(), casas = L.byte();
+    if (!CODIGO_MOEDA_VALIDO.test(moeda) || casas > 9) throw new ChaveErro('CORROMPIDA');
+    const valor = L.num(), dia = L.num(), ts = L.num(), tz = L.num() - 64;
+    const rid = L.bytes(4), nome = L.texto(), pub = L.bytes(33);
+    const rb = L.b.slice(ini, L.i);
+    const sig = L.bytes(64);
+    if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
+    if (valor > LIMITES.valor || (tipo === 'pagamento' && valor < 1) || (tipo === 'cancelamento' && valor !== 0) ||
+        dia > 120000 || ts > 8e9 || tz < -60 || tz > 60) throw new ChaveErro('CORROMPIDA');
+    if (!sBaixo(sig) || !(await confere(pub, juntar(TAGS[4].r, rb), sig))) throw new ChaveErro('ASSINATURA');
+    const idHex = hex(id).toUpperCase();
+    return {
+      tipo: 'recibo', codigo, idHex, ref: `${idHex.slice(0, 4)}-${idHex.slice(4, 8)}`, hash: hex(hash),
+      recibo: { tipo, moeda, casas, valor, dia, ts, tz, rid: hex(rid), nome, pub: b64url(pub), id: await idDe(pub), idLongo: await idLongoDe(pub) }
+    };
+  }
+  // Does this receipt belong to this loan, signed by its creditor? Returns null if so, or an error code.
+  function conferirRecibo(mEmprestimo, mRecibo) {
+    if (!mRecibo || mRecibo.tipo !== 'recibo') return 'NAO_E_RECIBO';
+    if (!mEmprestimo || !mEmprestimo.hash || mRecibo.hash !== mEmprestimo.hash) return 'OUTRO_EMPRESTIMO';
+    const r = mRecibo.recibo;
+    if (r.moeda !== mEmprestimo.dados.moeda || r.casas !== mEmprestimo.dados.casas) return 'OUTRO_EMPRESTIMO';
+    if (!mEmprestimo.credor.pub || mEmprestimo.credor.pub !== r.pub) return 'NAO_CREDOR';
+    return null;
+  }
+
+  /* =================== installments, payments and late charges =================== */
+  // Installments: the total split in equal parts (the last one takes the remainder), due on days
+  // spread evenly from the loan day; the last one is due on the payment day.
+  function parcelasDe(d, total = d.total) {
+    const n = d.parcelas > 1 ? d.parcelas : 1, dias = d.dp - d.de;
+    const base = Math.floor(total / n), lista = [];
+    for (let k = 1; k <= n; k++) {
+      lista.push({ n: k, dia: k === n ? d.dp : d.de + Math.round(dias * k / n), valor: k === n ? total - base * (n - 1) : base });
+    }
+    return lista;
+  }
+  // Balance on day `hoje`, given the payments [{ dia, valor }] from signed receipts.
+  // Payments pay the installments in order; whatever is left over pays the late charges.
+  // Late fee (multa): once, on what was still unpaid of an installment after its due day.
+  // Late interest (mora): simple, per 30-day month, on what stays unpaid of each installment,
+  // for each day after its due day. Both are rounded up, like the total.
+  function situacao(d, total, pagamentos, hoje) {
+    const multa = d.multa || 0, mora = d.mora || 0;
+    const parcelas = parcelasDe(d, total).map(p => ({ ...p, restante: p.valor, multa: 0, mora: 0, desde: p.dia, multou: false, pagaEm: null }));
+    const acumular = ate => {
+      if (!multa && !mora) return;
+      for (const p of parcelas) {
+        if (ate <= p.dia || p.restante <= 0) continue;
+        if (!p.multou) { p.multou = true; p.multa = p.restante * multa / 1e6; }
+        const ini = Math.max(p.desde, p.dia);
+        if (ate > ini) { p.mora += p.restante * mora / 1e6 * (ate - ini) / 30; p.desde = ate; }
+      }
+    };
+    let pago = 0, sobra = 0;
+    const lista = (pagamentos || []).filter(p => p && p.valor > 0).slice().sort((a, b) => a.dia - b.dia);
+    for (const pg of lista) {
+      acumular(pg.dia);
+      let resto = pg.valor;
+      pago += pg.valor;
+      for (const p of parcelas) {
+        if (resto <= 0) break;
+        if (p.restante <= 0) continue;
+        const x = Math.min(resto, p.restante);
+        p.restante -= x; resto -= x;
+        if (p.restante === 0) p.pagaEm = pg.dia;
+      }
+      sobra += resto;
+    }
+    acumular(hoje);
+    const encargos = Math.ceil(Number(parcelas.reduce((s, p) => s + p.multa + p.mora, 0).toFixed(4)));
+    const principal = parcelas.reduce((s, p) => s + p.restante, 0);
+    return {
+      parcelas: parcelas.map(({ desde, multou, ...p }) => p),
+      pago, principal, encargos,
+      encargosPagos: Math.min(sobra, encargos),
+      saldo: Math.max(0, principal + encargos - sobra),
+      credito: Math.max(0, sobra - encargos),
+      atrasadas: parcelas.filter(p => p.restante > 0 && p.dia < hoje).length,
+      proxima: parcelas.find(p => p.restante > 0) || null
+    };
+  }
+
   /* =================== password-protected backup =================== */
+  // v1: 210,000 PBKDF2 rounds (still opens) · v2: 600,000 rounds (OWASP's figure for PBKDF2-SHA256)
   const MAGICO = enc.encode('DIDB');
-  async function chaveDaSenha(senha, sal) {
+  const RODADAS = { 1: 210000, 2: 600000 };
+  async function chaveDaSenha(senha, sal, rodadas) {
     const base = await subtle().importKey('raw', enc.encode(senha), 'PBKDF2', false, ['deriveKey']);
-    return subtle().deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: 210000 },
+    return subtle().deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: rodadas },
       base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
   }
   async function exportarBackup(objeto, senha) {
     const sal = crypto.getRandomValues(new Uint8Array(16));
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const chave = await chaveDaSenha(senha, sal);
+    const chave = await chaveDaSenha(senha, sal, RODADAS[2]);
     const cifrado = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv }, chave, enc.encode(JSON.stringify(objeto))));
-    const corpo = b64url(juntar(MAGICO, [1], sal, iv, cifrado));
+    const corpo = b64url(juntar(MAGICO, [2], sal, iv, cifrado));
     return 'DIDB-' + corpo + '-' + checksum(corpo);
   }
   async function importarBackup(txt, senha) {
@@ -2266,8 +2476,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!m) throw new ChaveErro('BACKUP_FORMATO');
     if (checksum(m[1]) !== m[2].toUpperCase()) throw new ChaveErro('BACKUP_FORMATO');
     const b = deB64url(m[1]);
-    if (b.length < 4 + 1 + 16 + 12 + 17 || !iguais(b.slice(0, 4), MAGICO) || b[4] !== 1) throw new ChaveErro('BACKUP_FORMATO');
-    const chave = await chaveDaSenha(senha, b.slice(5, 21));
+    if (b.length < 4 + 1 + 16 + 12 + 17 || !iguais(b.slice(0, 4), MAGICO) || !RODADAS[b[4]]) throw new ChaveErro('BACKUP_FORMATO');
+    const chave = await chaveDaSenha(senha, b.slice(5, 21), RODADAS[b[4]]);
     let texto;
     try {
       texto = dec.decode(new Uint8Array(await subtle().decrypt({ name: 'AES-GCM', iv: b.slice(21, 33) }, chave, b.slice(33))));
@@ -2275,6 +2485,36 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       throw new ChaveErro('SENHA');
     }
     return JSON.parse(texto);
+  }
+  // A rough password strength score (0 to 4) for the backup form; it never blocks a long password.
+  function forcaSenha(s) {
+    s = String(s || '');
+    if (s.length < 10) return 0;
+    const tipos = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(s)).length;
+    const repetida = /^(.)\1+$/.test(s) || /^(?:0123456789|1234567890|abcdefghij|qwertyuiop)/i.test(s);
+    if (repetida) return 0;
+    let p = s.length >= 16 ? 3 : s.length >= 12 ? 2 : 1;
+    if (tipos >= 3) p++;
+    if (s.split(' ').filter(Boolean).length >= 4) p++;
+    return Math.min(4, p);
+  }
+
+  /* =================== PIN for the app lock =================== */
+  // The PIN only locks the screen (the device's own lock protects the files). It is stored as a
+  // PBKDF2 hash, never in the clear.
+  async function hashPin(pin, salB64) {
+    const sal = salB64 ? deB64url(salB64) : crypto.getRandomValues(new Uint8Array(16));
+    const base = await subtle().importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await subtle().deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: 100000 }, base, 256));
+    return { sal: b64url(sal), hash: b64url(bits) };
+  }
+  async function conferirPin(pin, trava) {
+    if (!trava || !trava.sal || !trava.hash) return false;
+    const { hash } = await hashPin(pin, trava.sal);
+    const a = enc.encode(hash), b = enc.encode(trava.hash);
+    let dif = a.length ^ b.length;
+    for (let i = 0; i < Math.min(a.length, b.length); i++) dif |= a[i] ^ b[i];
+    return dif === 0;
   }
 
   /* =================== QR code (byte mode, levels L/M/Q/H) =================== */
@@ -2652,9 +2892,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   return {
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
-    criarPerfil, idDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
-    exportarBackup, importarBackup, QR,
-    _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum }
+    criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
+    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
+    exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, QR,
+    _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };
 })();
 /*</core>*/
