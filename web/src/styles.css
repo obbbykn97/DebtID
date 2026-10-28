@@ -21,7 +21,7 @@
 }
 /* Soft, dark */
 :root[data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
+  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
   --line:#EDE7DE; --rule:#EDE7DE; --dash:#4C4852; --placeholder:#6F6973; --key-bg:#0D0C10; --key-note:#A9A39B; --red:#FF6B7A;
   color-scheme:dark;
 }
@@ -31,7 +31,7 @@
   --ink:#111111; --ink-2:#2E2E2E; --muted:#7A7A7A; --line:#111111; --rule:#D6D6D6; --dash:#D6D6D6;
   --placeholder:#A8A8A8; --key-bg:#141414; --key-note:#A6A6A6; --red:#D33A2C;
   --band:#141414; --band-ink:#FFFFFF; --band-muted:#8E8E8E;
-  --accent:#9DBF3E; --coral:#E5573F; --ok:#9DBF3E; --warn:#E5573F; --info:#EDEDED;
+  --accent:#A3C65B; --coral:#E5573F; --ok:#A3C65B; --warn:#E5573F; --info:#EDEDED;
   --r-lg:0; --r-md:0; --r-sm:0; --r-btn:999px; --bw:1px;
   --sh:none; --sh-sm:none; --sh-lg:none;
   --display:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -39,7 +39,7 @@
 }
 /* Professional, dark */
 :root[data-ui="pro"][data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A;
+  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411;
   --ink:#F2F2F2; --ink-2:#CFCFCF; --muted:#8C8C8C; --line:#F2F2F2; --rule:#2E2E2E; --dash:#333333;
   --placeholder:#5E5E5E; --key-bg:#000000; --key-note:#8C8C8C; --red:#FF6B5C;
   --band:#000000; --info:#1E1E1E;
@@ -856,3 +856,19 @@ code,.mo-cod,.rc-ref{direction:ltr;unicode-bidi:isolate}
 :root[lang|="ur"] :is(h1,h2,h3,.bv-title){line-height:1.7}
 /* questions asked from the lock screen (forgot the PIN, key lost) appear above it */
 body.trava-aberta .modal{z-index:90}
+
+/* DebtID 2.0: compact operational home */
+.painel-inicio{padding-block:24px 36px}
+.inicio-totais{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.inicio-totais .stat{min-width:0}
+.inicio-acoes{display:flex;gap:10px;margin:20px 0}
+.inicio-recentes,.inicio-proximos{margin-top:24px}
+.inicio-recentes h2,.inicio-proximos h2{font-size:1.15rem;margin:0 0 14px}
+.entrada-opcoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.entrada-opcoes .btn{white-space:normal;min-height:60px;padding-inline:10px}
+:root[data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E}
+:root[data-ui="pro"][data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E;--band:#000}
+:root[data-ui="pro"] .btn-primary{background:#A3C65B;color:#0B0E07;border-color:#A3C65B}
+:root[data-ui="pro"] .btn-primary:hover{background:#B4D571;color:#0B0E07}
+:root[data-ui="pro"] .btn:focus-visible{outline:3px solid #A3C65B;outline-offset:3px}
+@media(max-width:540px){.entrada-opcoes{grid-template-columns:1fr}.inicio-totais .stat{padding:14px 10px}.inicio-totais .stat b{font-size:clamp(19px,5vw,27px)}}

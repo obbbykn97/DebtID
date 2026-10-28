@@ -530,13 +530,33 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const TAGS = {
     2: { p: enc.encode('DebtID/v2/proposta'), c: enc.encode('DebtID/v2/confirma') },
     3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') },
-    4: { p: enc.encode('DebtID/v4/proposta'), c: enc.encode('DebtID/v4/confirma'), r: enc.encode('DebtID/v4/recibo') }
+    4: { p: enc.encode('DebtID/v4/proposta'), c: enc.encode('DebtID/v4/confirma'), r: enc.encode('DebtID/v4/recibo') },
+    5: { p: enc.encode('DebtID/v5/proposta'), c: enc.encode('DebtID/v5/confirma') }
   };
   const TAG_HASH = enc.encode('DebtID/emprestimo');
   const EXTRA = { obs: 1, parcelas: 2, atraso: 4, outro: 8 };
   const TIPOS_RECIBO = ['pagamento', 'quitacao', 'cancelamento'];
   const hexParaBytes = h => Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 16));
   const bytesObs = s => enc.encode(s).length;
+  const MULTAS = ['nenhuma', 'fixa', 'percentual'], MORAS = ['nenhuma', 'simples', 'composta'];
+  const PERIODOS_MORA = ['dia', 'mes', 'ano'], CAPITALIZACAO = ['dia', 'mes'];
+  // v5: fixed fee in minor units, percentage/rate in millionths.
+  function normalizarEncargosAtraso(v) {
+    if (!v) return null;
+    const e = { multaTipo:v.multaTipo || 'nenhuma', multaValor:v.multaValor || 0,
+      moraTipo:v.moraTipo || 'nenhuma', moraTaxa:v.moraTaxa || 0,
+      moraPeriodo:v.moraPeriodo || 'mes', capitalizacao:v.capitalizacao || 'dia',
+      incluirMultaNaBase:v.incluirMultaNaBase === true };
+    if (!MULTAS.includes(e.multaTipo) || !MORAS.includes(e.moraTipo) ||
+        !PERIODOS_MORA.includes(e.moraPeriodo) || !CAPITALIZACAO.includes(e.capitalizacao) ||
+        !Number.isSafeInteger(e.multaValor) || e.multaValor < 0 ||
+        e.multaValor > (e.multaTipo === 'fixa' ? LIMITES.valor : LIMITES.multa) ||
+        !Number.isSafeInteger(e.moraTaxa) || e.moraTaxa < 0 || e.moraTaxa > LIMITES.taxa ||
+        (e.multaTipo === 'nenhuma' && e.multaValor !== 0) ||
+        (e.moraTipo === 'nenhuma' && e.moraTaxa !== 0)) throw new RangeError('regras de atraso inválidas');
+    return e;
+  }
+
 
   function escreverP(d, versao) {
     const e = new Escritor();
@@ -554,6 +574,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (d.parcelas > 1) e.num(d.parcelas);
       if (atraso) { e.num(d.multa || 0); e.num(d.mora || 0); }
       if (d.pubOutro) e.bytes(d.pubOutro);
+    }
+    if (versao >= 5) {
+      const t = d.encargosAtraso;
+      e.byte(MULTAS.indexOf(t.multaTipo)); e.num(t.multaValor);
+      e.byte(MORAS.indexOf(t.moraTipo)); e.num(t.moraTaxa);
+      e.byte(PERIODOS_MORA.indexOf(t.moraPeriodo));
+      e.byte(CAPITALIZACAO.indexOf(t.capitalizacao));
+      e.byte(t.incluirMultaNaBase ? 1 : 0);
     }
     return e.fim();
   }
@@ -590,7 +618,21 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         if (iguais(pubOutro, pubEmissor)) throw new ChaveErro('CORROMPIDA');
       }
     }
-    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor, obs, parcelas, multa, mora, pubOutro };
+    let encargosAtraso = null;
+    if (versao >= 5) {
+      const mi = L.byte(), multaValor = L.num(), mo = L.byte(), moraTaxa = L.num();
+      const pe = L.byte(), ca = L.byte(), incluir = L.byte();
+      if (incluir > 1 || multa || mora) throw new ChaveErro('CORROMPIDA');
+      try {
+        encargosAtraso = normalizarEncargosAtraso({
+          multaTipo:MULTAS[mi], multaValor, moraTipo:MORAS[mo], moraTaxa,
+          moraPeriodo:PERIODOS_MORA[pe], capitalizacao:CAPITALIZACAO[ca], incluirMultaNaBase:!!incluir
+        });
+        if (mi >= MULTAS.length || mo >= MORAS.length || pe >= PERIODOS_MORA.length || ca >= CAPITALIZACAO.length)
+          throw new RangeError('índice inválido');
+      } catch { throw new ChaveErro('CORROMPIDA'); }
+    }
+    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor, obs, parcelas, multa, mora, pubOutro, encargosAtraso };
     validarDados(d);
     conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
@@ -625,7 +667,9 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (bytesObs(obs) > LIMITES.obsBytes) throw new RangeError('observação longa demais');
     const parcelas = dados.parcelas > 1 ? dados.parcelas : 1;
     if (!Number.isSafeInteger(parcelas) || parcelas > LIMITES.parcelas) throw new RangeError('parcelas');
-    const multa = dados.multa || 0, mora = dados.mora || 0;
+    const encargosAtraso = normalizarEncargosAtraso(dados.encargosAtraso);
+    const versao = encargosAtraso ? 5 : VERSAO;
+    const multa = versao === 5 ? 0 : dados.multa || 0, mora = versao === 5 ? 0 : dados.mora || 0;
     if (!Number.isSafeInteger(multa) || multa < 0 || multa > LIMITES.multa || !Number.isSafeInteger(mora) || mora < 0 || mora > LIMITES.taxa) throw new RangeError('encargos');
     const minha = pubDoPerfil(perfil);
     let pubOutro = null;
@@ -640,13 +684,13 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       moeda, casas: infoMoeda(moeda).casas,
       valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: minha,
-      obs, parcelas, multa, mora, pubOutro
+      obs, parcelas, multa, mora, pubOutro, encargosAtraso
     };
     d.total = calcular(d).total;
     validarDados(d);
-    const p = escreverP(d, VERSAO);
-    const sig = await assinar(perfil, juntar(TAGS[VERSAO].p, p));
-    return embalar(juntar([VERSAO, PROPOSTA], p, sig));
+    const p = escreverP(d, versao);
+    const sig = await assinar(perfil, juntar(TAGS[versao].p, p));
+    return embalar(juntar([versao, PROPOSTA], p, sig));
   }
 
   // Confirms someone else's proposal and returns the code validated by both sides.
@@ -675,6 +719,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       };
     }
     const versao = dados[0];
+    if (versao === 6 && (dados[1] === 4 || dados[1] === 5)) return lerMovimentoAssinado(dados, codigo);
     if (!TAGS[versao]) throw new ChaveErro('VERSAO');
     const tipo = dados[1];
     if (tipo === RECIBO && versao >= 4) return lerRecibo(dados, codigo);
@@ -707,7 +752,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
     const dadosExibir = {
       moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total,
-      obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora
+      obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora, encargosAtraso: d.encargosAtraso
     };
     const idHex = hex(d.id).toUpperCase();
     return {
@@ -719,6 +764,81 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,
       bruto: { p: d, pBytes, sig1, versao }
     };
+  }
+
+  /* =================== bilateral payment requests (v6 messages) =================== */
+  const ASS_REQ = enc.encode('DebtID/v6/pedido'), ASS_RESP = enc.encode('DebtID/v6/resposta');
+  const SOLICITACAO = 4, RESPOSTA = 5;
+  function mensagemMovimento(m) {
+    const e = new Escritor();
+    e.bytes(hexParaBytes(m.hash)); e.bytes(hexParaBytes(m.idHex));
+    e.byte(m.operacao === 'estorno' ? 1 : 0);
+    e.bytes(m.alvoRid ? hexParaBytes(m.alvoRid) : new Uint8Array(8));
+    e.texto(m.moeda); e.byte(m.casas);
+    e.num(m.valor); e.num(m.dia); e.bytes(hexParaBytes(m.rid));
+    e.num(m.ts); e.num(m.tz + 64); e.bytes(m.pub); e.texto(m.nome);
+    return e.fim();
+  }
+  const pertence = (pub,m) => [m.credor.pub,m.devedor.pub].includes(b64url(pub));
+  async function criarSolicitacaoPagamento(perfil, m, { valor, dia, operacao = 'pagamento', alvoRid = null }) {
+    if (!m || m.tipo !== 'validado' || !pertence(pubDoPerfil(perfil),m)) throw new ChaveErro('OUTRA_PESSOA');
+    if (!Number.isSafeInteger(valor) || valor < 1 || valor > LIMITES.valor ||
+        !Number.isSafeInteger(dia) || dia < m.dados.de || dia > 120000) throw new RangeError('pagamento');
+    if (operacao !== 'pagamento' && operacao !== 'estorno') throw new RangeError('tipo');
+    if (operacao === 'estorno' && !/^[a-f0-9]{16}$/.test(alvoRid || '')) throw new RangeError('referência de estorno');
+    const { ts, tz } = agora();
+    const msg = { hash:m.hash,idHex:m.idHex,operacao,alvoRid,moeda:m.dados.moeda,casas:m.dados.casas,
+      valor,dia,rid:hex(crypto.getRandomValues(new Uint8Array(8))),ts,tz,pub:pubDoPerfil(perfil),nome:perfil.nome };
+    const corpo = mensagemMovimento(msg), sig = await assinar(perfil, juntar(ASS_REQ, corpo));
+    return embalar(juntar([6,SOLICITACAO], corpo, sig));
+  }
+  async function responderSolicitacaoPagamento(perfil, codigo, aprovado) {
+    const m = await lerCodigo(codigo);
+    if (!m || !m.tipo.startsWith('solicitacao-')) throw new ChaveErro('NAO_E_PROPOSTA');
+    const minha = pubDoPerfil(perfil);
+    if (iguais(minha, deB64url(m.solicitante.pub))) throw new ChaveErro('PROPRIA');
+    const { ts, tz } = agora(), e = new Escritor();
+    e.byte(aprovado ? 1 : 0); e.num(ts); e.num(tz + 64); e.bytes(minha); e.texto(perfil.nome);
+    const rb = e.fim();
+    const sig = await assinar(perfil, juntar(ASS_RESP, m.bruto.corpo, m.bruto.sig, rb));
+    return embalar(juntar([6,RESPOSTA], m.bruto.corpo, m.bruto.sig, rb, sig));
+  }
+  async function lerMovimentoAssinado(dados, codigo) {
+    const L = new Leitor(dados); L.i = 2;
+    const ini = L.i, hash = L.bytes(16), id = L.bytes(6), op = L.byte(), alvo = L.bytes(8);
+    if (op !== 0 && op !== 1) throw new ChaveErro('CORROMPIDA');
+    const moeda = L.texto(), casas = L.byte(), valor = L.num(), dia = L.num(), rid = L.bytes(8),
+      ts = L.num(), tz = L.num() - 64, pub = L.bytes(33), nome = L.texto();
+    const corpo = L.b.slice(ini,L.i), sig = L.bytes(64);
+    if (!CODIGO_MOEDA_VALIDO.test(moeda) || casas > 9 || valor < 1 || valor > LIMITES.valor ||
+        dia > 120000 || ts > 8e9 || tz < -60 || tz > 60 || !sBaixo(sig) ||
+        !(await confere(pub,juntar(ASS_REQ,corpo),sig))) throw new ChaveErro('CORROMPIDA');
+    const operacao = op ? 'estorno' : 'pagamento';
+    const alvoRid = op ? hex(alvo) : null;
+    if (!op && alvo.some(n => n !== 0)) throw new ChaveErro('CORROMPIDA');
+    let respondente = null, aprovado = null;
+    if (dados[1] === RESPOSTA) {
+      const iniR = L.i, ok = L.byte(), ts2 = L.num(), tz2 = L.num() - 64, pub2 = L.bytes(33), nome2 = L.texto();
+      const rb = L.b.slice(iniR,L.i), sig2 = L.bytes(64);
+      if (ok > 1 || ts2 > 8e9 || tz2 < -60 || tz2 > 60 || iguais(pub,pub2) || !sBaixo(sig2) ||
+          !(await confere(pub2,juntar(ASS_RESP,corpo,sig,rb),sig2))) throw new ChaveErro('ASSINATURA');
+      respondente = { nome:nome2,...(await identificacao(pub2)),ts:ts2,tz:tz2 };
+      aprovado = !!ok;
+    }
+    if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
+    return { tipo:(respondente ? 'confirmacao-' : 'solicitacao-') + operacao, codigo,hash:hex(hash),
+      idHex:hex(id).toUpperCase(),operacao,alvoRid,moeda,casas,valor,dia,rid:hex(rid),
+      solicitante:{nome,...(await identificacao(pub)),ts,tz},respondente,aprovado,bruto:{corpo,sig} };
+  }
+  function conferirMovimento(m, mensagem) {
+    if (!m || m.tipo !== 'validado' || !mensagem || !/^(solicitacao|confirmacao)-(pagamento|estorno)$/.test(mensagem.tipo)) return 'NAO_E_EMPRESTIMO';
+    if (mensagem.hash !== m.hash || mensagem.idHex !== m.idHex || mensagem.moeda !== m.dados.moeda ||
+        mensagem.casas !== m.dados.casas || mensagem.dia < m.dados.de || mensagem.valor < 1) return 'OUTRO_EMPRESTIMO';
+    if (![m.credor.pub,m.devedor.pub].includes(mensagem.solicitante.pub)) return 'OUTRA_PESSOA';
+    if (mensagem.respondente &&
+        (![m.credor.pub,m.devedor.pub].includes(mensagem.respondente.pub) ||
+         mensagem.respondente.pub === mensagem.solicitante.pub)) return 'OUTRA_PESSOA';
+    return null;
   }
 
   /* =================== receipts (payment, settlement, cancellation) =================== */
@@ -802,6 +922,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   // Late interest (mora): simple, per 30-day month, on what stays unpaid of each installment,
   // for each day after its due day. Both are rounded up, like the total.
   function situacao(d, total, pagamentos, hoje) {
+    if (d.encargosAtraso) return situacaoAtrasoNovo(d, total, pagamentos, hoje);
     const multa = d.multa || 0, mora = d.mora || 0;
     const parcelas = parcelasDe(d, total).map(p => ({ ...p, restante: p.valor, multa: 0, mora: 0, desde: p.dia, multou: false, pagaEm: null }));
     const acumular = ate => {
@@ -840,6 +961,73 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       atrasadas: parcelas.filter(p => p.restante > 0 && p.dia < hoje).length,
       proxima: parcelas.find(p => p.restante > 0) || null
     };
+  }
+
+  // v5 terms. Older signed loans continue to use the original v4 calculation.
+  // Day counts: 1/30/365; fractional capitalization periods use exponential accrual.
+  function situacaoAtrasoNovo(d, total, pagamentos, hoje) {
+    const t = normalizarEncargosAtraso(d.encargosAtraso);
+    const parcelas = parcelasDe(d, total).map(p => ({ ...p, restante:p.valor, multa:0, mora:0, desde:p.dia, multou:false, pagaEm:null }));
+    let multaFixaAplicada = false, pago = 0, sobra = 0, encargosPagos = 0;
+    const periodo = { dia:1, mes:30, ano:365 }[t.moraPeriodo];
+    const capitalizacao = t.capitalizacao === 'mes' ? 30 : 1;
+    function acumular(ate) {
+      for (const p of parcelas) {
+        if (ate <= p.dia) continue;
+        if (!p.multou && p.restante > 0) {
+          p.multou = true;
+          if (t.multaTipo === 'percentual') p.multa = p.restante * t.multaValor / 1e6;
+          else if (t.multaTipo === 'fixa' && !multaFixaAplicada) { p.multa = t.multaValor; multaFixaAplicada = true; }
+        }
+        const dias = ate - Math.max(p.desde, p.dia);
+        if (dias <= 0 || t.moraTipo === 'nenhuma' || t.moraTaxa === 0) continue;
+        const base = p.restante + (t.incluirMultaNaBase ? p.multa : 0) + (t.moraTipo === 'composta' ? p.mora : 0);
+        if (base > 0) {
+          const r = t.moraTaxa / 1e6;
+          const fator = t.moraTipo === 'simples' ? r * dias / periodo
+            : Math.pow(1 + r * capitalizacao / periodo, dias / capitalizacao) - 1;
+          p.mora += base * fator;
+        }
+        p.desde = ate;
+      }
+    }
+    for (const pg of (pagamentos || []).filter(p => p && Number.isSafeInteger(p.valor) && p.valor > 0).slice().sort((a,b) => a.dia - b.dia)) {
+      acumular(pg.dia);
+      let resto = pg.valor;
+      pago += pg.valor;
+      for (const p of parcelas) {
+        if (resto <= 0) break;
+        const x = Math.min(resto, p.restante);
+        p.restante -= x; resto -= x;
+        if (p.restante === 0) p.pagaEm = pg.dia;
+      }
+      for (const p of parcelas) {
+        if (resto <= 0) break;
+        for (const nome of ['mora','multa']) {
+          const x = Math.min(resto, p[nome]);
+          p[nome] -= x; resto -= x; encargosPagos += x;
+        }
+      }
+      sobra += resto;
+    }
+    acumular(hoje);
+    const rawEncargos = parcelas.reduce((s,p) => s + p.multa + p.mora, 0);
+    if (!Number.isFinite(rawEncargos) || rawEncargos > LIMITES.valor || !Number.isFinite(pago)) throw new RangeError('encargos excessivos');
+    const encargos = ceilCentavos(rawEncargos), principal = parcelas.reduce((s,p) => s + p.restante, 0);
+    const saldo = principal + encargos - sobra;
+    if (!Number.isSafeInteger(saldo)) throw new RangeError('saldo excessivo');
+    return {
+      parcelas:parcelas.map(({ desde,multou,...p }) => p),
+      pago, principal, encargos, encargosPagos:Math.round(encargosPagos),
+      saldo:Math.max(0,saldo), credito:Math.max(0,sobra),
+      atrasadas:parcelas.filter(p => p.restante > 0 && p.dia < hoje).length,
+      proxima:parcelas.find(p => p.restante > 0) || null
+    };
+  }
+
+  // Local entries can be annulled without deleting the historical record.
+  function pagamentosLocaisAtivos(lista) {
+    return (Array.isArray(lista) ? lista : []).filter(p => p && !p.anulado && Number.isSafeInteger(p.valor) && p.valor > 0);
   }
 
   /* =================== password-protected backup =================== */
@@ -1520,7 +1708,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
-    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
+    criarRecibo, conferirRecibo, criarSolicitacaoPagamento, responderSolicitacaoPagamento, conferirMovimento, TIPOS_RECIBO, parcelasDe, situacao, pagamentosLocaisAtivos,
     exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };

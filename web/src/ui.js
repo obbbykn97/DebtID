@@ -66,15 +66,27 @@
       k: m.hash, id: m.idHex, papel, status, codigo: m.codigo, tipoCodigo: m.tipo,
       outro: outro.nome, outroPub: outro.pub || null, outroId: outro.id || null,
       moeda: m.dados.moeda, casas: m.dados.casas, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp,
-      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0,
+      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0, encargosAtraso: m.dados.encargosAtraso || null,
       atualizadoEm: Date.now()
     };
   };
   const acharReg = m => (m && m.hash ? registros.find(r => r.k === m.hash) : null) || null;
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
-  const pagamentosLocaisDe = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
-  const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
-  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
+  const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
+  const movimentosAssinadosDe = r => (r && Array.isArray(r.movimentosAssinados) ? r.movimentosAssinados : []);
+  const estornosDe = r => (r && Array.isArray(r.estornosAssinados) ? r.estornosAssinados : []);
+  const pendentesDe = r => (r && Array.isArray(r.pedidosAssinados) ? r.pedidosAssinados : []);
+  const normalizarRid = rid => String(rid || '').padStart(16, '0');
+  const pagamentoOriginalDe = (r,rid) => [...movimentosAssinadosDe(r),...recibosDe(r).filter(x => x.tipo !== 'cancelamento')]
+    .find(x => normalizarRid(x.rid) === rid);
+  const pagamentosDe = r => {
+    const estornados = new Set(estornosDe(r).map(x => x.alvoRid));
+    return [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0 && !estornados.has(normalizarRid(x.rid))),
+      ...movimentosAssinadosDe(r).filter(x => !estornados.has(normalizarRid(x.rid))),
+      ...pagamentosLocaisDe(r)].map(x => ({ dia:x.dia,valor:x.valor }));
+  };
+  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0, encargosAtraso: r.encargosAtraso || null });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
   const diaLocal = dt => diaUTC(dt.getFullYear(), dt.getMonth(), dt.getDate());
@@ -83,7 +95,7 @@
   const momentoDe = dt => ({ ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) });
   const situacaoDe = (r, dia = hojeDia()) => D.situacao(dadosDe(r), r.total, pagamentosDe(r), dia);
   const emAberto = r => r.status === 'validado' || r.status === 'registrado';
-  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0;
+  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0 || !!r.encargosAtraso;
   // currency of a loan model's data or of a stored record (old ones have none: reais)
   const infoDe = d => D.infoMoeda(d.moeda || 'BRL', d.casas == null ? 2 : d.casas);
   const dinheiro = (v, d) => fmt.dinheiro(Math.round(v), infoDe(d));
@@ -113,6 +125,45 @@
       Object.assign(patch, { status: 'quitado', quitadoDia: r.dia, quitadoEm: r.ts * 1000, quitadoAssinado: true });
     }
     return { reg: upsert(patch), novo: true };
+  }
+
+  function salvarPedidoAssinado(reg, m) {
+    if (pendentesDe(reg).some(x => x.rid === m.rid && x.operacao === m.operacao)) return reg;
+    return upsert({ k:reg.k, pedidosAssinados:[...pendentesDe(reg), {
+      rid:m.rid,operacao:m.operacao,valor:m.valor,dia:m.dia,codigo:m.codigo,alvoRid:m.alvoRid,status:'pendente'
+    }],atualizadoEm:Date.now() });
+  }
+  function registrarRespostaAssinada(reg,m,contrato) {
+    if (!m.respondente || D.conferirMovimento(contrato,m) || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
+    const pendentes = pendentesDe(reg).map(p => p.rid === m.rid ? {...p,status:m.aprovado ? 'confirmado' : 'rejeitado'} : p);
+    if (m.operacao === 'pagamento') {
+      if (movimentosAssinadosDe(reg).some(x => x.rid === m.rid)) return false;
+    } else if (estornosDe(reg).some(x => x.rid === m.rid || x.alvoRid === m.alvoRid)) return false;
+    const patch = {k:reg.k,pedidosAssinados:pendentes,atualizadoEm:Date.now()};
+    if (m.aprovado && m.operacao === 'pagamento') {
+      if (m.valor > situacaoDe(reg).saldo) throw new D.ChaveErro('RECIBO_OUTRO');
+      patch.movimentosAssinados = [...movimentosAssinadosDe(reg),{rid:m.rid,valor:m.valor,dia:m.dia,codigo:m.codigo,ts:m.respondente.ts,tz:m.respondente.tz}];
+    }
+    if (m.aprovado && m.operacao === 'estorno') {
+      const original = pagamentoOriginalDe(reg,m.alvoRid);
+      if (!original || original.valor !== m.valor || original.dia !== m.dia ||
+          estornosDe(reg).some(x => x.alvoRid === m.alvoRid)) throw new D.ChaveErro('RECIBO_OUTRO');
+      patch.estornosAssinados = [...estornosDe(reg),{rid:m.rid,alvoRid:m.alvoRid,valor:m.valor,dia:m.dia,codigo:m.codigo,ts:m.respondente.ts,tz:m.respondente.tz}];
+    }
+    const prox = {...reg,...patch};
+    const saldo = situacaoDe(prox).saldo;
+    if (m.aprovado && reg.status !== 'cancelado' && (reg.status === 'validado' || reg.quitadoPorMovimento ||
+        (m.operacao === 'estorno' && recibosDe(reg).some(x => normalizarRid(x.rid) === m.alvoRid && x.tipo === 'quitacao')))) {
+      if (saldo === 0 && pagamentosDe(prox).length) {
+        patch.status = 'quitado'; patch.quitadoAssinado = true; patch.quitadoPorMovimento = true;
+        patch.quitadoDia = m.dia; patch.quitadoEm = Date.now();
+      } else if (reg.quitadoPorMovimento || m.operacao === 'estorno') {
+        patch.status = 'validado'; patch.quitadoAssinado = false; patch.quitadoPorMovimento = false;
+        patch.quitadoDia = null; patch.quitadoEm = null;
+      }
+    }
+    upsert(patch);
+    return true;
   }
 
   // Records saved by older versions get the new fields (fingerprint, the other person's key...).
@@ -519,7 +570,7 @@
   };
 
   /* ---------------- navigation ---------------- */
-  const VIEWS = ['inicio', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
+  const VIEWS = ['inicio', 'novo', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
   let atual = null;
   function rota() {
     let v = location.hash.replace('#', '') || 'inicio';
@@ -532,7 +583,8 @@
     $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v || (v === 'detalhe' && a.dataset.nav === 'registros')));
     document.body.classList.toggle('boas-vindas', v === 'boas-vindas');
     document.body.classList.toggle('com-abas', v !== 'boas-vindas');
-    if (v === 'inicio') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
+    if (v === 'inicio') renderInicio();
+    if (v === 'novo') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
     if (v === 'registros') renderRegistros();
     if (v === 'ajustes') renderAjustes();
     if (v === 'boas-vindas') prepararBoasVindas();
@@ -547,7 +599,7 @@
     if (!a) return;
     e.preventDefault();
     const alvo = document.getElementById(a.dataset.rolar);
-    if (location.hash !== '#inicio' && location.hash !== '') { irPara('inicio'); }
+    if (location.hash !== '#novo') { irPara('novo'); }
     setTimeout(() => alvo.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 30);
   });
 
@@ -599,12 +651,35 @@
     atualizaDicas();
   }
   const lerTaxaCampo = n => { const v = campo(n).value.trim(); if (!v) return 0; const x = D.lerNumero(v, false); return Number.isFinite(x) ? Math.round(x * 10000) : NaN; };
+  function lerEncargosNovos() {
+    if (!$('#f-regrasNovas').checked) return null;
+    const multaTipo = $('#f-multaTipo').value, moraTipo = $('#f-moraTipo').value;
+    const v = $('#f-novaMultaValor').value.trim(), tx = $('#f-novaMoraTaxa').value.trim();
+    const m = v ? D.lerNumero(v, multaTipo === 'fixa') : 0;
+    const t = tx ? D.lerNumero(tx, false) : 0;
+    const multaValor = Math.round(m * (multaTipo === 'fixa' ? 10 ** D.MOEDAS[moedaForm].casas : 10000));
+    const moraTaxa = Math.round(t * 10000);
+    if (!Number.isFinite(multaValor) || !Number.isFinite(moraTaxa) || multaValor < 0 || moraTaxa < 0 ||
+        multaValor > (multaTipo === 'fixa' ? D.LIMITES.valor : D.LIMITES.multa) || moraTaxa > D.LIMITES.taxa) throw new RangeError('encargos');
+    return { multaTipo, multaValor: multaTipo === 'nenhuma' ? 0 : multaValor,
+      moraTipo, moraTaxa: moraTipo === 'nenhuma' ? 0 : moraTaxa,
+      moraPeriodo: $('#f-moraPeriodo').value, capitalizacao: $('#f-capitalizacao').value,
+      incluirMultaNaBase: $('#f-incluirMulta').checked && multaTipo !== 'nenhuma' };
+  }
+
   function pintarContatoForm() {
     const caixa = $('#fixado');
     caixa.hidden = !contatoForm;
     if (contatoForm) caixa.querySelector('span').textContent = t('form.fixado', { nome: nomeContato(contatoForm), id: contatoForm.id });
   }
   function atualizaDicas() {
+    const novo = $('#f-regrasNovas').checked;
+    $('#camposAtrasoNovos').hidden = !novo;
+    ['multa','mora'].forEach(k => $('[data-f="' + k + '"]', form).hidden = novo);
+    $('#campoNovaMulta').hidden = !novo || $('#f-multaTipo').value === 'nenhuma';
+    const temMora = novo && $('#f-moraTipo').value !== 'nenhuma';
+    $('#campoNovaMora').hidden = $('#campoMoraPeriodo').hidden = !temMora;
+    $('#campoCapitalizacao').hidden = !temMora || $('#f-moraTipo').value !== 'composta';
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
     opTotal.disabled = composto; // compound interest needs a period (month or year)
@@ -639,6 +714,17 @@
       dica = t('dica.parcelasPrevia', { n, valor: fmt.dinheiro(lista[0].valor, D.MOEDAS[moedaForm]), dias: fmt.dias(Math.round((dp - de) / n)), primeira: fmt.data(lista[0].dia) });
     }
     $('#hintParcelas').textContent = dica;
+    const prev = $('#previaEncargos');
+    prev.textContent = '';
+    if (novo && temPrevia) {
+      try {
+        const e = lerEncargosNovos(), simulado = diaDeISO($('#f-previaAtraso').value) ?? dp + 30;
+        if (simulado >= de) {
+          const s = D.situacao({ de, dp, parcelas: emParcelas ? n : 1, encargosAtraso:e }, total, [], simulado);
+          prev.textContent = t('atraso.previa', { x: fmt.dinheiro(s.saldo, D.MOEDAS[moedaForm]), data:fmt.data(simulado) });
+        }
+      } catch { prev.textContent = t('atraso.invalido'); }
+    }
     const obs = campo('obs').value;
     $('#contaObs').textContent = `${obs.length}/140`;
   }
@@ -692,17 +778,22 @@
       else if (de != null && dp != null && parcelas > dp - de) erros.parcelas = t('erro.parcelasPrazo');
       else if (Number.isSafeInteger(total) && total < parcelas) erros.parcelas = t('erro.parcelasValor');
     }
-    const multa = lerTaxaCampo('multa'), mora = lerTaxaCampo('mora');
+    let encargosAtraso = null;
+    if ($('#f-regrasNovas').checked) {
+      try { encargosAtraso = lerEncargosNovos(); }
+      catch { erros.atraso = t('atraso.invalido'); }
+    }
+    const multa = encargosAtraso ? 0 : lerTaxaCampo('multa'), mora = encargosAtraso ? 0 : lerTaxaCampo('mora');
     if (!Number.isFinite(multa) || multa > D.LIMITES.multa) erros.multa = t('erro.multa');
     if (!Number.isFinite(mora) || mora > D.LIMITES.taxa) erros.mora = t('erro.mora');
     const obs = limparNome(campo('obs').value);
     if (new TextEncoder().encode(obs).length > D.LIMITES.obsBytes) erros.obs = t('erro.obs');
-    if (Object.keys(erros).some(k => ['parcelas', 'multa', 'mora', 'obs'].includes(k))) $('#maisOpcoes').open = true;
+    if (Object.keys(erros).some(k => ['parcelas', 'multa', 'mora', 'obs', 'atraso'].includes(k))) $('#maisOpcoes').open = true;
     return {
       erros,
       dados: {
         papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, moeda: moedaForm, valor, taxa, modo, composto, de, dp,
-        obs, parcelas, multa: multa || 0, mora: mora || 0, pubOutro: contatoForm ? contatoForm.pub : null
+        obs, parcelas, multa: multa || 0, mora: mora || 0, encargosAtraso, pubOutro: contatoForm ? contatoForm.pub : null
       }
     };
   }
@@ -723,6 +814,10 @@
   }
   function limparFormulario() {
     ['outro', 'valor', 'taxa', 'obs', 'multa', 'mora'].forEach(n => { campo(n).value = ''; });
+    $('#f-regrasNovas').checked = $('#f-incluirMulta').checked = false;
+    $('#f-multaTipo').value = $('#f-moraTipo').value = 'nenhuma';
+    $('#f-moraPeriodo').value = 'mes'; $('#f-capitalizacao').value = 'dia';
+    $('#f-novaMultaValor').value = $('#f-novaMoraTaxa').value = $('#f-previaAtraso').value = '';
     campo('parcelas').value = '3';
     $('#pg-unica').checked = true;
     contatoForm = null; pintarContatoForm();
@@ -764,11 +859,21 @@
     if (d.parcelas > 1) { $('#pg-parcelas').checked = true; campo('parcelas').value = String(d.parcelas); } else $('#pg-unica').checked = true;
     campo('multa').value = d.multa ? fmt.numEntrada(d.multa / 10000) : '';
     campo('mora').value = d.mora ? fmt.numEntrada(d.mora / 10000) : '';
-    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora);
+    $('#f-regrasNovas').checked = !!d.encargosAtraso;
+    const e = d.encargosAtraso;
+    $('#f-multaTipo').value = e ? e.multaTipo : 'nenhuma';
+    $('#f-novaMultaValor').value = e && e.multaValor ? fmt.numEntrada(e.multaValor / (e.multaTipo === 'fixa' ? 10 ** d.casas : 10000)) : '';
+    $('#f-moraTipo').value = e ? e.moraTipo : 'nenhuma';
+    $('#f-novaMoraTaxa').value = e && e.moraTaxa ? fmt.numEntrada(e.moraTaxa / 10000) : '';
+    $('#f-moraPeriodo').value = e ? e.moraPeriodo : 'mes';
+    $('#f-capitalizacao').value = e ? e.capitalizacao : 'dia';
+    $('#f-incluirMulta').checked = !!(e && e.incluirMultaNaBase);
+    $('#f-previaAtraso').value = '';
+    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora || e);
     const c = outra.pub ? contatoDe(outra.pub) : null;
     contatoForm = c; pintarContatoForm();
     atualizaDicas();
-    irPara('inicio');
+    irPara('novo');
     setTimeout(() => $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 60);
   }
 
@@ -884,6 +989,7 @@
       const m = await D.lerCodigo(txt);
       $('#f-codigo').value = ''; $('#msgConf').innerHTML = '';
       if (m.tipo === 'recibo') await abrirRecibo(m);
+      else if (m.tipo.startsWith('solicitacao-') || m.tipo.startsWith('confirmacao-')) await abrirMovimentoAssinado(m);
       else await abrirModelo(m);
     } catch (err) {
       $('#msgConf').innerHTML = alertaErro(err);
@@ -1098,6 +1204,38 @@
     irPara('detalhe');
   }
 
+  async function abrirMovimentoAssinado(m) {
+    const reg = registros.find(r => r.k === m.hash);
+    if (!reg || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
+    const contrato = await D.lerCodigo(reg.codigo);
+    if (D.conferirMovimento(contrato,m)) throw new D.ChaveErro('RECIBO_OUTRO');
+    if (m.operacao === 'estorno') {
+      const original = pagamentoOriginalDe(reg,m.alvoRid);
+      if (!original || original.valor !== m.valor || original.dia !== m.dia ||
+          estornosDe(reg).some(x => x.alvoRid === m.alvoRid)) throw new D.ChaveErro('RECIBO_OUTRO');
+    }
+    if (m.tipo.startsWith('confirmacao-')) {
+      const novo = registrarRespostaAssinada(reg,m,contrato);
+      return abrirModelo(contrato,{aviso:t(novo ? m.aprovado ? 'pay.confirmado' : 'pay.rejeitado' : 'pay.duplicado')});
+    }
+    if (m.solicitante.pub === perfil.pub) {
+      salvarPedidoAssinado(reg,m);
+      return abrirModelo(contrato,{codigoPagamento:m.codigo});
+    }
+    const ok = await perguntar({
+      titulo:t('pay.solicitacao'),texto:t('pay.verificar',{valor:dinheiro(m.valor,reg),data:fmt.data(m.dia),nome:m.solicitante.nome}),
+      ok:t('pay.aprovar')
+    });
+    if (!ok) {
+      const rejeitar = await perguntar({titulo:t('pay.rejeitar'),texto:t('pay.rejeitarConf'),ok:t('pay.rejeitar')});
+      if (!rejeitar) return abrirModelo(contrato);
+    }
+    const codigo = await D.responderSolicitacaoPagamento(perfil,m.codigo,!!ok);
+    const resposta = await D.lerCodigo(codigo);
+    registrarRespostaAssinada(reg,resposta,contrato);
+    return abrirModelo(contrato,{codigoPagamento:codigo,aviso:t(ok ? 'pay.confirmado' : 'pay.rejeitado')});
+  }
+
   const nomeTipoRecibo = tipo => t('recibo.' + tipo);
   function statusHTML() {
     const { m, ctx, reg, extra } = atual;
@@ -1108,6 +1246,7 @@
     const s = reg ? situacaoDe(reg) : null;
     const atraso = s && s.atrasadas ? ' ' + t('st.atrasadas', { n: s.atrasadas }) : '';
     let cls, icone, titulo, texto, botoes = '', extraHTML = '';
+    const btnSolicitar = `<button class="btn btn-primary" type="button" data-acao="solicitar-pagamento">${ico('plus')}${t('pay.solicitar')}</button>`;
     const btnPagamento = `<button class="btn btn-primary" type="button" data-acao="pagamento">${ico('plus')}${t('st.pagamento')}</button>`;
     const btnQuitarAss = `<button class="btn" type="button" data-acao="quitar-assinado">${ico('check')}${t('st.quitarAssinado')}</button>`;
     const btnLerRecibo = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerRecibo')}</button>
@@ -1154,14 +1293,14 @@
       if (d.dp < hojeDia() && !atraso && s && s.saldo > 0) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
       if (s && s.saldo === 0 && s.pago > 0) texto += ' ' + t(sou === 'credor' ? 'st.tudoPagoCredor' : 'st.tudoPagoDevedor');
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (reg) botoes = sou === 'credor' ? btnPagamento + btnQuitarAss : btnLerRecibo + btnQuitarLocal;
+      if (reg) botoes = btnSolicitar + (sou === 'credor' ? btnPagamento + btnQuitarAss : btnLerRecibo);
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
       titulo = t('st.quitadoT');
       texto = t(reg.quitadoAssinado ? 'st.quitadoAssinado' : 'st.quitado', { data: fmt.data(diaQuitado(reg)) });
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (!reg.quitadoAssinado) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
-      if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub) botoes += btnQuitarAss;
+      if (!reg.quitadoAssinado && !reg.quitadoPorPagamentoLocal && !reg.quitadoPorMovimento && reg.soRegistro) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
+      if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub && reg.soRegistro) botoes += btnQuitarAss;
     } else if (ctx === 'cancelado') {
       const rc = recibosDe(reg).find(x => x.tipo === 'cancelamento');
       cls = 'st-cancelado'; icone = 'alerta';
@@ -1209,6 +1348,9 @@
   function qrHTML() {
     const { m, ctx, extra } = atual;
     if (ctx === 'recebida') return '';
+    const pagamento = extra.codigoPagamento
+      ? qrBloco({codigo:extra.codigoPagamento,legenda:t('pay.codigo'),dica:t('pay.envie'),
+        imprimir:false,acaoCopiar:'copiar-movimento',acaoEnviar:'enviar-movimento',classe:'qr-recibo'}) : '';
     if (ctx === 'recibo') return qrBloco({ codigo: m.codigo, legenda: t('qr.recibo'), dica: t('qr.dicaRecibo') });
     let antes = '';
     if (extra.reciboMostrado) {
@@ -1231,7 +1373,7 @@
       legenda = t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
       dica = t('qr.dica');
     }
-    return antes + qrBloco({ codigo: m.codigo, legenda, dica, imprimir: !aguardando });
+    return pagamento + antes + qrBloco({ codigo: m.codigo, legenda, dica, imprimir: !aguardando });
   }
 
   function resumoHTML(m, reg) {
@@ -1250,13 +1392,13 @@
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
-    if (reg && (temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
+    if (reg && (reg.soRegistro || temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
       const s = situacaoDe(reg);
       const saldo = reg.status === 'quitado' ? 0 : s.saldo;
       html += `<div class="summary summary-2">
         <div class="stat s-2"><span>${t('res.pago')}</span>${valorStat(dinheiro(s.pago, reg))}<small>${t('res.pagoNota', { n: pagamentosDe(reg).length })}</small></div>
         <div class="stat s-1"><span>${t('res.saldo')}</span>${valorStat(dinheiro(saldo, reg))}<small>${t(s.encargos ? 'res.saldoEncargos' : 'res.saldoNota')}</small></div>
-        ${reg.multa || reg.mora ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
+        ${(reg.multa || reg.mora || reg.encargosAtraso) ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
         ${s.proxima && reg.status !== 'quitado' ? `<div class="stat s-3"><span>${t('res.proxima')}</span><b>${fmt.dataCurta(s.proxima.dia)}</b><small>${t('res.proximaNota', { n: s.proxima.n, de: reg.parcelas || 1, valor: dinheiro(s.proxima.restante, reg) })}</small></div>` : ''}
       </div>`;
     }
@@ -1267,8 +1409,10 @@
   function pagamentosHTML(reg) {
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
-    const locais = pagamentosLocaisDe(reg);
-    if (!temRegras(reg) && !recibos.length && !locais.length) return '';
+    const locais = pagamentosLocaisTodos(reg);
+    const movimentos = movimentosAssinadosDe(reg), estornos = estornosDe(reg), pedidos = pendentesDe(reg);
+    const estornados = new Set(estornos.map(x => x.alvoRid));
+    if (!reg.soRegistro && !temRegras(reg) && !recibos.length && !locais.length && !movimentos.length && !pedidos.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -1282,21 +1426,39 @@
         return `<li class="${cls}"><span class="pc-n">${p.n}/${reg.parcelas || 1}</span><span class="pc-main"><b>${dinheiro(p.valor, reg)}</b><small>${t('pg.vence', { data: fmt.data(p.dia) })}</small></span><span class="pc-estado">${estado}</span></li>`;
       }).join('') + '</ol>';
     }
+    if (reg.encargosAtraso) {
+      const e = reg.encargosAtraso;
+      html += `<p class="hint">${textoEncargosAtraso(reg)} ${t('atraso.aviso')}</p>`;
+    }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
     }
     if (locais.length) {
-      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map(x =>
-        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}</small></span></li>`).join('') + '</ul>';
+      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map((x, i) =>
+        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}${x.anulado ? ' · ' + t('local.anulado') : ''}</small></span>
+         ${x.anulado ? '' : `<button class="btn btn-ghost" type="button" data-acao="editar-pagamento-local" data-index="${i}">${t('local.editar')}</button>
+         <button class="btn btn-ghost" type="button" data-acao="anular-pagamento-local" data-index="${i}">${t('local.anular')}</button>`}</li>`).join('') + '</ul>';
     }
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
         `<li><span class="pc-main"><b>${esc(nomeTipoRecibo(x.tipo))}${x.valor ? ' · ' + dinheiro(x.valor, reg) : ''}</b><small>${t('pg.reciboDia', { data: fmt.data(x.dia), quando: fmt.momento(x.ts, x.tz) })}</small></span>
-         <button class="btn btn-ghost" type="button" data-acao="ver-recibo" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button></li>`).join('') + '</ul>';
+         <button class="btn btn-ghost" type="button" data-acao="ver-recibo" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button>
+         ${x.tipo !== 'cancelamento' && reg.tipoCodigo === 'validado' && !estornados.has(normalizarRid(x.rid)) ?
+           `<button class="btn btn-ghost" type="button" data-acao="solicitar-estorno" data-rid="${esc(x.rid)}">${t('pay.estornar')}</button>` : ''}</li>`).join('') + '</ul>';
     } else if (reg.papel === 'credor' && emAberto(reg)) {
       html += `<p class="hint">${t('pg.semRecibosCredor')}</p>`;
     } else if (emAberto(reg)) {
       html += `<p class="hint">${t('pg.semRecibosDevedor')}</p>`;
+    }
+    if (movimentos.length) {
+      html += `<h4>${t('pay.confirmados')}</h4><ul class="recibos">` + movimentos.map(x =>
+        `<li><span class="pc-main"><b>${dinheiro(x.valor,reg)}</b><small>${fmt.data(x.dia)}${estornados.has(x.rid) ? ' · ' + t('pay.estornado') : ''}</small></span>
+        ${estornados.has(x.rid) ? '' : `<button class="btn btn-ghost" type="button" data-acao="solicitar-estorno" data-rid="${esc(x.rid)}">${t('pay.estornar')}</button>`}</li>`).join('') + '</ul>';
+    }
+    if (pedidos.length) {
+      html += `<h4>${t('pay.pedidos')}</h4><ul class="recibos">` + pedidos.map(x =>
+        `<li><span class="pc-main"><b>${t('pay.'+x.operacao)} · ${dinheiro(x.valor,reg)}</b><small>${t('pay.'+x.status)}</small></span>
+         <button class="btn btn-ghost" type="button" data-acao="ver-pedido" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button></li>`).join('') + '</ul>';
     }
     return html + '</section>';
   }
@@ -1307,8 +1469,18 @@
     const em = parteEmissora(m);
     ev.push({ ts: m.dados.ts, tz: m.dados.tz, texto: t('tl.criado', { nome: esc(em.nome) }) });
     if (m.confirmadoEm) ev.push({ ts: m.confirmadoEm.ts, tz: m.confirmadoEm.tz, texto: t('tl.confirmado', { nome: esc(parteOutra(m).nome) }) });
-    for (const x of pagamentosLocaisDe(reg)) {
+    for (const x of pagamentosLocaisTodos(reg)) {
+      if (x.anulado) continue;
       ev.push({ ts: x.ts, tz: x.tz, texto: `${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)} · ${fmt.data(x.dia)}` });
+    }
+    for (const x of (reg && reg.historicoLocal || [])) {
+      ev.push({ ts: x.ts, tz: x.tz, texto: t(x.tipo === 'edicao' ? 'local.edicao' : 'local.anulado') + ' · ' + dinheiro(x.valor, reg) });
+    }
+    for (const x of movimentosAssinadosDe(reg)) {
+      ev.push({ts:x.ts,tz:x.tz,texto:t('pay.confirmado')+' · '+dinheiro(x.valor,reg)});
+    }
+    for (const x of estornosDe(reg)) {
+      ev.push({ts:x.ts,tz:x.tz,texto:t('pay.estornado')+' · '+dinheiro(x.valor,reg)});
     }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
@@ -1320,6 +1492,19 @@
     ev.sort((a, b) => a.ts - b.ts);
     return `<section class="panel linha-tempo" aria-labelledby="t-tl"><h3 id="t-tl">${t('tl.titulo')}</h3><ol>` +
       ev.map(e => `<li><small>${fmt.momento(e.ts, e.tz)}</small><span>${e.texto}</span></li>`).join('') + '</ol></section>';
+  }
+
+  function textoEncargosAtraso(d) {
+    const e = d.encargosAtraso;
+    if (!e) return '';
+    const multa = e.multaTipo === 'nenhuma' ? t('atraso.nenhuma')
+      : e.multaTipo === 'fixa' ? t('atraso.fixa') + ': ' + dinheiro(e.multaValor, d)
+      : t('atraso.percentual') + ': ' + fmt.taxa(e.multaValor);
+    const mora = e.moraTipo === 'nenhuma' ? t('atraso.nenhuma')
+      : t('atraso.' + e.moraTipo) + ': ' + fmt.taxa(e.moraTaxa);
+    const texto = t('atraso.resumo', { multa, mora, periodo:t('atraso.' + e.moraPeriodo) });
+    return texto + (e.moraTipo === 'composta' ? ' ' + t('atraso.capitalizacao') + ': ' + t('atraso.' + e.capitalizacao) : '')
+      + (e.incluirMultaNaBase ? ' ' + t('atraso.incluirMulta') : '');
   }
 
   function textoJuros(d, c) {
@@ -1375,6 +1560,10 @@
     if (d.parcelas > 1) {
       const lista = D.parcelasDe(d, c.total);
       extras += `<p class="rc-text">${t('rc.parcelas', { n: d.parcelas, lista: lista.map(p => t('rc.parcelaItem', { n: p.n, valor: dinheiro(p.valor, d), data: fmt.data(p.dia) })).join('; ') })}</p>`;
+    }
+    if (d.encargosAtraso) {
+      const e = d.encargosAtraso;
+      extras += `<p class="rc-text">${textoEncargosAtraso(d)}</p>`;
     }
     if (d.multa || d.mora) extras += `<p class="rc-text">${t(d.multa && d.mora ? 'rc.atraso' : d.multa ? 'rc.atrasoMulta' : 'rc.atrasoMora', { multa: fmt.taxa(d.multa || 0), mora: fmt.taxa(d.mora || 0) })}</p>`;
     const recibos = recibosDe(reg).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).sort((a, b) => a.dia - b.dia);
@@ -1528,10 +1717,35 @@
     }
   }
 
+  function salvarPagamentoLocal(reg, lista, tipo = null, anterior = null) {
+    const s = situacaoDe({ ...reg, pagamentosLocais: lista });
+    const quitou = s.saldo === 0 && D.pagamentosLocaisAtivos(lista).length > 0;
+    const agora = momentoDe(new Date());
+    const patch = { k: reg.k, pagamentosLocais: lista, atualizadoEm: Date.now() };
+    if (tipo) patch.historicoLocal = [...(reg.historicoLocal || []), { ...agora, tipo, valor: anterior.valor, dia: anterior.dia }];
+    // Only automatic settlements may be reopened by correcting a payment.
+    if (reg.status === 'registrado' || reg.quitadoPorPagamentoLocal) {
+      patch.status = quitou ? 'quitado' : 'registrado';
+      patch.quitadoPorPagamentoLocal = quitou;
+      patch.quitadoAssinado = false;
+      patch.quitadoDia = quitou ? Math.max(...D.pagamentosLocaisAtivos(lista).map(x => x.dia)) : null;
+      patch.quitadoEm = quitou ? Date.now() : null;
+    }
+    upsert(patch);
+    reRender();
+  }
+
   document.addEventListener('click', async e => {
     const b = e.target.closest('[data-acao]');
     if (!b) return;
     const acao = b.dataset.acao;
+    if (acao === 'escolher-tipo') {
+      $('#p-' + (b.dataset.papel === 'devedor' ? 'devedor' : 'credor')).checked = true;
+      $(b.dataset.pessoal === 'true' ? '#c-so' : '#c-pedir').checked = true;
+      atualizaDicas();
+      $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     if (acao === 'ler-qr') return lerEAbrir();
     if (acao === 'copiar-backup') return toast(t(await copiar($('#codigoBackup').textContent) ? 'toast.backupCopiado' : 'toast.semCopiarCurto'));
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
@@ -1558,6 +1772,8 @@
       case 'recusar': atual = null; irPara('conferir'); toast(t('toast.nadaAssinado')); break;
       case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
+      case 'copiar-movimento': toast(t(await copiar(atual.extra.codigoPagamento) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
+      case 'enviar-movimento': compartilhar(atual.extra.codigoPagamento); break;
       case 'copiar-recibo': toast(t(await copiar(atual.extra.reciboMostrado) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar-recibo': compartilhar(t('share.recibo', { ref: atual.m.ref, codigo: atual.extra.reciboMostrado })); break;
       case 'imprimir': imprimir(); break;
@@ -1584,8 +1800,63 @@
         if (!resp) break;
         if (resp.valor <= 0 || resp.valor > saldo) { toast(t('modal.valorInvalido')); break; }
         const agora = momentoDe(new Date());
-        upsert({ k: reg.k, pagamentosLocais: [...pagamentosLocaisDe(reg), { ...resp, ...agora, valor: resp.valor }], atualizadoEm: Date.now() });
-        reRender(); toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        const id = Array.from(crypto.getRandomValues(new Uint32Array(2))).join('-');
+        salvarPagamentoLocal(reg, [...pagamentosLocaisTodos(reg), { ...resp, ...agora, id }]);
+        toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        break;
+      }
+      case 'editar-pagamento-local': case 'anular-pagamento-local': {
+        if (!reg || !reg.soRegistro) break;
+        const i = Number(b.dataset.index), todos = pagamentosLocaisTodos(reg), antes = todos[i];
+        if (!Number.isSafeInteger(i) || i < 0 || !antes || antes.anulado) break;
+        if (acao === 'anular-pagamento-local') {
+          const ok = await perguntar({ titulo: t('local.anular'), texto: t('local.confirmarAnular'), ok: t('modal.confirmar'), perigo: true });
+          if (!ok) break;
+          const lista = todos.slice(); lista[i] = { ...antes, anulado: true };
+          salvarPagamentoLocal(reg, lista, 'anulacao', antes);
+        } else {
+          const resp = await perguntar({
+            titulo: t('local.editar'), texto: t('local.avisarEdicao'), ok: t('modal.confirmar'),
+            valor: { moeda: reg.moeda, casas: reg.casas, padrao: antes.valor },
+            data: isoDeDia(antes.dia), dataMin: isoDeDia(Math.min(reg.de, hojeDia())), dataMax: isoDeDia(hojeDia())
+          });
+          if (!resp) break;
+          const lista = todos.slice(); lista[i] = { ...antes, valor: resp.valor, dia: resp.dia };
+          const saldo = situacaoDe({ ...reg, pagamentosLocais: lista });
+          if (saldo.credito > 0) { toast(t('modal.valorInvalido')); break; }
+          salvarPagamentoLocal(reg, lista, 'edicao', antes);
+        }
+        break;
+      }
+      case 'solicitar-pagamento': {
+        if (!reg || reg.tipoCodigo !== 'validado' || !emAberto(reg)) break;
+        const s = situacaoDe(reg),hojeISO=isoDeDia(hojeDia());
+        const resp = await perguntar({titulo:t('pay.solicitar'),texto:t('pay.informar'),
+          ok:t('pay.gerar'),valor:{moeda:reg.moeda,casas:reg.casas,padrao:Math.max(1,Math.min(s.saldo,s.proxima?.restante || s.saldo))},
+          data:hojeISO,dataMin:isoDeDia(Math.min(reg.de,hojeDia())),dataMax:hojeISO});
+        if (!resp) break;
+        if (resp.valor <= 0 || resp.valor > s.saldo) {toast(t('modal.valorInvalido'));break;}
+        const cod = await D.criarSolicitacaoPagamento(perfil,atual.m,resp),pedido=await D.lerCodigo(cod);
+        salvarPedidoAssinado(reg,pedido);
+        reRender({codigoPagamento:cod});
+        window.scrollTo({top:0,behavior:'instant'});
+        toast(t('pay.pendente'));
+        break;
+      }
+      case 'solicitar-estorno': {
+        if (!reg || reg.soRegistro || reg.tipoCodigo !== 'validado') break;
+        const alvo = pagamentoOriginalDe(reg,normalizarRid(b.dataset.rid));
+        if (!alvo || estornosDe(reg).some(x => x.alvoRid === normalizarRid(alvo.rid))) break;
+        const ok=await perguntar({titulo:t('pay.estornar'),texto:t('pay.estornarConf',{valor:dinheiro(alvo.valor,reg)}),ok:t('pay.gerar'),perigo:true});
+        if (!ok) break;
+        const cod=await D.criarSolicitacaoPagamento(perfil,atual.m,{operacao:'estorno',alvoRid:normalizarRid(alvo.rid),valor:alvo.valor,dia:alvo.dia});
+        const pedido=await D.lerCodigo(cod);salvarPedidoAssinado(reg,pedido);
+        reRender({codigoPagamento:cod});window.scrollTo({top:0,behavior:'instant'});toast(t('pay.pendente'));
+        break;
+      }
+      case 'ver-pedido': {
+        const pedido=pendentesDe(reg).find(x => x.rid===b.dataset.rid);
+        if (pedido) {reRender({codigoPagamento:pedido.codigo});window.scrollTo({top:0,behavior:'instant'});}
         break;
       }
       case 'pagamento': emitirRecibo('pagamento'); break;
@@ -1598,13 +1869,14 @@
       }
       case 'corrigir': case 'usar-dados': preencherForm(atual.m, reg); toast(t(acao === 'corrigir' ? 'toast.corrigir' : 'toast.usarDados')); break;
       case 'quitar': {
+        if (!reg || !reg.soRegistro) break;
         const hojeISO = isoDeDia(hojeDia());
         const r = await perguntar({
           titulo: t('modal.quitarT'), texto: t(reg.papel === 'devedor' ? 'modal.quitarDevedor' : 'modal.quitarCredor'),
           ok: t('modal.quitarOk'), data: hojeISO, dataMax: hojeISO
         });
         if (!r) break;
-        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, atualizadoEm: Date.now() });
+        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, quitadoPorPagamentoLocal: false, atualizadoEm: Date.now() });
         reRender(); toast(t('toast.quitado')); break;
       }
       case 'desquitar': {
@@ -1654,6 +1926,26 @@
   }
   const saldoAberto = r => (emAberto(r) ? situacaoDe(r).saldo : 0);
 
+  function renderInicio() {
+    const dia = hojeDia(), abertos = registros.filter(emAberto);
+    $('#inicioTotais').innerHTML =
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'credor'), saldoAberto)}</div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'devedor'), saldoAberto)}</div>`;
+    const vencendo = [];
+    for (const r of abertos) {
+      const p = situacaoDe(r, dia).parcelas.find(x => x.restante > 0 && x.dia <= dia + 30);
+      if (p) vencendo.push({ r, p });
+    }
+    vencendo.sort((a,b) => a.p.dia - b.p.dia);
+    const v = $('#inicioVencimentos');
+    v.hidden = !vencendo.length;
+    v.innerHTML = vencendo.length ? `<h2>${t('venc.titulo')}</h2><div class="lista">` +
+      vencendo.slice(0, 3).map(({ r }) => linhaRegistro(r, dia)).join('') + '</div>' : '';
+    const recentes = registros.slice().sort((a,b) => (b.atualizadoEm || b.criadoEm || 0) - (a.atualizadoEm || a.criadoEm || 0)).slice(0, 5);
+    $('#inicioRecentes').innerHTML = recentes.length ? recentes.map(r => linhaRegistro(r, dia)).join('')
+      : `<p class="hint">${t('inicio.vazio')}</p>`;
+  }
+
   function renderRegistros() {
     const abertos = registros.filter(emAberto);
     $('#totais').innerHTML =
@@ -1693,7 +1985,7 @@
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     $('#filtrosLista').hidden = visao() === 'pessoas';
     if (!registros.length) {
-      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#inicio">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
+      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#novo">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
       $('#pessoaFiltro').innerHTML = '';
       return;
     }
