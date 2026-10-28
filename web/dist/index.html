@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-tTosyBh0YPxTOKZguSO+yab0pgUJ5FIYInIHZvXlnQ0=' 'sha256-q899VRVtJ2nioPLQjANTPscHZbBUPbGv2kyUe+MIZbE=' 'sha256-HCKp21bsWXUd8gr8fOOLzr0ftETP7QIDThLtAaSmFN0='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-BEppyLk4P1bWQAYlfawdPKsOvPmDw+XmmtX16AKPsWA=' 'sha256-pgb/W/I4GLVNI1D2hVsRi5NoTdF/1Tn03/I+Qh43M4E=' 'sha256-FGtSYMbHXRL6haay5gA5/hMUARQa8ZwIpvgKHaZexRA='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -1084,6 +1084,20 @@ body.trava-aberta .modal{z-index:90}
                     <div class="control"><input id="f-mora" name="mora" type="text" inputmode="decimal" placeholder="Ex.: 1" data-i18n-ph="form.moraPh"><span class="affix end">%</span></div>
                     <div class="err" id="e-mora"></div>
                   </div>
+                  <div class="field span2"><label class="atraso-ativar" for="f-regrasNovas"><input id="f-regrasNovas" type="checkbox"><span data-i18n="atraso.avancado">Outras regras de atraso (multa fixa ou juros compostos)</span></label></div>
+                  <div class="span2" id="camposAtrasoNovos" hidden>
+                    <div class="grid">
+                      <div class="field"><label for="f-multaTipo" data-i18n="atraso.multaTipo">Tipo de multa</label><div class="control"><select id="f-multaTipo"><option value="nenhuma" data-i18n="atraso.nenhuma">Nenhuma</option><option value="fixa" data-i18n="atraso.fixa">Valor fixo</option><option value="percentual" data-i18n="atraso.percentual">Percentual</option></select></div></div>
+                      <div class="field" id="campoNovaMulta" hidden><label for="f-novaMultaValor" data-i18n="atraso.multaValor">Valor ou percentual da multa</label><div class="control"><input id="f-novaMultaValor" type="text" inputmode="decimal" placeholder="0"></div></div>
+                      <div class="field"><label for="f-moraTipo" data-i18n="atraso.moraTipo">Juros por atraso</label><div class="control"><select id="f-moraTipo"><option value="nenhuma" data-i18n="atraso.nenhuma">Nenhum</option><option value="simples" data-i18n="atraso.simples">Simples</option><option value="composta" data-i18n="atraso.composta">Compostos</option></select></div></div>
+                      <div class="field" id="campoNovaMora" hidden><label for="f-novaMoraTaxa" data-i18n="atraso.moraTaxa">Taxa da mora (%)</label><div class="control"><input id="f-novaMoraTaxa" type="text" inputmode="decimal" placeholder="Ex.: 1"></div></div>
+                      <div class="field" id="campoMoraPeriodo" hidden><label for="f-moraPeriodo" data-i18n="atraso.periodo">Período da taxa</label><div class="control"><select id="f-moraPeriodo"><option value="dia" data-i18n="atraso.dia">Ao dia</option><option value="mes" selected data-i18n="atraso.mes">Ao mês</option><option value="ano" data-i18n="atraso.ano">Ao ano</option></select></div></div>
+                      <div class="field" id="campoCapitalizacao" hidden><label for="f-capitalizacao" data-i18n="atraso.capitalizacao">Capitalização</label><div class="control"><select id="f-capitalizacao"><option value="dia" data-i18n="atraso.dia">Diária</option><option value="mes" data-i18n="atraso.mes">Mensal</option></select></div></div>
+                      <div class="field span2"><label class="atraso-ativar" for="f-incluirMulta"><input id="f-incluirMulta" type="checkbox"><span data-i18n="atraso.incluirMulta">Incluir a multa na base dos juros (verifique a legalidade)</span></label></div>
+                      <div class="field span2"><label for="f-previaAtraso" data-i18n="atraso.dataPrevia">Simular saldo na data</label><div class="control"><input id="f-previaAtraso" type="date"></div><p class="hint" id="previaEncargos"></p></div>
+                    </div>
+                    <p class="hint" data-i18n="atraso.aviso">Juros sobre multa e capitalização podem ser limitados por lei. A outra pessoa precisa aceitar as condições assinadas. Clientes antigos não leem as novas regras.</p>
+                  </div>
                   <p class="hint span2" data-i18n="dica.atraso">Opcional. Valem só depois do vencimento, sobre o valor que faltar pagar. Combinem valores razoáveis: a lei pode limitar multas e juros.</p>
                   <div class="field span2" data-f="obs">
                     <label for="f-obs"><span data-i18n="form.obs">Observação</span> <small id="contaObs">0/140</small></label>
@@ -1496,7 +1510,7 @@ const DebtIDTextos = {
   pt: {
     "meta.descricao": "DebtID: calculadora e registro de empréstimos em qualquer moeda, assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
     "nav.secoes": "Seções", "nav.navegacao": "Navegação",
-    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "Anular este pagamento? Ele deixará de contar no saldo, mas continuará no histórico.", "local.edicao": "Pagamento corrigido", "local.avisarEdicao": "Confira o valor e a data.", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "Anular este pagamento? Ele deixará de contar no saldo, mas continuará no histórico.", "local.edicao": "Pagamento corrigido", "local.avisarEdicao": "Confira o valor e a data.", "atraso.previa": "Saldo simulado em {data}: {x}", "atraso.invalido": "Confira os valores e as taxas de atraso.", "atraso.resumo": "Cobrança por atraso: multa {multa}; juros {mora} ({periodo}).", "atraso.aviso": "Multas e juros compostos podem ter restrições legais. As duas pessoas devem aceitar essas regras; versões antigas não conseguem ler os novos contratos.", "atraso.avancado": "Configurar multas e juros por atraso", "atraso.multaTipo": "Tipo de multa", "atraso.nenhuma": "Nenhuma", "atraso.fixa": "Valor fixo", "atraso.percentual": "Percentual", "atraso.multaValor": "Valor ou percentual da multa", "atraso.moraTipo": "Juros por atraso", "atraso.simples": "Simples", "atraso.composta": "Compostos", "atraso.moraTaxa": "Taxa dos juros por atraso (%)", "atraso.periodo": "Período da taxa", "atraso.dia": "Ao dia", "atraso.mes": "Ao mês", "atraso.ano": "Ao ano", "atraso.capitalizacao": "Capitalização", "atraso.incluirMulta": "Incluir a multa no cálculo dos juros (verifique a legislação)", "atraso.dataPrevia": "Simular saldo na data", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
 
     "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
@@ -1899,7 +1913,7 @@ const DebtIDTextos = {
   en: {
     "meta.descricao": "DebtID: a loan calculator and IOU in any currency, signed by both sides, with a QR code. Everything stays on your device.",
     "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "local.editar": "Edit", "local.anular": "Void", "local.anulado": "Voided", "local.confirmarAnular": "Void this payment? It will no longer count toward the balance, but remains in history.", "local.edicao": "Payment corrected", "local.avisarEdicao": "Check the amount and date.", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
+    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "local.editar": "Edit", "local.anular": "Void", "local.anulado": "Voided", "local.confirmarAnular": "Void this payment? It will no longer count toward the balance, but remains in history.", "local.edicao": "Payment corrected", "local.avisarEdicao": "Check the amount and date.", "atraso.previa": "Projected balance on {data}: {x}", "atraso.invalido": "Check the late fees and rates.", "atraso.resumo": "Late charges: fee {multa}; interest {mora} ({periodo}).", "atraso.aviso": "Late fees and compound interest may be restricted by law. Both parties must agree; older app versions cannot read these contracts.", "atraso.avancado": "Configure late fees and interest", "atraso.multaTipo": "Late fee type", "atraso.nenhuma": "None", "atraso.fixa": "Fixed amount", "atraso.percentual": "Percentage", "atraso.multaValor": "Fee amount or percentage", "atraso.moraTipo": "Late interest", "atraso.simples": "Simple", "atraso.composta": "Compound", "atraso.moraTaxa": "Late interest rate (%)", "atraso.periodo": "Rate period", "atraso.dia": "Daily", "atraso.mes": "Monthly", "atraso.ano": "Yearly", "atraso.capitalizacao": "Compounding", "atraso.incluirMulta": "Include late fee in the interest base (check applicable law)", "atraso.dataPrevia": "Project balance on date", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
 
     "hero.eyebrow": "Loan records · signed by both sides",
@@ -2302,7 +2316,7 @@ const DebtIDTextos = {
   es: {
     "meta.descricao": "DebtID: calculadora y registro de préstamos en cualquier moneda, firmado por las dos partes, con código QR. Todo queda en tu dispositivo.",
     "nav.secoes": "Secciones", "nav.navegacao": "Navegación",
-    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "¿Anular este pago? Ya no contará en el saldo, pero permanecerá en el historial.", "local.edicao": "Pago corregido", "local.avisarEdicao": "Revisa el importe y la fecha.", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "¿Anular este pago? Ya no contará en el saldo, pero permanecerá en el historial.", "local.edicao": "Pago corregido", "local.avisarEdicao": "Revisa el importe y la fecha.", "atraso.previa": "Saldo previsto para {data}: {x}", "atraso.invalido": "Revisa los cargos y tasas de demora.", "atraso.resumo": "Cargos por demora: multa {multa}; intereses {mora} ({periodo}).", "atraso.aviso": "Las multas y los intereses compuestos pueden estar limitados por ley. Ambas partes deben aceptar las condiciones; las versiones antiguas no pueden leer estos contratos.", "atraso.avancado": "Configurar multas e intereses de demora", "atraso.multaTipo": "Tipo de multa", "atraso.nenhuma": "Ninguna", "atraso.fixa": "Importe fijo", "atraso.percentual": "Porcentaje", "atraso.multaValor": "Importe o porcentaje de la multa", "atraso.moraTipo": "Intereses de demora", "atraso.simples": "Simples", "atraso.composta": "Compuestos", "atraso.moraTaxa": "Tasa de interés de demora (%)", "atraso.periodo": "Período de la tasa", "atraso.dia": "Diaria", "atraso.mes": "Mensual", "atraso.ano": "Anual", "atraso.capitalizacao": "Capitalización", "atraso.incluirMulta": "Incluir multa en la base de intereses (consulta la ley)", "atraso.dataPrevia": "Simular saldo en la fecha", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Cambiar a modo claro", "tema.paraEscuro": "Cambiar a modo oscuro",
 
     "hero.eyebrow": "Registro de préstamos · firmado por los dos",
@@ -2753,7 +2767,7 @@ const DebtIDIdioma = (() => {
 DebtIDTextos.ar = {
   "meta.descricao": "DebtID: حاسبة قروض وإقرار بدين بأي عملة، يوقّعه الطرفان، مع رمز QR. كل شيء يبقى على جهازك.",
   "nav.secoes": "الأقسام", "nav.navegacao": "التنقل",
-  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "local.editar": "تعديل", "local.anular": "إلغاء", "local.anulado": "ملغى", "local.confirmarAnular": "هل تريد إلغاء هذه الدفعة؟ ستبقى في السجل ولن تُحتسب في الرصيد.", "local.edicao": "تم تصحيح الدفعة", "local.avisarEdicao": "تحقق من المبلغ والتاريخ.", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
+  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "local.editar": "تعديل", "local.anular": "إلغاء", "local.anulado": "ملغى", "local.confirmarAnular": "هل تريد إلغاء هذه الدفعة؟ ستبقى في السجل ولن تُحتسب في الرصيد.", "local.edicao": "تم تصحيح الدفعة", "local.avisarEdicao": "تحقق من المبلغ والتاريخ.", "atraso.previa": "الرصيد المتوقع في {data}: {x}", "atraso.invalido": "تحقق من رسوم التأخير وأسعار الفائدة.", "atraso.resumo": "رسوم التأخير: غرامة {multa}؛ فائدة {mora} ({periodo}).", "atraso.aviso": "قد يقيّد القانون الغرامات والفائدة المركبة. يجب موافقة الطرفين؛ الإصدارات القديمة لا تستطيع قراءة هذه العقود.", "atraso.avancado": "إعداد غرامات وفوائد التأخير", "atraso.multaTipo": "نوع الغرامة", "atraso.nenhuma": "لا شيء", "atraso.fixa": "مبلغ ثابت", "atraso.percentual": "نسبة مئوية", "atraso.multaValor": "قيمة الغرامة أو نسبتها", "atraso.moraTipo": "فوائد التأخير", "atraso.simples": "بسيطة", "atraso.composta": "مركبة", "atraso.moraTaxa": "معدل فوائد التأخير (%)", "atraso.periodo": "مدة المعدل", "atraso.dia": "يوميًا", "atraso.mes": "شهريًا", "atraso.ano": "سنويًا", "atraso.capitalizacao": "الرسملة", "atraso.incluirMulta": "إضافة الغرامة إلى أساس الفائدة (تحقق من القانون)", "atraso.dataPrevia": "محاكاة الرصيد بتاريخ", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
   "tema.paraClaro": "التبديل إلى الوضع الفاتح", "tema.paraEscuro": "التبديل إلى الوضع الداكن",
 
   "hero.eyebrow": "سجل القروض · بتوقيع الطرفين",
@@ -3157,7 +3171,7 @@ DebtIDTextos.ar = {
 DebtIDTextos.bn = {
   "meta.descricao": "DebtID: যেকোনো মুদ্রায় ধারের হিসাব ও রসিদ, দুই পক্ষের স্বাক্ষরসহ, QR কোড দিয়ে। সবকিছু আপনার ডিভাইসেই থাকে।",
   "nav.secoes": "বিভাগ", "nav.navegacao": "নেভিগেশন",
-  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "local.editar": "সম্পাদনা", "local.anular": "বাতিল", "local.anulado": "বাতিল", "local.confirmarAnular": "এই পেমেন্ট বাতিল করবেন? হিসাব থেকে বাদ যাবে, তবে ইতিহাসে থাকবে।", "local.edicao": "পেমেন্ট সংশোধিত", "local.avisarEdicao": "পরিমাণ ও তারিখ যাচাই করুন।", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
+  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "local.editar": "সম্পাদনা", "local.anular": "বাতিল", "local.anulado": "বাতিল", "local.confirmarAnular": "এই পেমেন্ট বাতিল করবেন? হিসাব থেকে বাদ যাবে, তবে ইতিহাসে থাকবে।", "local.edicao": "পেমেন্ট সংশোধিত", "local.avisarEdicao": "পরিমাণ ও তারিখ যাচাই করুন।", "atraso.previa": "{data} তারিখে সম্ভাব্য বকেয়া: {x}", "atraso.invalido": "বিলম্বের ফি ও সুদের হার যাচাই করুন।", "atraso.resumo": "বিলম্বের খরচ: জরিমানা {multa}; সুদ {mora} ({periodo})।", "atraso.aviso": "জরিমানা ও চক্রবৃদ্ধি সুদ আইনে সীমিত হতে পারে। উভয় পক্ষের সম্মতি প্রয়োজন; পুরোনো সংস্করণ এই চুক্তি পড়তে পারে না।", "atraso.avancado": "বিলম্বের জরিমানা ও সুদ নির্ধারণ", "atraso.multaTipo": "জরিমানার ধরন", "atraso.nenhuma": "নেই", "atraso.fixa": "নির্দিষ্ট পরিমাণ", "atraso.percentual": "শতাংশ", "atraso.multaValor": "জরিমানার পরিমাণ বা হার", "atraso.moraTipo": "বিলম্বের সুদ", "atraso.simples": "সরল", "atraso.composta": "চক্রবৃদ্ধি", "atraso.moraTaxa": "বিলম্বের সুদের হার (%)", "atraso.periodo": "হারের সময়কাল", "atraso.dia": "দৈনিক", "atraso.mes": "মাসিক", "atraso.ano": "বার্ষিক", "atraso.capitalizacao": "চক্রবৃদ্ধির মেয়াদ", "atraso.incluirMulta": "সুদের ভিত্তিতে জরিমানা যোগ করুন (আইন দেখুন)", "atraso.dataPrevia": "তারিখ অনুযায়ী বকেয়া হিসাব করুন", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
   "tema.paraClaro": "লাইট মোডে যান", "tema.paraEscuro": "ডার্ক মোডে যান",
 
   "hero.eyebrow": "ধারের রেকর্ড · দুই পক্ষের স্বাক্ষর",
@@ -3561,7 +3575,7 @@ DebtIDTextos.bn = {
 DebtIDTextos.de = {
   "meta.descricao": "DebtID: Darlehensrechner und Schuldschein in jeder Währung, von beiden Seiten unterschrieben, mit QR-Code. Alles bleibt auf deinem Gerät.",
   "nav.secoes": "Bereiche", "nav.navegacao": "Navigation",
-  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "local.editar": "Bearbeiten", "local.anular": "Stornieren", "local.anulado": "Storniert", "local.confirmarAnular": "Diese Zahlung stornieren? Sie zählt nicht mehr zum Saldo, bleibt aber im Verlauf.", "local.edicao": "Zahlung korrigiert", "local.avisarEdicao": "Betrag und Datum prüfen.", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
+  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "local.editar": "Bearbeiten", "local.anular": "Stornieren", "local.anulado": "Storniert", "local.confirmarAnular": "Diese Zahlung stornieren? Sie zählt nicht mehr zum Saldo, bleibt aber im Verlauf.", "local.edicao": "Zahlung korrigiert", "local.avisarEdicao": "Betrag und Datum prüfen.", "atraso.previa": "Prognostizierter Saldo am {data}: {x}", "atraso.invalido": "Bitte Verzugsgebühren und Zinssätze prüfen.", "atraso.resumo": "Verzugskosten: Gebühr {multa}; Zinsen {mora} ({periodo}).", "atraso.aviso": "Verzugsgebühren und Zinseszinsen können gesetzlich begrenzt sein. Beide Parteien müssen zustimmen; ältere Versionen können diese Verträge nicht lesen.", "atraso.avancado": "Verzugsgebühren und Zinsen einstellen", "atraso.multaTipo": "Art der Verzugsgebühr", "atraso.nenhuma": "Keine", "atraso.fixa": "Fester Betrag", "atraso.percentual": "Prozentsatz", "atraso.multaValor": "Gebührenbetrag oder Prozentsatz", "atraso.moraTipo": "Verzugszinsen", "atraso.simples": "Einfach", "atraso.composta": "Zusammengesetzt", "atraso.moraTaxa": "Verzugszinssatz (%)", "atraso.periodo": "Zinszeitraum", "atraso.dia": "Täglich", "atraso.mes": "Monatlich", "atraso.ano": "Jährlich", "atraso.capitalizacao": "Verzinsung", "atraso.incluirMulta": "Gebühr zur Zinsbasis hinzufügen (Gesetz prüfen)", "atraso.dataPrevia": "Saldo für Datum berechnen", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
   "tema.paraClaro": "Zum hellen Modus wechseln", "tema.paraEscuro": "Zum dunklen Modus wechseln",
 
   "hero.eyebrow": "Darlehen festhalten · von beiden Seiten unterschrieben",
@@ -3965,7 +3979,7 @@ DebtIDTextos.de = {
 DebtIDTextos.fr = {
   "meta.descricao": "DebtID : calculatrice et reconnaissance de dette dans n'importe quelle devise, signée par les deux parties, avec un code QR. Tout reste sur votre appareil.",
   "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "local.editar": "Modifier", "local.anular": "Annuler", "local.anulado": "Annulé", "local.confirmarAnular": "Annuler ce paiement ? Il ne comptera plus dans le solde mais restera dans l'historique.", "local.edicao": "Paiement corrigé", "local.avisarEdicao": "Vérifiez le montant et la date.", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
+  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "local.editar": "Modifier", "local.anular": "Annuler", "local.anulado": "Annulé", "local.confirmarAnular": "Annuler ce paiement ? Il ne comptera plus dans le solde mais restera dans l'historique.", "local.edicao": "Paiement corrigé", "local.avisarEdicao": "Vérifiez le montant et la date.", "atraso.previa": "Solde prévu au {data} : {x}", "atraso.invalido": "Vérifiez les frais et taux de retard.", "atraso.resumo": "Retard : pénalité {multa} ; intérêts {mora} ({periodo}).", "atraso.aviso": "Les pénalités et intérêts composés peuvent être limités par la loi. Les deux parties doivent accepter ; les anciennes versions ne peuvent pas lire ces contrats.", "atraso.avancado": "Configurer les pénalités et intérêts de retard", "atraso.multaTipo": "Type de pénalité", "atraso.nenhuma": "Aucune", "atraso.fixa": "Montant fixe", "atraso.percentual": "Pourcentage", "atraso.multaValor": "Montant ou pourcentage de la pénalité", "atraso.moraTipo": "Intérêts de retard", "atraso.simples": "Simples", "atraso.composta": "Composés", "atraso.moraTaxa": "Taux des intérêts de retard (%)", "atraso.periodo": "Période du taux", "atraso.dia": "Par jour", "atraso.mes": "Par mois", "atraso.ano": "Par an", "atraso.capitalizacao": "Capitalisation", "atraso.incluirMulta": "Inclure la pénalité dans la base des intérêts (vérifier la loi)", "atraso.dataPrevia": "Simuler le solde à la date", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
   "tema.paraClaro": "Passer en mode clair", "tema.paraEscuro": "Passer en mode sombre",
 
   "hero.eyebrow": "Registre de prêts · signé par les deux parties",
@@ -4369,7 +4383,7 @@ DebtIDTextos.fr = {
 DebtIDTextos.hi = {
   "meta.descricao": "DebtID: किसी भी मुद्रा में उधार का कैलकुलेटर और रसीद, दोनों पक्षों के हस्ताक्षर के साथ, QR कोड सहित। सब कुछ आपके डिवाइस पर ही रहता है।",
   "nav.secoes": "भाग", "nav.navegacao": "नेविगेशन",
-  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "local.editar": "संपादित करें", "local.anular": "रद्द करें", "local.anulado": "रद्द", "local.confirmarAnular": "यह भुगतान रद्द करें? शेष राशि में नहीं गिना जाएगा, लेकिन इतिहास में रहेगा।", "local.edicao": "भुगतान सुधारा गया", "local.avisarEdicao": "राशि और तारीख जाँचें।", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
+  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "local.editar": "संपादित करें", "local.anular": "रद्द करें", "local.anulado": "रद्द", "local.confirmarAnular": "यह भुगतान रद्द करें? शेष राशि में नहीं गिना जाएगा, लेकिन इतिहास में रहेगा।", "local.edicao": "भुगतान सुधारा गया", "local.avisarEdicao": "राशि और तारीख जाँचें।", "atraso.previa": "{data} को अनुमानित बकाया: {x}", "atraso.invalido": "देरी के शुल्क और ब्याज दरें जाँचें।", "atraso.resumo": "देरी के शुल्क: जुर्माना {multa}; ब्याज {mora} ({periodo})।", "atraso.aviso": "जुर्माने और चक्रवृद्धि ब्याज पर कानूनी सीमाएँ हो सकती हैं। दोनों पक्षों की सहमति आवश्यक है; पुराने संस्करण ये अनुबंध नहीं पढ़ सकते।", "atraso.avancado": "देरी के शुल्क और ब्याज तय करें", "atraso.multaTipo": "जुर्माने का प्रकार", "atraso.nenhuma": "कोई नहीं", "atraso.fixa": "निश्चित राशि", "atraso.percentual": "प्रतिशत", "atraso.multaValor": "जुर्माने की राशि या प्रतिशत", "atraso.moraTipo": "देरी का ब्याज", "atraso.simples": "साधारण", "atraso.composta": "चक्रवृद्धि", "atraso.moraTaxa": "देरी ब्याज दर (%)", "atraso.periodo": "दर की अवधि", "atraso.dia": "प्रतिदिन", "atraso.mes": "प्रतिमाह", "atraso.ano": "प्रतिवर्ष", "atraso.capitalizacao": "चक्रवृद्धि अवधि", "atraso.incluirMulta": "ब्याज की गणना में जुर्माना जोड़ें (कानून देखें)", "atraso.dataPrevia": "तारीख पर बकाया देखें", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
   "tema.paraClaro": "लाइट मोड पर जाएँ", "tema.paraEscuro": "डार्क मोड पर जाएँ",
 
   "hero.eyebrow": "उधार का रिकॉर्ड · दोनों पक्षों के हस्ताक्षर",
@@ -4773,7 +4787,7 @@ DebtIDTextos.hi = {
 DebtIDTextos.id = {
   "meta.descricao": "DebtID: kalkulator pinjaman dan surat pengakuan utang dalam mata uang apa pun, ditandatangani kedua pihak, dengan kode QR. Semuanya tetap di perangkat Anda.",
   "nav.secoes": "Bagian", "nav.navegacao": "Navigasi",
-  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "local.editar": "Ubah", "local.anular": "Batalkan", "local.anulado": "Dibatalkan", "local.confirmarAnular": "Batalkan pembayaran ini? Tidak lagi dihitung dalam saldo tetapi tetap ada di riwayat.", "local.edicao": "Pembayaran dikoreksi", "local.avisarEdicao": "Periksa jumlah dan tanggal.", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
+  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "local.editar": "Ubah", "local.anular": "Batalkan", "local.anulado": "Dibatalkan", "local.confirmarAnular": "Batalkan pembayaran ini? Tidak lagi dihitung dalam saldo tetapi tetap ada di riwayat.", "local.edicao": "Pembayaran dikoreksi", "local.avisarEdicao": "Periksa jumlah dan tanggal.", "atraso.previa": "Saldo perkiraan pada {data}: {x}", "atraso.invalido": "Periksa biaya dan suku bunga keterlambatan.", "atraso.resumo": "Biaya keterlambatan: denda {multa}; bunga {mora} ({periodo}).", "atraso.aviso": "Denda dan bunga majemuk mungkin dibatasi hukum. Kedua pihak harus setuju; versi lama tidak dapat membaca kontrak ini.", "atraso.avancado": "Atur denda dan bunga keterlambatan", "atraso.multaTipo": "Jenis denda", "atraso.nenhuma": "Tidak ada", "atraso.fixa": "Jumlah tetap", "atraso.percentual": "Persentase", "atraso.multaValor": "Jumlah atau persentase denda", "atraso.moraTipo": "Bunga keterlambatan", "atraso.simples": "Sederhana", "atraso.composta": "Majemuk", "atraso.moraTaxa": "Suku bunga keterlambatan (%)", "atraso.periodo": "Periode bunga", "atraso.dia": "Harian", "atraso.mes": "Bulanan", "atraso.ano": "Tahunan", "atraso.capitalizacao": "Kapitalisasi", "atraso.incluirMulta": "Sertakan denda sebagai dasar bunga (periksa hukum)", "atraso.dataPrevia": "Simulasikan saldo pada tanggal", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
   "tema.paraClaro": "Beralih ke mode terang", "tema.paraEscuro": "Beralih ke mode gelap",
 
   "hero.eyebrow": "Catatan pinjaman · ditandatangani kedua pihak",
@@ -5177,7 +5191,7 @@ DebtIDTextos.id = {
 DebtIDTextos.ru = {
   "meta.descricao": "DebtID: калькулятор займов и расписка в любой валюте, подписанная обеими сторонами, с QR-кодом. Всё остаётся на вашем устройстве.",
   "nav.secoes": "Разделы", "nav.navegacao": "Навигация",
-  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "local.editar": "Изменить", "local.anular": "Аннулировать", "local.anulado": "Аннулировано", "local.confirmarAnular": "Аннулировать платёж? Он не будет учтён в остатке, но останется в истории.", "local.edicao": "Платёж исправлен", "local.avisarEdicao": "Проверьте сумму и дату.", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
+  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "local.editar": "Изменить", "local.anular": "Аннулировать", "local.anulado": "Аннулировано", "local.confirmarAnular": "Аннулировать платёж? Он не будет учтён в остатке, но останется в истории.", "local.edicao": "Платёж исправлен", "local.avisarEdicao": "Проверьте сумму и дату.", "atraso.previa": "Прогноз остатка на {data}: {x}", "atraso.invalido": "Проверьте штрафы и ставки за просрочку.", "atraso.resumo": "Просрочка: штраф {multa}; проценты {mora} ({periodo}).", "atraso.aviso": "Штрафы и сложные проценты могут ограничиваться законом. Обе стороны должны согласиться; старые версии не читают такие договоры.", "atraso.avancado": "Настроить штрафы и проценты за просрочку", "atraso.multaTipo": "Тип штрафа", "atraso.nenhuma": "Нет", "atraso.fixa": "Фиксированная сумма", "atraso.percentual": "Процент", "atraso.multaValor": "Сумма или процент штрафа", "atraso.moraTipo": "Проценты за просрочку", "atraso.simples": "Простые", "atraso.composta": "Сложные", "atraso.moraTaxa": "Ставка процентов за просрочку (%)", "atraso.periodo": "Период ставки", "atraso.dia": "В день", "atraso.mes": "В месяц", "atraso.ano": "В год", "atraso.capitalizacao": "Капитализация", "atraso.incluirMulta": "Включить штраф в базу процентов (проверьте закон)", "atraso.dataPrevia": "Рассчитать остаток на дату", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
   "tema.paraClaro": "Включить светлую тему", "tema.paraEscuro": "Включить тёмную тему",
 
   "hero.eyebrow": "Учёт займов · подписано обеими сторонами",
@@ -5581,7 +5595,7 @@ DebtIDTextos.ru = {
 DebtIDTextos.ur = {
   "meta.descricao": "DebtID: کسی بھی کرنسی میں قرض کا کیلکولیٹر اور رسید، دونوں فریقوں کے دستخط کے ساتھ، QR کوڈ سمیت۔ سب کچھ آپ کے آلے پر ہی رہتا ہے۔",
   "nav.secoes": "حصے", "nav.navegacao": "نیویگیشن",
-  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "local.editar": "ترمیم", "local.anular": "منسوخ", "local.anulado": "منسوخ", "local.confirmarAnular": "یہ ادائیگی منسوخ کریں؟ بقایا میں شمار نہیں ہوگی لیکن تاریخ میں رہے گی۔", "local.edicao": "ادائیگی درست کی گئی", "local.avisarEdicao": "رقم اور تاریخ چیک کریں۔", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
+  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "local.editar": "ترمیم", "local.anular": "منسوخ", "local.anulado": "منسوخ", "local.confirmarAnular": "یہ ادائیگی منسوخ کریں؟ بقایا میں شمار نہیں ہوگی لیکن تاریخ میں رہے گی۔", "local.edicao": "ادائیگی درست کی گئی", "local.avisarEdicao": "رقم اور تاریخ چیک کریں۔", "atraso.previa": "{data} کو متوقع بقایا: {x}", "atraso.invalido": "تاخیر کی فیس اور شرح چیک کریں۔", "atraso.resumo": "تاخیر کے اخراجات: جرمانہ {multa}؛ سود {mora} ({periodo})۔", "atraso.aviso": "جرمانے اور مرکب سود پر قانونی پابندیاں ہو سکتی ہیں۔ دونوں فریقوں کی رضامندی ضروری ہے؛ پرانے ورژن یہ معاہدے نہیں پڑھ سکتے۔", "atraso.avancado": "تاخیر کے جرمانے اور سود مقرر کریں", "atraso.multaTipo": "جرمانے کی قسم", "atraso.nenhuma": "کوئی نہیں", "atraso.fixa": "مقررہ رقم", "atraso.percentual": "فیصد", "atraso.multaValor": "جرمانے کی رقم یا فیصد", "atraso.moraTipo": "تاخیر کا سود", "atraso.simples": "سادہ", "atraso.composta": "مرکب", "atraso.moraTaxa": "تاخیر کی شرح سود (%)", "atraso.periodo": "شرح کی مدت", "atraso.dia": "روزانہ", "atraso.mes": "ماہانہ", "atraso.ano": "سالانہ", "atraso.capitalizacao": "مرکب حساب", "atraso.incluirMulta": "سود کی بنیاد میں جرمانہ شامل کریں (قانون دیکھیں)", "atraso.dataPrevia": "تاریخ پر بقایا دیکھیں", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
   "tema.paraClaro": "لائٹ موڈ پر جائیں", "tema.paraEscuro": "ڈارک موڈ پر جائیں",
 
   "hero.eyebrow": "قرض کا ریکارڈ · دونوں فریقوں کے دستخط",
@@ -5985,7 +5999,7 @@ DebtIDTextos.ur = {
 DebtIDTextos.zh = {
   "meta.descricao": "DebtID：支持任意货币的借款计算器和借条，双方签名，附二维码。所有数据都留在你的设备上。",
   "nav.secoes": "栏目", "nav.navegacao": "导航",
-  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "local.editar": "编辑", "local.anular": "作废", "local.anulado": "已作废", "local.confirmarAnular": "作废这笔付款？它将不再计入余额，但会保留在历史记录中。", "local.edicao": "付款已更正", "local.avisarEdicao": "请核对金额和日期。", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
+  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "local.editar": "编辑", "local.anular": "作废", "local.anulado": "已作废", "local.confirmarAnular": "作废这笔付款？它将不再计入余额，但会保留在历史记录中。", "local.edicao": "付款已更正", "local.avisarEdicao": "请核对金额和日期。", "atraso.previa": "{data} 的预计余额：{x}", "atraso.invalido": "请检查逾期费用和利率。", "atraso.resumo": "逾期费用：罚金 {multa}；利息 {mora}（{periodo}）。", "atraso.aviso": "罚金与复利可能受到法律限制。双方须同意；旧版应用无法读取此类合同。", "atraso.avancado": "设置逾期罚金与利息", "atraso.multaTipo": "罚金类型", "atraso.nenhuma": "无", "atraso.fixa": "固定金额", "atraso.percentual": "百分比", "atraso.multaValor": "罚金金额或比例", "atraso.moraTipo": "逾期利息", "atraso.simples": "单利", "atraso.composta": "复利", "atraso.moraTaxa": "逾期利率 (%)", "atraso.periodo": "利率周期", "atraso.dia": "每日", "atraso.mes": "每月", "atraso.ano": "每年", "atraso.capitalizacao": "复利周期", "atraso.incluirMulta": "将罚金计入计息本金（请核实法律）", "atraso.dataPrevia": "模拟指定日期的余额", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
   "tema.paraClaro": "切换到浅色模式", "tema.paraEscuro": "切换到深色模式",
 
   "hero.eyebrow": "借款记录 · 双方签名",
@@ -6921,13 +6935,33 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const TAGS = {
     2: { p: enc.encode('DebtID/v2/proposta'), c: enc.encode('DebtID/v2/confirma') },
     3: { p: enc.encode('DebtID/v3/proposta'), c: enc.encode('DebtID/v3/confirma') },
-    4: { p: enc.encode('DebtID/v4/proposta'), c: enc.encode('DebtID/v4/confirma'), r: enc.encode('DebtID/v4/recibo') }
+    4: { p: enc.encode('DebtID/v4/proposta'), c: enc.encode('DebtID/v4/confirma'), r: enc.encode('DebtID/v4/recibo') },
+    5: { p: enc.encode('DebtID/v5/proposta'), c: enc.encode('DebtID/v5/confirma') }
   };
   const TAG_HASH = enc.encode('DebtID/emprestimo');
   const EXTRA = { obs: 1, parcelas: 2, atraso: 4, outro: 8 };
   const TIPOS_RECIBO = ['pagamento', 'quitacao', 'cancelamento'];
   const hexParaBytes = h => Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 16));
   const bytesObs = s => enc.encode(s).length;
+  const MULTAS = ['nenhuma', 'fixa', 'percentual'], MORAS = ['nenhuma', 'simples', 'composta'];
+  const PERIODOS_MORA = ['dia', 'mes', 'ano'], CAPITALIZACAO = ['dia', 'mes'];
+  // v5: fixed fee in minor units, percentage/rate in millionths.
+  function normalizarEncargosAtraso(v) {
+    if (!v) return null;
+    const e = { multaTipo:v.multaTipo || 'nenhuma', multaValor:v.multaValor || 0,
+      moraTipo:v.moraTipo || 'nenhuma', moraTaxa:v.moraTaxa || 0,
+      moraPeriodo:v.moraPeriodo || 'mes', capitalizacao:v.capitalizacao || 'dia',
+      incluirMultaNaBase:v.incluirMultaNaBase === true };
+    if (!MULTAS.includes(e.multaTipo) || !MORAS.includes(e.moraTipo) ||
+        !PERIODOS_MORA.includes(e.moraPeriodo) || !CAPITALIZACAO.includes(e.capitalizacao) ||
+        !Number.isSafeInteger(e.multaValor) || e.multaValor < 0 ||
+        e.multaValor > (e.multaTipo === 'fixa' ? LIMITES.valor : LIMITES.multa) ||
+        !Number.isSafeInteger(e.moraTaxa) || e.moraTaxa < 0 || e.moraTaxa > LIMITES.taxa ||
+        (e.multaTipo === 'nenhuma' && e.multaValor !== 0) ||
+        (e.moraTipo === 'nenhuma' && e.moraTaxa !== 0)) throw new RangeError('regras de atraso inválidas');
+    return e;
+  }
+
 
   function escreverP(d, versao) {
     const e = new Escritor();
@@ -6945,6 +6979,14 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       if (d.parcelas > 1) e.num(d.parcelas);
       if (atraso) { e.num(d.multa || 0); e.num(d.mora || 0); }
       if (d.pubOutro) e.bytes(d.pubOutro);
+    }
+    if (versao >= 5) {
+      const t = d.encargosAtraso;
+      e.byte(MULTAS.indexOf(t.multaTipo)); e.num(t.multaValor);
+      e.byte(MORAS.indexOf(t.moraTipo)); e.num(t.moraTaxa);
+      e.byte(PERIODOS_MORA.indexOf(t.moraPeriodo));
+      e.byte(CAPITALIZACAO.indexOf(t.capitalizacao));
+      e.byte(t.incluirMultaNaBase ? 1 : 0);
     }
     return e.fim();
   }
@@ -6981,7 +7023,21 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         if (iguais(pubOutro, pubEmissor)) throw new ChaveErro('CORROMPIDA');
       }
     }
-    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor, obs, parcelas, multa, mora, pubOutro };
+    let encargosAtraso = null;
+    if (versao >= 5) {
+      const mi = L.byte(), multaValor = L.num(), mo = L.byte(), moraTaxa = L.num();
+      const pe = L.byte(), ca = L.byte(), incluir = L.byte();
+      if (incluir > 1 || (x & EXTRA.atraso)) throw new ChaveErro('CORROMPIDA');
+      try {
+        encargosAtraso = normalizarEncargosAtraso({
+          multaTipo:MULTAS[mi], multaValor, moraTipo:MORAS[mo], moraTaxa,
+          moraPeriodo:PERIODOS_MORA[pe], capitalizacao:CAPITALIZACAO[ca], incluirMultaNaBase:!!incluir
+        });
+        if (mi >= MULTAS.length || mo >= MORAS.length || pe >= PERIODOS_MORA.length || ca >= CAPITALIZACAO.length)
+          throw new RangeError('índice inválido');
+      } catch { throw new ChaveErro('CORROMPIDA'); }
+    }
+    const d = { id, modo, composto, papel, moeda, casas, valor, taxa, de, dp: de + dias, ts, tz, total, nomeEmissor, nomeOutro, pubEmissor, obs, parcelas, multa, mora, pubOutro, encargosAtraso };
     validarDados(d);
     conferirTotal(d, total);
     return { d, bytes: L.b.slice(ini, L.i) };
@@ -7016,7 +7072,9 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (bytesObs(obs) > LIMITES.obsBytes) throw new RangeError('observação longa demais');
     const parcelas = dados.parcelas > 1 ? dados.parcelas : 1;
     if (!Number.isSafeInteger(parcelas) || parcelas > LIMITES.parcelas) throw new RangeError('parcelas');
-    const multa = dados.multa || 0, mora = dados.mora || 0;
+    const encargosAtraso = normalizarEncargosAtraso(dados.encargosAtraso);
+    const versao = encargosAtraso ? 5 : VERSAO;
+    const multa = versao === 5 ? 0 : dados.multa || 0, mora = versao === 5 ? 0 : dados.mora || 0;
     if (!Number.isSafeInteger(multa) || multa < 0 || multa > LIMITES.multa || !Number.isSafeInteger(mora) || mora < 0 || mora > LIMITES.taxa) throw new RangeError('encargos');
     const minha = pubDoPerfil(perfil);
     let pubOutro = null;
@@ -7031,13 +7089,13 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       moeda, casas: infoMoeda(moeda).casas,
       valor: dados.valor, taxa: dados.taxa, de: dados.de, dp: dados.dp,
       ts, tz, nomeEmissor: perfil.nome, nomeOutro: dados.nomeOutro, pubEmissor: minha,
-      obs, parcelas, multa, mora, pubOutro
+      obs, parcelas, multa, mora, pubOutro, encargosAtraso
     };
     d.total = calcular(d).total;
     validarDados(d);
-    const p = escreverP(d, VERSAO);
-    const sig = await assinar(perfil, juntar(TAGS[VERSAO].p, p));
-    return embalar(juntar([VERSAO, PROPOSTA], p, sig));
+    const p = escreverP(d, versao);
+    const sig = await assinar(perfil, juntar(TAGS[versao].p, p));
+    return embalar(juntar([versao, PROPOSTA], p, sig));
   }
 
   // Confirms someone else's proposal and returns the code validated by both sides.
@@ -7098,7 +7156,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
     const dadosExibir = {
       moeda: d.moeda, casas: d.casas, valor: d.valor, taxa: d.taxa, modo: d.modo, composto: d.composto, de: d.de, dp: d.dp, ts: d.ts, tz: d.tz, total: d.total,
-      obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora
+      obs: d.obs, parcelas: d.parcelas, multa: d.multa, mora: d.mora, encargosAtraso: d.encargosAtraso
     };
     const idHex = hex(d.id).toUpperCase();
     return {
@@ -7193,6 +7251,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   // Late interest (mora): simple, per 30-day month, on what stays unpaid of each installment,
   // for each day after its due day. Both are rounded up, like the total.
   function situacao(d, total, pagamentos, hoje) {
+    if (d.encargosAtraso) return situacaoAtrasoNovo(d, total, pagamentos, hoje);
     const multa = d.multa || 0, mora = d.mora || 0;
     const parcelas = parcelasDe(d, total).map(p => ({ ...p, restante: p.valor, multa: 0, mora: 0, desde: p.dia, multou: false, pagaEm: null }));
     const acumular = ate => {
@@ -7230,6 +7289,68 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       credito: Math.max(0, sobra - encargos),
       atrasadas: parcelas.filter(p => p.restante > 0 && p.dia < hoje).length,
       proxima: parcelas.find(p => p.restante > 0) || null
+    };
+  }
+
+  // v5 terms. Older signed loans continue to use the original v4 calculation.
+  // Day counts: 1/30/365; fractional capitalization periods use exponential accrual.
+  function situacaoAtrasoNovo(d, total, pagamentos, hoje) {
+    const t = normalizarEncargosAtraso(d.encargosAtraso);
+    const parcelas = parcelasDe(d, total).map(p => ({ ...p, restante:p.valor, multa:0, mora:0, desde:p.dia, multou:false, pagaEm:null }));
+    let multaFixaAplicada = false, pago = 0, sobra = 0, encargosPagos = 0;
+    const periodo = { dia:1, mes:30, ano:365 }[t.moraPeriodo];
+    const capitalizacao = t.capitalizacao === 'mes' ? 30 : 1;
+    function acumular(ate) {
+      for (const p of parcelas) {
+        if (ate <= p.dia) continue;
+        if (!p.multou && p.restante > 0) {
+          p.multou = true;
+          if (t.multaTipo === 'percentual') p.multa = p.restante * t.multaValor / 1e6;
+          else if (t.multaTipo === 'fixa' && !multaFixaAplicada) { p.multa = t.multaValor; multaFixaAplicada = true; }
+        }
+        const dias = ate - Math.max(p.desde, p.dia);
+        if (dias <= 0 || t.moraTipo === 'nenhuma' || t.moraTaxa === 0) continue;
+        const base = p.restante + (t.incluirMultaNaBase ? p.multa : 0) + (t.moraTipo === 'composta' ? p.mora : 0);
+        if (base > 0) {
+          const r = t.moraTaxa / 1e6;
+          const fator = t.moraTipo === 'simples' ? r * dias / periodo
+            : Math.pow(1 + r * capitalizacao / periodo, dias / capitalizacao) - 1;
+          p.mora += base * fator;
+        }
+        p.desde = ate;
+      }
+    }
+    for (const pg of (pagamentos || []).filter(p => p && Number.isSafeInteger(p.valor) && p.valor > 0).slice().sort((a,b) => a.dia - b.dia)) {
+      acumular(pg.dia);
+      let resto = pg.valor;
+      pago += pg.valor;
+      for (const p of parcelas) {
+        if (resto <= 0) break;
+        const x = Math.min(resto, p.restante);
+        p.restante -= x; resto -= x;
+        if (p.restante === 0) p.pagaEm = pg.dia;
+      }
+      for (const p of parcelas) {
+        if (resto <= 0) break;
+        for (const nome of ['mora','multa']) {
+          const x = Math.min(resto, p[nome]);
+          p[nome] -= x; resto -= x; encargosPagos += x;
+        }
+      }
+      sobra += resto;
+    }
+    acumular(hoje);
+    const rawEncargos = parcelas.reduce((s,p) => s + p.multa + p.mora, 0);
+    if (!Number.isFinite(rawEncargos) || rawEncargos > LIMITES.valor || !Number.isFinite(pago)) throw new RangeError('encargos excessivos');
+    const encargos = ceilCentavos(rawEncargos), principal = parcelas.reduce((s,p) => s + p.restante, 0);
+    const saldo = principal + encargos - sobra;
+    if (!Number.isSafeInteger(saldo)) throw new RangeError('saldo excessivo');
+    return {
+      parcelas:parcelas.map(({ desde,multou,...p }) => p),
+      pago, principal, encargos, encargosPagos:Math.round(encargosPagos),
+      saldo:Math.max(0,saldo), credito:Math.max(0,sobra),
+      atrasadas:parcelas.filter(p => p.restante > 0 && p.dia < hoje).length,
+      proxima:parcelas.find(p => p.restante > 0) || null
     };
   }
 
@@ -7992,7 +8113,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       k: m.hash, id: m.idHex, papel, status, codigo: m.codigo, tipoCodigo: m.tipo,
       outro: outro.nome, outroPub: outro.pub || null, outroId: outro.id || null,
       moeda: m.dados.moeda, casas: m.dados.casas, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp,
-      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0,
+      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0, encargosAtraso: m.dados.encargosAtraso || null,
       atualizadoEm: Date.now()
     };
   };
@@ -8001,7 +8122,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
   const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
   const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
-  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
+  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0, encargosAtraso: r.encargosAtraso || null });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
   const diaLocal = dt => diaUTC(dt.getFullYear(), dt.getMonth(), dt.getDate());
@@ -8010,7 +8131,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const momentoDe = dt => ({ ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) });
   const situacaoDe = (r, dia = hojeDia()) => D.situacao(dadosDe(r), r.total, pagamentosDe(r), dia);
   const emAberto = r => r.status === 'validado' || r.status === 'registrado';
-  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0;
+  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0 || !!r.encargosAtraso;
   // currency of a loan model's data or of a stored record (old ones have none: reais)
   const infoDe = d => D.infoMoeda(d.moeda || 'BRL', d.casas == null ? 2 : d.casas);
   const dinheiro = (v, d) => fmt.dinheiro(Math.round(v), infoDe(d));
@@ -8527,12 +8648,35 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     atualizaDicas();
   }
   const lerTaxaCampo = n => { const v = campo(n).value.trim(); if (!v) return 0; const x = D.lerNumero(v, false); return Number.isFinite(x) ? Math.round(x * 10000) : NaN; };
+  function lerEncargosNovos() {
+    if (!$('#f-regrasNovas').checked) return null;
+    const multaTipo = $('#f-multaTipo').value, moraTipo = $('#f-moraTipo').value;
+    const v = $('#f-novaMultaValor').value.trim(), tx = $('#f-novaMoraTaxa').value.trim();
+    const m = v ? D.lerNumero(v, multaTipo === 'fixa') : 0;
+    const t = tx ? D.lerNumero(tx, false) : 0;
+    const multaValor = Math.round(m * (multaTipo === 'fixa' ? 10 ** D.MOEDAS[moedaForm].casas : 10000));
+    const moraTaxa = Math.round(t * 10000);
+    if (!Number.isFinite(multaValor) || !Number.isFinite(moraTaxa) || multaValor < 0 || moraTaxa < 0 ||
+        multaValor > (multaTipo === 'fixa' ? D.LIMITES.valor : D.LIMITES.multa) || moraTaxa > D.LIMITES.taxa) throw new RangeError('encargos');
+    return { multaTipo, multaValor: multaTipo === 'nenhuma' ? 0 : multaValor,
+      moraTipo, moraTaxa: moraTipo === 'nenhuma' ? 0 : moraTaxa,
+      moraPeriodo: $('#f-moraPeriodo').value, capitalizacao: $('#f-capitalizacao').value,
+      incluirMultaNaBase: $('#f-incluirMulta').checked && multaTipo !== 'nenhuma' };
+  }
+
   function pintarContatoForm() {
     const caixa = $('#fixado');
     caixa.hidden = !contatoForm;
     if (contatoForm) caixa.querySelector('span').textContent = t('form.fixado', { nome: nomeContato(contatoForm), id: contatoForm.id });
   }
   function atualizaDicas() {
+    const novo = $('#f-regrasNovas').checked;
+    $('#camposAtrasoNovos').hidden = !novo;
+    ['multa','mora'].forEach(k => $('[data-f="' + k + '"]', form).hidden = novo);
+    $('#campoNovaMulta').hidden = !novo || $('#f-multaTipo').value === 'nenhuma';
+    const temMora = novo && $('#f-moraTipo').value !== 'nenhuma';
+    $('#campoNovaMora').hidden = $('#campoMoraPeriodo').hidden = !temMora;
+    $('#campoCapitalizacao').hidden = !temMora || $('#f-moraTipo').value !== 'composta';
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
     opTotal.disabled = composto; // compound interest needs a period (month or year)
@@ -8567,6 +8711,17 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       dica = t('dica.parcelasPrevia', { n, valor: fmt.dinheiro(lista[0].valor, D.MOEDAS[moedaForm]), dias: fmt.dias(Math.round((dp - de) / n)), primeira: fmt.data(lista[0].dia) });
     }
     $('#hintParcelas').textContent = dica;
+    const prev = $('#previaEncargos');
+    prev.textContent = '';
+    if (novo && temPrevia) {
+      try {
+        const e = lerEncargosNovos(), simulado = diaDeISO($('#f-previaAtraso').value) ?? dp + 30;
+        if (simulado >= de) {
+          const s = D.situacao({ de, dp, parcelas: emParcelas ? n : 1, encargosAtraso:e }, total, [], simulado);
+          prev.textContent = t('atraso.previa', { x: fmt.dinheiro(s.saldo, D.MOEDAS[moedaForm]), data:fmt.data(simulado) });
+        }
+      } catch { prev.textContent = t('atraso.invalido'); }
+    }
     const obs = campo('obs').value;
     $('#contaObs').textContent = `${obs.length}/140`;
   }
@@ -8620,7 +8775,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       else if (de != null && dp != null && parcelas > dp - de) erros.parcelas = t('erro.parcelasPrazo');
       else if (Number.isSafeInteger(total) && total < parcelas) erros.parcelas = t('erro.parcelasValor');
     }
-    const multa = lerTaxaCampo('multa'), mora = lerTaxaCampo('mora');
+    let encargosAtraso = null;
+    if ($('#f-regrasNovas').checked) {
+      try { encargosAtraso = lerEncargosNovos(); }
+      catch { erros.multa = t('atraso.invalido'); }
+    }
+    const multa = encargosAtraso ? 0 : lerTaxaCampo('multa'), mora = encargosAtraso ? 0 : lerTaxaCampo('mora');
     if (!Number.isFinite(multa) || multa > D.LIMITES.multa) erros.multa = t('erro.multa');
     if (!Number.isFinite(mora) || mora > D.LIMITES.taxa) erros.mora = t('erro.mora');
     const obs = limparNome(campo('obs').value);
@@ -8630,7 +8790,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       erros,
       dados: {
         papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, moeda: moedaForm, valor, taxa, modo, composto, de, dp,
-        obs, parcelas, multa: multa || 0, mora: mora || 0, pubOutro: contatoForm ? contatoForm.pub : null
+        obs, parcelas, multa: multa || 0, mora: mora || 0, encargosAtraso, pubOutro: contatoForm ? contatoForm.pub : null
       }
     };
   }
@@ -8651,6 +8811,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   }
   function limparFormulario() {
     ['outro', 'valor', 'taxa', 'obs', 'multa', 'mora'].forEach(n => { campo(n).value = ''; });
+    $('#f-regrasNovas').checked = $('#f-incluirMulta').checked = false;
+    $('#f-multaTipo').value = $('#f-moraTipo').value = 'nenhuma';
+    $('#f-moraPeriodo').value = 'mes'; $('#f-capitalizacao').value = 'dia';
+    $('#f-novaMultaValor').value = $('#f-novaMoraTaxa').value = $('#f-previaAtraso').value = '';
     campo('parcelas').value = '3';
     $('#pg-unica').checked = true;
     contatoForm = null; pintarContatoForm();
@@ -8692,7 +8856,17 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (d.parcelas > 1) { $('#pg-parcelas').checked = true; campo('parcelas').value = String(d.parcelas); } else $('#pg-unica').checked = true;
     campo('multa').value = d.multa ? fmt.numEntrada(d.multa / 10000) : '';
     campo('mora').value = d.mora ? fmt.numEntrada(d.mora / 10000) : '';
-    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora);
+    $('#f-regrasNovas').checked = !!d.encargosAtraso;
+    const e = d.encargosAtraso;
+    $('#f-multaTipo').value = e ? e.multaTipo : 'nenhuma';
+    $('#f-novaMultaValor').value = e && e.multaValor ? fmt.numEntrada(e.multaValor / (e.multaTipo === 'fixa' ? 10 ** d.casas : 10000)) : '';
+    $('#f-moraTipo').value = e ? e.moraTipo : 'nenhuma';
+    $('#f-novaMoraTaxa').value = e && e.moraTaxa ? fmt.numEntrada(e.moraTaxa / 10000) : '';
+    $('#f-moraPeriodo').value = e ? e.moraPeriodo : 'mes';
+    $('#f-capitalizacao').value = e ? e.capitalizacao : 'dia';
+    $('#f-incluirMulta').checked = !!(e && e.incluirMultaNaBase);
+    $('#f-previaAtraso').value = '';
+    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora || e);
     const c = outra.pub ? contatoDe(outra.pub) : null;
     contatoForm = c; pintarContatoForm();
     atualizaDicas();
@@ -9184,7 +9358,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       html += `<div class="summary summary-2">
         <div class="stat s-2"><span>${t('res.pago')}</span>${valorStat(dinheiro(s.pago, reg))}<small>${t('res.pagoNota', { n: pagamentosDe(reg).length })}</small></div>
         <div class="stat s-1"><span>${t('res.saldo')}</span>${valorStat(dinheiro(saldo, reg))}<small>${t(s.encargos ? 'res.saldoEncargos' : 'res.saldoNota')}</small></div>
-        ${reg.multa || reg.mora ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
+        ${(reg.multa || reg.mora || reg.encargosAtraso) ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
         ${s.proxima && reg.status !== 'quitado' ? `<div class="stat s-3"><span>${t('res.proxima')}</span><b>${fmt.dataCurta(s.proxima.dia)}</b><small>${t('res.proximaNota', { n: s.proxima.n, de: reg.parcelas || 1, valor: dinheiro(s.proxima.restante, reg) })}</small></div>` : ''}
       </div>`;
     }
@@ -9209,6 +9383,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         else { estado = t('pg.aVencer'); cls = ''; }
         return `<li class="${cls}"><span class="pc-n">${p.n}/${reg.parcelas || 1}</span><span class="pc-main"><b>${dinheiro(p.valor, reg)}</b><small>${t('pg.vence', { data: fmt.data(p.dia) })}</small></span><span class="pc-estado">${estado}</span></li>`;
       }).join('') + '</ol>';
+    }
+    if (reg.encargosAtraso) {
+      const e = reg.encargosAtraso;
+      html += `<p class="hint">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })} ${t('atraso.aviso')}</p>`;
     }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
@@ -9309,6 +9487,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (d.parcelas > 1) {
       const lista = D.parcelasDe(d, c.total);
       extras += `<p class="rc-text">${t('rc.parcelas', { n: d.parcelas, lista: lista.map(p => t('rc.parcelaItem', { n: p.n, valor: dinheiro(p.valor, d), data: fmt.data(p.dia) })).join('; ') })}</p>`;
+    }
+    if (d.encargosAtraso) {
+      const e = d.encargosAtraso;
+      extras += `<p class="rc-text">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })}</p>`;
     }
     if (d.multa || d.mora) extras += `<p class="rc-text">${t(d.multa && d.mora ? 'rc.atraso' : d.multa ? 'rc.atrasoMulta' : 'rc.atrasoMora', { multa: fmt.taxa(d.multa || 0), mora: fmt.taxa(d.mora || 0) })}</p>`;
     const recibos = recibosDe(reg).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).sort((a, b) => a.dia - b.dia);
