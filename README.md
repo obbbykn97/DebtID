@@ -7,7 +7,7 @@
 <p align="center">A loan calculator and IOU in any currency. Both sides sign it, and a QR code lets anyone check the record in seconds.<br>
 It works offline, with no account and no server, in 12 languages.</p>
 
----
+[Download APK](https://github.com/obbbykn97/DebtID-multi/releases/latest) · [How it works](#how-it-works) · [Security](#security) · [Development](#for-developers)
 
 ## Download
 
@@ -17,12 +17,26 @@ You can also use it on a computer: download `web/dist/index.html` and open it in
 
 ## How it works
 
-1. The person who records the loan picks the currency and enters the amount, rate and dates. They can also set installments, a late fee and a note. DebtID creates a signed code and shows it as a QR code.
-2. The other person scans the QR code in their own DebtID, checks the numbers and confirms with their own signature.
-3. The first person scans the confirmation QR code back. The loan is now validated by both sides, on both phones.
-4. When money is paid back, the lender signs a receipt and the borrower scans its QR code. The payment shows on both phones, and the borrower keeps the proof.
+| You want to… | Use… |
+| --- | --- |
+| Track a debt on your own device | **Just record** |
+| Record an agreement with another person | The lender or borrower option, then exchange signed codes |
+| Record a payment confirmed by both people | A payment request followed by a signed response |
 
-Either side can start the record.
+1. Enter the person, currency, amount and dates. Interest, installments and late charges are optional.
+2. Share the QR or text code. The other person opens it in DebtID, checks the details and signs.
+3. Import their confirmation on the first device. Both people now hold the confirmed agreement.
+4. To record a payment, either person can send a request. The other approves or rejects it; their response must return to the requester.
+
+Pending requests do not reduce the balance. Devices do not sync over the internet: each update requires exchanging codes.
+
+## What's new in 2.0
+
+- A home screen with amounts owed and receivable by currency, due dates and recent records.
+- Personal payments can be corrected or voided while preserving their history.
+- Payments and reversals confirmed by both parties. Reversals preserve the original event.
+- Fixed or percentage late fees and simple or compound late interest, with a balance preview for a chosen date.
+- A dark theme with a black background and olive cards, alongside the light theme.
 
 ## Features
 
@@ -53,7 +67,7 @@ Either side can start the record.
 
 ### Languages and look
 
-- 12 languages, the most spoken in the world according to Ethnologue: English, Mandarin Chinese, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Indonesian, Urdu, Russian and German. Arabic and Urdu read right to left, and the screen mirrors.
+- 12 languages: English, Mandarin Chinese, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Indonesian, Urdu, Russian and German. Arabic and Urdu read right to left, and the screen mirrors.
 - Two looks, *Professional* and *Soft*, each with light and dark themes, a large-text option and 36 app icons to choose from.
 
 ## Security
