@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-hlDL6VTSaiYS0r4HRISi13TV3AKhZX+7A64Z1u/jMBk=' 'sha256-QYyYERPNQDUQXf5wqZlkgd7eWLDxRaIUaX/W/3gObjU=' 'sha256-IRL+HyFWxlCI0EZV1lmEJS2h2HQrMxTDZbm7J9RLoeA='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-rPIQcyicbr+5ZlWlcEmI1y/yaYhVLH5/Yp3qld3djMM=' 'sha256-QYyYERPNQDUQXf5wqZlkgd7eWLDxRaIUaX/W/3gObjU=' 'sha256-BbcIAACWH8PBdPrgkPMjgie+02DvZBRrRdIjG5vL5jw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -49,7 +49,7 @@
 }
 /* Soft, dark */
 :root[data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
+  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
   --line:#EDE7DE; --rule:#EDE7DE; --dash:#4C4852; --placeholder:#6F6973; --key-bg:#0D0C10; --key-note:#A9A39B; --red:#FF6B7A;
   color-scheme:dark;
 }
@@ -59,7 +59,7 @@
   --ink:#111111; --ink-2:#2E2E2E; --muted:#7A7A7A; --line:#111111; --rule:#D6D6D6; --dash:#D6D6D6;
   --placeholder:#A8A8A8; --key-bg:#141414; --key-note:#A6A6A6; --red:#D33A2C;
   --band:#141414; --band-ink:#FFFFFF; --band-muted:#8E8E8E;
-  --accent:#9DBF3E; --coral:#E5573F; --ok:#9DBF3E; --warn:#E5573F; --info:#EDEDED;
+  --accent:#A3C65B; --coral:#E5573F; --ok:#A3C65B; --warn:#E5573F; --info:#EDEDED;
   --r-lg:0; --r-md:0; --r-sm:0; --r-btn:999px; --bw:1px;
   --sh:none; --sh-sm:none; --sh-lg:none;
   --display:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -67,7 +67,7 @@
 }
 /* Professional, dark */
 :root[data-ui="pro"][data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A;
+  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411;
   --ink:#F2F2F2; --ink-2:#CFCFCF; --muted:#8C8C8C; --line:#F2F2F2; --rule:#2E2E2E; --dash:#333333;
   --placeholder:#5E5E5E; --key-bg:#000000; --key-note:#8C8C8C; --red:#FF6B5C;
   --band:#000000; --info:#1E1E1E;
@@ -884,6 +884,22 @@ code,.mo-cod,.rc-ref{direction:ltr;unicode-bidi:isolate}
 :root[lang|="ur"] :is(h1,h2,h3,.bv-title){line-height:1.7}
 /* questions asked from the lock screen (forgot the PIN, key lost) appear above it */
 body.trava-aberta .modal{z-index:90}
+
+/* DebtID 2.0: compact operational home */
+.painel-inicio{padding-block:24px 36px}
+.inicio-totais{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.inicio-totais .stat{min-width:0}
+.inicio-acoes{display:flex;gap:10px;margin:20px 0}
+.inicio-recentes,.inicio-proximos{margin-top:24px}
+.inicio-recentes h2,.inicio-proximos h2{font-size:1.15rem;margin:0 0 14px}
+.entrada-opcoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.entrada-opcoes .btn{white-space:normal;min-height:60px;padding-inline:10px}
+:root[data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E}
+:root[data-ui="pro"][data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E;--band:#000}
+:root[data-ui="pro"] .btn-primary{background:#A3C65B;color:#0B0E07;border-color:#A3C65B}
+:root[data-ui="pro"] .btn-primary:hover{background:#B4D571;color:#0B0E07}
+:root[data-ui="pro"] .btn:focus-visible{outline:3px solid #A3C65B;outline-offset:3px}
+@media(max-width:540px){.entrada-opcoes{grid-template-columns:1fr}.inicio-totais .stat{padding:14px 10px}.inicio-totais .stat b{font-size:clamp(19px,5vw,27px)}}
 </style>
 </head>
 <body>
@@ -942,8 +958,8 @@ body.trava-aberta .modal{z-index:90}
         <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="44 44 168 168"><rect class="bm-a" x="64" y="52" width="36" height="152" rx="6"/><path class="bm-a" d="M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z"/><circle class="bm-p" cx="133" cy="128" r="13"/></svg></span>DebtID</a>
         <div class="top-r">
           <nav class="nav" aria-label="Seções" data-i18n-aria="nav.secoes">
-            <a href="#inicio" data-nav="inicio" data-i18n="nav.novo">Novo</a>
-            <a href="#conferir" data-nav="conferir" data-i18n="nav.conferir">Conferir</a>
+            <a href="#inicio" data-nav="inicio" data-i18n="nav.inicio">Início</a>
+            <a href="#novo" data-nav="novo" data-i18n="nav.novo">Novo</a>
             <a href="#registros" data-nav="registros" data-i18n="nav.registros">Registros</a>
             <a href="#ajustes" data-nav="ajustes" data-i18n="nav.ajustes">Ajustes</a>
           </nav>
@@ -955,88 +971,28 @@ body.trava-aberta .modal{z-index:90}
     </header>
 
     <main>
-      <!-- ================= NEW LOAN ================= -->
       <section class="view" id="v-inicio" data-view="inicio">
-        <div class="hero wrap only-soft">
-          <div>
-            <p class="eyebrow" data-i18n="hero.eyebrow">Registro de empréstimos · assinado pelos dois</p>
-            <h1 data-i18n="hero.titulo">Quem empresta, registra.</h1>
-            <p class="lead" data-i18n="hero.lead">Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.</p>
-            <ul class="chips">
-              <li style="background:var(--yellow)"><svg class="ico"><use href="#i-calc"/></svg><span data-i18n="hero.chip1">Juros simples e compostos</span></li>
-              <li style="background:var(--lime)"><svg class="ico"><use href="#i-escudo"/></svg><span data-i18n="hero.chip2">Assinado pelos dois</span></li>
-              <li style="background:var(--rose)"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="hero.chip3">QR code</span></li>
-            </ul>
-            <div class="hero-cta">
-              <a class="btn btn-primary" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
-              <a class="link-arrow" href="#conferir"><span data-i18n="hero.ler">Ler um código</span> <svg class="ico"><use href="#i-seta"/></svg></a>
-            </div>
+        <div class="wrap view-pad painel-inicio">
+          <div class="sec-head"><div><p class="kicker">DebtID</p><h1 data-i18n="inicio.titulo">Visão geral</h1></div></div>
+          <div class="summary inicio-totais" id="inicioTotais"></div>
+          <div class="btns inicio-acoes">
+            <a href="#novo" class="btn btn-primary" data-i18n="comum.novoRegistro">Novo registro</a>
+            <a href="#conferir" class="btn" data-i18n="nav.conferir">Conferir</a>
           </div>
-          <svg class="hero-art" viewBox="0 0 420 440" aria-hidden="true">
-            <polygon class="shd" points="64,74 372,74 372,304 218,414 64,304" transform="translate(10 10)" stroke-width="4" stroke-linejoin="round"/>
-            <polygon class="o" points="64,74 372,74 372,304 218,414 64,304" fill="#F6A3E6" stroke-width="4" stroke-linejoin="round"/>
-            <g transform="rotate(-6 218 230)">
-              <rect class="shd" x="134" y="114" width="180" height="232" rx="12"/>
-              <rect class="o" x="128" y="108" width="180" height="232" rx="12" fill="#fff" stroke-width="3"/>
-              <text x="148" y="142" style="font-family:var(--display);font-weight:900" font-size="15" fill="#1C1B1F" data-i18n="art.recibo">RECIBO</text>
-              <rect x="250" y="128" width="40" height="18" rx="9" fill="#F8CB47" stroke="#1C1B1F" stroke-width="2"/>
-              <rect x="148" y="158" width="140" height="7" rx="3.5" fill="#E8E2DA"/>
-              <rect x="148" y="172" width="116" height="7" rx="3.5" fill="#E8E2DA"/>
-              <text x="148" y="206" style="font-family:var(--display);font-weight:900" font-size="14" fill="#615C57">₿</text>
-              <text x="147" y="242" style="font-family:var(--display);font-weight:900" font-size="34" fill="#1C1B1F" letter-spacing="-1" data-i18n="art.valor">0,0026</text>
-              <rect x="148" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
-              <path d="M160 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="224" y="262" width="64" height="40" rx="6" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
-              <path d="M236 283l6 6 12-13" fill="none" stroke="#1E9E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="148" y="312" width="140" height="16" rx="5" fill="#1C1B1F"/>
-              <text x="156" y="324" style="font-family:var(--mono)" font-size="9.5" fill="#DFF45C">-mRQucdQxpIV…YE19</text>
-            </g>
-            <g transform="translate(18 26)">
-              <rect class="shd" x="5" y="5" width="112" height="112" rx="16"/>
-              <rect class="o" width="112" height="112" rx="16" fill="#fff" stroke-width="3"/>
-              <g fill="#1C1B1F"><rect x="16" y="16" width="26" height="26" rx="4"/><rect x="70" y="16" width="26" height="26" rx="4"/><rect x="16" y="70" width="26" height="26" rx="4"/><rect x="70" y="70" width="10" height="10"/><rect x="86" y="70" width="10" height="10"/><rect x="70" y="86" width="10" height="10"/><rect x="86" y="86" width="10" height="10" fill="#EC4C86"/><rect x="52" y="16" width="8" height="8"/><rect x="52" y="34" width="8" height="8"/><rect x="16" y="52" width="8" height="8"/><rect x="34" y="52" width="8" height="8"/><rect x="52" y="52" width="8" height="8"/><rect x="52" y="70" width="8" height="8"/><rect x="52" y="88" width="8" height="8"/></g>
-              <g fill="#fff"><rect x="22" y="22" width="14" height="14" rx="2"/><rect x="76" y="22" width="14" height="14" rx="2"/><rect x="22" y="76" width="14" height="14" rx="2"/></g>
-              <g fill="#1C1B1F"><rect x="26" y="26" width="6" height="6"/><rect x="80" y="26" width="6" height="6"/><rect x="26" y="80" width="6" height="6"/></g>
-            </g>
-            <g>
-              <circle class="shd" cx="377" cy="253" r="40"/>
-              <circle class="o" cx="372" cy="248" r="40" fill="#F8CB47" stroke-width="3"/>
-              <path d="M352 248l14 14 26-28" fill="none" stroke="#1C1B1F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <g transform="translate(222 386)">
-              <rect class="shd" x="4" y="4" width="186" height="34" rx="17"/>
-              <rect class="o" width="186" height="34" rx="17" fill="#3DDC84" stroke-width="2.5"/>
-              <circle cx="18" cy="17" r="9" fill="#fff" stroke="#1C1B1F" stroke-width="2"/>
-              <path d="M14 17l3 3 5-6" fill="none" stroke="#1C1B1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="34" y="22" style="font-family:var(--sans);font-weight:800" font-size="13.5" fill="#1C1B1F" data-i18n="art.selo">assinado pelos dois</text>
-            </g>
-            <path class="o" d="M200 360 222 369 211 372 208 383Z" fill="#8F9CF3" stroke-width="2.5" stroke-linejoin="round"/>
-          </svg>
+          <section class="panel inicio-proximos" id="inicioVencimentos" hidden></section>
+          <section class="panel inicio-recentes"><h2 data-i18n="inicio.recentes">Registros recentes</h2><div class="lista" id="inicioRecentes"></div></section>
         </div>
-
-        <div class="hero-pro only-pro">
-          <div class="wrap">
-            <p class="hp-eyebrow" data-i18n="hp.eyebrow">Calcule · Registre · Comprove</p>
-            <h1 class="hp-title" data-i18n="hero.titulo">Quem empresta, registra.</h1>
-            <div class="hp-row">
-              <p class="hp-sub" data-i18n-html="hp.sub"><span>Assinado pelos dois,</span> <em>conferido em segundos</em></p>
-              <a class="btn btn-inv" href="#novo-form" data-rolar="novo-form" data-i18n="comum.novoRegistro">Novo registro</a>
-            </div>
-            <div class="hp-feats">
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-escudo"/></svg></span><b data-i18n="hp.f1t">Assinatura digital</b><small data-i18n="hp.f1">Credor e devedor assinam com chaves que ficam só no celular de cada um.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-qr"/></svg></span><b data-i18n="hp.f2t">QR code</b><small data-i18n="hp.f2">Mostre o QR e a outra pessoa confere em segundos.</small></div>
-              <div><span class="hp-dot"><svg class="ico"><use href="#i-cadeado"/></svg></span><b data-i18n="hp.f3t">Sem servidor</b><small data-i18n="hp.f3">Nada sai do aparelho. Funciona até sem internet.</small></div>
-            </div>
+      </section>
+      <!-- ================= NEW LOAN ================= -->
+      <section class="view" id="v-novo" data-view="novo">
+        <div class="wrap view-pad">
+          <p class="intro" data-i18n="novo.escolha">Como você quer registrar esta dívida?</p>
+          <div class="entrada-opcoes" role="group">
+            <button class="btn" type="button" data-acao="escolher-tipo" data-papel="credor" data-pessoal="false" data-i18n="form.credor">Quem empresta</button>
+            <button class="btn" type="button" data-acao="escolher-tipo" data-papel="devedor" data-pessoal="false" data-i18n="form.devedor">Quem pega emprestado</button>
+            <button class="btn" type="button" data-acao="escolher-tipo" data-papel="credor" data-pessoal="true" data-i18n="form.confSo">Só registrar</button>
           </div>
         </div>
-        <div class="wrap only-pro">
-          <div class="hp-stats">
-            <div><b>2</b><span data-i18n-html="hp.s1">assinaturas<br>por registro</span></div>
-            <div><b>0</b><span data-i18n-html="hp.s2">servidores<br>no caminho</span></div>
-            <div><b>1</b><span data-i18n-html="hp.s3">QR code<br>para conferir</span></div>
-          </div>
-        </div>
-
         <div class="wrap">
           <section class="block panel" id="novo-form" aria-labelledby="t-novo">
             <div class="sec-head">
@@ -1446,8 +1402,8 @@ body.trava-aberta .modal{z-index:90}
 </div>
 
 <nav class="tabbar" aria-label="Navegação" data-i18n-aria="nav.navegacao">
-  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-plus"/></svg><span data-i18n="nav.novo">Novo</span></a>
-  <a href="#conferir" data-nav="conferir"><svg class="ico"><use href="#i-qr"/></svg><span data-i18n="nav.conferir">Conferir</span></a>
+  <a href="#inicio" data-nav="inicio"><svg class="ico"><use href="#i-calc"/></svg><span data-i18n="nav.inicio">Início</span></a>
+  <a href="#novo" data-nav="novo"><svg class="ico"><use href="#i-plus"/></svg><span data-i18n="nav.novo">Novo</span></a>
   <a href="#registros" data-nav="registros"><svg class="ico"><use href="#i-list"/></svg><span data-i18n="nav.registros">Registros</span></a>
   <a href="#ajustes" data-nav="ajustes"><svg class="ico"><use href="#i-ajustes"/></svg><span data-i18n="nav.ajustes">Ajustes</span></a>
 </nav>
@@ -1540,7 +1496,7 @@ const DebtIDTextos = {
   pt: {
     "meta.descricao": "DebtID: calculadora e registro de empréstimos em qualquer moeda, assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
     "nav.secoes": "Seções", "nav.navegacao": "Navegação",
-    "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
 
     "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
@@ -1943,7 +1899,7 @@ const DebtIDTextos = {
   en: {
     "meta.descricao": "DebtID: a loan calculator and IOU in any currency, signed by both sides, with a QR code. Everything stays on your device.",
     "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-    "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
+    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
 
     "hero.eyebrow": "Loan records · signed by both sides",
@@ -2346,7 +2302,7 @@ const DebtIDTextos = {
   es: {
     "meta.descricao": "DebtID: calculadora y registro de préstamos en cualquier moneda, firmado por las dos partes, con código QR. Todo queda en tu dispositivo.",
     "nav.secoes": "Secciones", "nav.navegacao": "Navegación",
-    "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Cambiar a modo claro", "tema.paraEscuro": "Cambiar a modo oscuro",
 
     "hero.eyebrow": "Registro de préstamos · firmado por los dos",
@@ -2797,7 +2753,7 @@ const DebtIDIdioma = (() => {
 DebtIDTextos.ar = {
   "meta.descricao": "DebtID: حاسبة قروض وإقرار بدين بأي عملة، يوقّعه الطرفان، مع رمز QR. كل شيء يبقى على جهازك.",
   "nav.secoes": "الأقسام", "nav.navegacao": "التنقل",
-  "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
+  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
   "tema.paraClaro": "التبديل إلى الوضع الفاتح", "tema.paraEscuro": "التبديل إلى الوضع الداكن",
 
   "hero.eyebrow": "سجل القروض · بتوقيع الطرفين",
@@ -3201,7 +3157,7 @@ DebtIDTextos.ar = {
 DebtIDTextos.bn = {
   "meta.descricao": "DebtID: যেকোনো মুদ্রায় ধারের হিসাব ও রসিদ, দুই পক্ষের স্বাক্ষরসহ, QR কোড দিয়ে। সবকিছু আপনার ডিভাইসেই থাকে।",
   "nav.secoes": "বিভাগ", "nav.navegacao": "নেভিগেশন",
-  "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
+  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
   "tema.paraClaro": "লাইট মোডে যান", "tema.paraEscuro": "ডার্ক মোডে যান",
 
   "hero.eyebrow": "ধারের রেকর্ড · দুই পক্ষের স্বাক্ষর",
@@ -3605,7 +3561,7 @@ DebtIDTextos.bn = {
 DebtIDTextos.de = {
   "meta.descricao": "DebtID: Darlehensrechner und Schuldschein in jeder Währung, von beiden Seiten unterschrieben, mit QR-Code. Alles bleibt auf deinem Gerät.",
   "nav.secoes": "Bereiche", "nav.navegacao": "Navigation",
-  "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
+  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
   "tema.paraClaro": "Zum hellen Modus wechseln", "tema.paraEscuro": "Zum dunklen Modus wechseln",
 
   "hero.eyebrow": "Darlehen festhalten · von beiden Seiten unterschrieben",
@@ -4009,7 +3965,7 @@ DebtIDTextos.de = {
 DebtIDTextos.fr = {
   "meta.descricao": "DebtID : calculatrice et reconnaissance de dette dans n'importe quelle devise, signée par les deux parties, avec un code QR. Tout reste sur votre appareil.",
   "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-  "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
+  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
   "tema.paraClaro": "Passer en mode clair", "tema.paraEscuro": "Passer en mode sombre",
 
   "hero.eyebrow": "Registre de prêts · signé par les deux parties",
@@ -4413,7 +4369,7 @@ DebtIDTextos.fr = {
 DebtIDTextos.hi = {
   "meta.descricao": "DebtID: किसी भी मुद्रा में उधार का कैलकुलेटर और रसीद, दोनों पक्षों के हस्ताक्षर के साथ, QR कोड सहित। सब कुछ आपके डिवाइस पर ही रहता है।",
   "nav.secoes": "भाग", "nav.navegacao": "नेविगेशन",
-  "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
+  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
   "tema.paraClaro": "लाइट मोड पर जाएँ", "tema.paraEscuro": "डार्क मोड पर जाएँ",
 
   "hero.eyebrow": "उधार का रिकॉर्ड · दोनों पक्षों के हस्ताक्षर",
@@ -4817,7 +4773,7 @@ DebtIDTextos.hi = {
 DebtIDTextos.id = {
   "meta.descricao": "DebtID: kalkulator pinjaman dan surat pengakuan utang dalam mata uang apa pun, ditandatangani kedua pihak, dengan kode QR. Semuanya tetap di perangkat Anda.",
   "nav.secoes": "Bagian", "nav.navegacao": "Navigasi",
-  "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
+  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
   "tema.paraClaro": "Beralih ke mode terang", "tema.paraEscuro": "Beralih ke mode gelap",
 
   "hero.eyebrow": "Catatan pinjaman · ditandatangani kedua pihak",
@@ -5221,7 +5177,7 @@ DebtIDTextos.id = {
 DebtIDTextos.ru = {
   "meta.descricao": "DebtID: калькулятор займов и расписка в любой валюте, подписанная обеими сторонами, с QR-кодом. Всё остаётся на вашем устройстве.",
   "nav.secoes": "Разделы", "nav.navegacao": "Навигация",
-  "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
+  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
   "tema.paraClaro": "Включить светлую тему", "tema.paraEscuro": "Включить тёмную тему",
 
   "hero.eyebrow": "Учёт займов · подписано обеими сторонами",
@@ -5625,7 +5581,7 @@ DebtIDTextos.ru = {
 DebtIDTextos.ur = {
   "meta.descricao": "DebtID: کسی بھی کرنسی میں قرض کا کیلکولیٹر اور رسید، دونوں فریقوں کے دستخط کے ساتھ، QR کوڈ سمیت۔ سب کچھ آپ کے آلے پر ہی رہتا ہے۔",
   "nav.secoes": "حصے", "nav.navegacao": "نیویگیشن",
-  "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
+  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
   "tema.paraClaro": "لائٹ موڈ پر جائیں", "tema.paraEscuro": "ڈارک موڈ پر جائیں",
 
   "hero.eyebrow": "قرض کا ریکارڈ · دونوں فریقوں کے دستخط",
@@ -6029,7 +5985,7 @@ DebtIDTextos.ur = {
 DebtIDTextos.zh = {
   "meta.descricao": "DebtID：支持任意货币的借款计算器和借条，双方签名，附二维码。所有数据都留在你的设备上。",
   "nav.secoes": "栏目", "nav.navegacao": "导航",
-  "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
+  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
   "tema.paraClaro": "切换到浅色模式", "tema.paraEscuro": "切换到深色模式",
 
   "hero.eyebrow": "借款记录 · 双方签名",
@@ -8484,7 +8440,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   };
 
   /* ---------------- navigation ---------------- */
-  const VIEWS = ['inicio', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
+  const VIEWS = ['inicio', 'novo', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
   let atual = null;
   function rota() {
     let v = location.hash.replace('#', '') || 'inicio';
@@ -8497,7 +8453,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v || (v === 'detalhe' && a.dataset.nav === 'registros')));
     document.body.classList.toggle('boas-vindas', v === 'boas-vindas');
     document.body.classList.toggle('com-abas', v !== 'boas-vindas');
-    if (v === 'inicio') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
+    if (v === 'inicio') renderInicio();
+    if (v === 'novo') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
     if (v === 'registros') renderRegistros();
     if (v === 'ajustes') renderAjustes();
     if (v === 'boas-vindas') prepararBoasVindas();
@@ -8512,7 +8469,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!a) return;
     e.preventDefault();
     const alvo = document.getElementById(a.dataset.rolar);
-    if (location.hash !== '#inicio' && location.hash !== '') { irPara('inicio'); }
+    if (location.hash !== '#novo') { irPara('novo'); }
     setTimeout(() => alvo.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 30);
   });
 
@@ -8733,7 +8690,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const c = outra.pub ? contatoDe(outra.pub) : null;
     contatoForm = c; pintarContatoForm();
     atualizaDicas();
-    irPara('inicio');
+    irPara('novo');
     setTimeout(() => $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 60);
   }
 
@@ -9497,6 +9454,13 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const b = e.target.closest('[data-acao]');
     if (!b) return;
     const acao = b.dataset.acao;
+    if (acao === 'escolher-tipo') {
+      $('#p-' + (b.dataset.papel === 'devedor' ? 'devedor' : 'credor')).checked = true;
+      $(b.dataset.pessoal === 'true' ? '#c-so' : '#c-pedir').checked = true;
+      atualizaDicas();
+      $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     if (acao === 'ler-qr') return lerEAbrir();
     if (acao === 'copiar-backup') return toast(t(await copiar($('#codigoBackup').textContent) ? 'toast.backupCopiado' : 'toast.semCopiarCurto'));
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
@@ -9619,6 +9583,26 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   }
   const saldoAberto = r => (emAberto(r) ? situacaoDe(r).saldo : 0);
 
+  function renderInicio() {
+    const dia = hojeDia(), abertos = registros.filter(emAberto);
+    $('#inicioTotais').innerHTML =
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'credor'), saldoAberto)}</div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'devedor'), saldoAberto)}</div>`;
+    const vencendo = [];
+    for (const r of abertos) {
+      const p = situacaoDe(r, dia).parcelas.find(x => x.restante > 0 && x.dia <= dia + 30);
+      if (p) vencendo.push({ r, p });
+    }
+    vencendo.sort((a,b) => a.p.dia - b.p.dia);
+    const v = $('#inicioVencimentos');
+    v.hidden = !vencendo.length;
+    v.innerHTML = vencendo.length ? `<h2>${t('venc.titulo')}</h2><div class="lista">` +
+      vencendo.slice(0, 3).map(({ r }) => linhaRegistro(r, dia)).join('') + '</div>' : '';
+    const recentes = registros.slice().sort((a,b) => (b.atualizadoEm || b.criadoEm || 0) - (a.atualizadoEm || a.criadoEm || 0)).slice(0, 5);
+    $('#inicioRecentes').innerHTML = recentes.length ? recentes.map(r => linhaRegistro(r, dia)).join('')
+      : `<p class="hint">${t('inicio.vazio')}</p>`;
+  }
+
   function renderRegistros() {
     const abertos = registros.filter(emAberto);
     $('#totais').innerHTML =
@@ -9658,7 +9642,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     $('#filtrosLista').hidden = visao() === 'pessoas';
     if (!registros.length) {
-      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#inicio">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
+      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#novo">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
       $('#pessoaFiltro').innerHTML = '';
       return;
     }
