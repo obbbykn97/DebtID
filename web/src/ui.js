@@ -133,8 +133,8 @@
       rid:m.rid,operacao:m.operacao,valor:m.valor,dia:m.dia,codigo:m.codigo,alvoRid:m.alvoRid,status:'pendente'
     }],atualizadoEm:Date.now() });
   }
-  function registrarRespostaAssinada(reg,m) {
-    if (!m.respondente || D.conferirMovimento(atual.m,m) || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
+  function registrarRespostaAssinada(reg,m,contrato) {
+    if (!m.respondente || D.conferirMovimento(contrato,m) || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
     const pendentes = pendentesDe(reg).map(p => p.rid === m.rid ? {...p,status:m.aprovado ? 'confirmado' : 'rejeitado'} : p);
     if (m.operacao === 'pagamento') {
       if (movimentosAssinadosDe(reg).some(x => x.rid === m.rid)) return false;
@@ -988,6 +988,7 @@
       const m = await D.lerCodigo(txt);
       $('#f-codigo').value = ''; $('#msgConf').innerHTML = '';
       if (m.tipo === 'recibo') await abrirRecibo(m);
+      else if (m.tipo.startsWith('solicitacao-') || m.tipo.startsWith('confirmacao-')) await abrirMovimentoAssinado(m);
       else await abrirModelo(m);
     } catch (err) {
       $('#msgConf').innerHTML = alertaErro(err);
@@ -1202,6 +1203,38 @@
     irPara('detalhe');
   }
 
+  async function abrirMovimentoAssinado(m) {
+    const reg = registros.find(r => r.k === m.hash);
+    if (!reg || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
+    const contrato = await D.lerCodigo(reg.codigo);
+    if (D.conferirMovimento(contrato,m)) throw new D.ChaveErro('RECIBO_OUTRO');
+    if (m.operacao === 'estorno') {
+      const original = pagamentoOriginalDe(reg,m.alvoRid);
+      if (!original || original.valor !== m.valor || original.dia !== m.dia ||
+          estornosDe(reg).some(x => x.alvoRid === m.alvoRid)) throw new D.ChaveErro('RECIBO_OUTRO');
+    }
+    if (m.tipo.startsWith('confirmacao-')) {
+      const novo = registrarRespostaAssinada(reg,m,contrato);
+      return abrirModelo(contrato,{aviso:t(novo ? m.aprovado ? 'pay.confirmado' : 'pay.rejeitado' : 'pay.duplicado')});
+    }
+    if (m.solicitante.pub === perfil.pub) {
+      salvarPedidoAssinado(reg,m);
+      return abrirModelo(contrato,{codigoPagamento:m.codigo});
+    }
+    const ok = await perguntar({
+      titulo:t('pay.solicitacao'),texto:t('pay.verificar',{valor:dinheiro(m.valor,reg),data:fmt.data(m.dia),nome:m.solicitante.nome}),
+      ok:t('pay.aprovar')
+    });
+    if (!ok) {
+      const rejeitar = await perguntar({titulo:t('pay.rejeitar'),texto:t('pay.rejeitarConf'),ok:t('pay.rejeitar')});
+      if (!rejeitar) return abrirModelo(contrato);
+    }
+    const codigo = await D.responderSolicitacaoPagamento(perfil,m.codigo,!!ok);
+    const resposta = await D.lerCodigo(codigo);
+    registrarRespostaAssinada(reg,resposta,contrato);
+    return abrirModelo(contrato,{codigoPagamento:codigo,aviso:t(ok ? 'pay.confirmado' : 'pay.rejeitado')});
+  }
+
   const nomeTipoRecibo = tipo => t('recibo.' + tipo);
   function statusHTML() {
     const { m, ctx, reg, extra } = atual;
@@ -1212,6 +1245,7 @@
     const s = reg ? situacaoDe(reg) : null;
     const atraso = s && s.atrasadas ? ' ' + t('st.atrasadas', { n: s.atrasadas }) : '';
     let cls, icone, titulo, texto, botoes = '', extraHTML = '';
+    const btnSolicitar = `<button class="btn btn-primary" type="button" data-acao="solicitar-pagamento">${ico('plus')}${t('pay.solicitar')}</button>`;
     const btnPagamento = `<button class="btn btn-primary" type="button" data-acao="pagamento">${ico('plus')}${t('st.pagamento')}</button>`;
     const btnQuitarAss = `<button class="btn" type="button" data-acao="quitar-assinado">${ico('check')}${t('st.quitarAssinado')}</button>`;
     const btnLerRecibo = `<button class="btn btn-dark so-qr" type="button" data-acao="ler-qr">${ico('camera')}${t('st.lerRecibo')}</button>
@@ -1258,14 +1292,14 @@
       if (d.dp < hojeDia() && !atraso && s && s.saldo > 0) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
       if (s && s.saldo === 0 && s.pago > 0) texto += ' ' + t(sou === 'credor' ? 'st.tudoPagoCredor' : 'st.tudoPagoDevedor');
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (reg) botoes = sou === 'credor' ? btnPagamento + btnQuitarAss : btnLerRecibo + btnQuitarLocal;
+      if (reg) botoes = btnSolicitar + (sou === 'credor' ? btnPagamento + btnQuitarAss : btnLerRecibo);
     } else if (ctx === 'quitado') {
       cls = 'st-quitado'; icone = 'check';
       titulo = t('st.quitadoT');
       texto = t(reg.quitadoAssinado ? 'st.quitadoAssinado' : 'st.quitado', { data: fmt.data(diaQuitado(reg)) });
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (!reg.quitadoAssinado && !reg.quitadoPorPagamentoLocal) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
-      if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub) botoes += btnQuitarAss;
+      if (!reg.quitadoAssinado && !reg.quitadoPorPagamentoLocal && !reg.quitadoPorMovimento && reg.soRegistro) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
+      if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub && reg.soRegistro) botoes += btnQuitarAss;
     } else if (ctx === 'cancelado') {
       const rc = recibosDe(reg).find(x => x.tipo === 'cancelamento');
       cls = 'st-cancelado'; icone = 'alerta';
@@ -1313,6 +1347,9 @@
   function qrHTML() {
     const { m, ctx, extra } = atual;
     if (ctx === 'recebida') return '';
+    const pagamento = extra.codigoPagamento
+      ? qrBloco({codigo:extra.codigoPagamento,legenda:t('pay.codigo'),dica:t('pay.envie'),
+        imprimir:false,acaoCopiar:'copiar-movimento',acaoEnviar:'enviar-movimento',classe:'qr-recibo'}) : '';
     if (ctx === 'recibo') return qrBloco({ codigo: m.codigo, legenda: t('qr.recibo'), dica: t('qr.dicaRecibo') });
     let antes = '';
     if (extra.reciboMostrado) {
@@ -1335,7 +1372,7 @@
       legenda = t(m.tipo === 'v1' ? 'qr.antigo' : 'qr.validado');
       dica = t('qr.dica');
     }
-    return antes + qrBloco({ codigo: m.codigo, legenda, dica, imprimir: !aguardando });
+    return pagamento + antes + qrBloco({ codigo: m.codigo, legenda, dica, imprimir: !aguardando });
   }
 
   function resumoHTML(m, reg) {
@@ -1714,6 +1751,8 @@
       case 'recusar': atual = null; irPara('conferir'); toast(t('toast.nadaAssinado')); break;
       case 'copiar': toast(t(await copiar(atual.m.codigo) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar': compartilhar(mensagemCompartilhar()); break;
+      case 'copiar-movimento': toast(t(await copiar(atual.extra.codigoPagamento) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
+      case 'enviar-movimento': compartilhar(atual.extra.codigoPagamento); break;
       case 'copiar-recibo': toast(t(await copiar(atual.extra.reciboMostrado) ? 'toast.codigoCopiado' : 'toast.semCopiar')); break;
       case 'enviar-recibo': compartilhar(t('share.recibo', { ref: atual.m.ref, codigo: atual.extra.reciboMostrado })); break;
       case 'imprimir': imprimir(); break;
@@ -1768,6 +1807,37 @@
         }
         break;
       }
+      case 'solicitar-pagamento': {
+        if (!reg || reg.tipoCodigo !== 'validado' || !emAberto(reg)) break;
+        const s = situacaoDe(reg),hojeISO=isoDeDia(hojeDia());
+        const resp = await perguntar({titulo:t('pay.solicitar'),texto:t('pay.informar'),
+          ok:t('pay.gerar'),valor:{moeda:reg.moeda,casas:reg.casas,padrao:Math.max(1,Math.min(s.saldo,s.proxima?.restante || s.saldo))},
+          data:hojeISO,dataMin:isoDeDia(Math.min(reg.de,hojeDia())),dataMax:hojeISO});
+        if (!resp) break;
+        if (resp.valor <= 0 || resp.valor > s.saldo) {toast(t('modal.valorInvalido'));break;}
+        const cod = await D.criarSolicitacaoPagamento(perfil,atual.m,resp),pedido=await D.lerCodigo(cod);
+        salvarPedidoAssinado(reg,pedido);
+        reRender({codigoPagamento:cod});
+        window.scrollTo({top:0,behavior:'instant'});
+        toast(t('pay.pendente'));
+        break;
+      }
+      case 'solicitar-estorno': {
+        if (!reg || reg.soRegistro || reg.tipoCodigo !== 'validado') break;
+        const alvo = pagamentoOriginalDe(reg,normalizarRid(b.dataset.rid));
+        if (!alvo || estornosDe(reg).some(x => x.alvoRid === normalizarRid(alvo.rid))) break;
+        const ok=await perguntar({titulo:t('pay.estornar'),texto:t('pay.estornarConf',{valor:dinheiro(alvo.valor,reg)}),ok:t('pay.gerar'),perigo:true});
+        if (!ok) break;
+        const cod=await D.criarSolicitacaoPagamento(perfil,atual.m,{operacao:'estorno',alvoRid:normalizarRid(alvo.rid),valor:alvo.valor,dia:alvo.dia});
+        const pedido=await D.lerCodigo(cod);salvarPedidoAssinado(reg,pedido);
+        reRender({codigoPagamento:cod});window.scrollTo({top:0,behavior:'instant'});toast(t('pay.pendente'));
+        break;
+      }
+      case 'ver-pedido': {
+        const pedido=pendentesDe(reg).find(x => x.rid===b.dataset.rid);
+        if (pedido) {reRender({codigoPagamento:pedido.codigo});window.scrollTo({top:0,behavior:'instant'});}
+        break;
+      }
       case 'pagamento': emitirRecibo('pagamento'); break;
       case 'quitar-assinado': emitirRecibo('quitacao'); break;
       case 'cancelar': emitirRecibo('cancelamento'); break;
@@ -1778,6 +1848,7 @@
       }
       case 'corrigir': case 'usar-dados': preencherForm(atual.m, reg); toast(t(acao === 'corrigir' ? 'toast.corrigir' : 'toast.usarDados')); break;
       case 'quitar': {
+        if (!reg || !reg.soRegistro) break;
         const hojeISO = isoDeDia(hojeDia());
         const r = await perguntar({
           titulo: t('modal.quitarT'), texto: t(reg.papel === 'devedor' ? 'modal.quitarDevedor' : 'modal.quitarCredor'),
