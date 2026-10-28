@@ -7972,7 +7972,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const { t } = DebtIDIdioma;
   D.definirIdioma(DebtIDIdioma.atual());
   const $ = (s, r = document) => r.querySelector(s);
-  const $ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const raiz = document.documentElement;
   const TITULO = document.title;
   const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -8037,8 +8037,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   };
   const acharReg = m => (m && m.hash ? registros.find(r => r.k === m.hash) : null) || null;
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
-  const pagamentosLocaisDe = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
-  const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
+  const pagamentosDe = r => recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).map(x => ({ dia: x.dia, valor: x.valor }));
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
@@ -8164,20 +8163,20 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     raiz.dataset.theme = tema;
     const rot = t(tema === 'dark' ? 'tema.paraClaro' : 'tema.paraEscuro');
     const b = $('#temaBtn'); b.setAttribute('aria-label', rot); b.title = rot;
-    $('input[name="tema"]').forEach(i => { i.checked = i.value === pref; });
+    $$('input[name="tema"]').forEach(i => { i.checked = i.value === pref; });
     corDasBarras();
     if (location.hash === '#registros') renderGrafico();
   }
   function aplicarUI(ui) {
     raiz.dataset.ui = ui === 'soft' ? 'soft' : 'pro';
     gravarTexto(K.ui, raiz.dataset.ui);
-    $('input[name="ui"],input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
+    $$('input[name="ui"],input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
     corDasBarras();
   }
   function aplicarTexto(v) {
     raiz.dataset.texto = v === 'grande' ? 'grande' : 'normal';
     gravarTexto(K.texto, v === 'grande' ? 'grande' : null);
-    $('input[name="texto"]').forEach(i => { i.checked = i.value === raiz.dataset.texto; });
+    $$('input[name="texto"]').forEach(i => { i.checked = i.value === raiz.dataset.texto; });
   }
   $('#temaBtn').addEventListener('click', () => {
     gravarTexto(K.tema, raiz.dataset.theme === 'dark' ? 'light' : 'dark');
@@ -8390,7 +8389,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       document.body.classList.add('trava-aberta');
       if (abrir) {
         document.body.classList.add('travado');
-        $('.page, .tabbar').forEach(el => el.setAttribute('aria-hidden', 'true'));
+        $$('.page, .tabbar').forEach(el => el.setAttribute('aria-hidden', 'true'));
       }
       fimTrava = ok => {
         caixa.hidden = true; fimTrava = null; clearTimeout(timerEspera);
@@ -8398,7 +8397,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         if (abrir) {
           travado = false;
           document.body.classList.remove('travado');
-          $('.page, .tabbar').forEach(el => el.removeAttribute('aria-hidden'));
+          $$('.page, .tabbar').forEach(el => el.removeAttribute('aria-hidden'));
         }
         res(ok);
       };
@@ -8493,8 +8492,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (!perfil && v !== 'boas-vindas') troca('boas-vindas');
     else if (perfil && v === 'boas-vindas') troca('inicio');
     if (v === 'detalhe' && !atual) troca('registros');
-    $('.view').forEach(s => s.classList.toggle('on', s.dataset.view === v));
-    $('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v || (v === 'detalhe' && a.dataset.nav === 'registros')));
+    $$('.view').forEach(s => s.classList.toggle('on', s.dataset.view === v));
+    $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v || (v === 'detalhe' && a.dataset.nav === 'registros')));
     document.body.classList.toggle('boas-vindas', v === 'boas-vindas');
     document.body.classList.toggle('com-abas', v !== 'boas-vindas');
     if (v === 'inicio') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
@@ -9090,7 +9089,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       titulo = t('st.pessoalT');
       texto = t('st.pessoal', { nome: esc(outra.nome) }) + atraso;
       if (d.dp < hojeDia() && !atraso) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
-      botoes = `<button class="btn btn-primary" type="button" data-acao="pagamento-local">${ico('plus')}${t('st.pagamento')}</button>` + btnQuitarLocal +
+      botoes = (sou === 'credor' ? btnPagamento + btnQuitarAss : btnQuitarLocal) +
                `<button class="btn" type="button" data-acao="pedir-confirmacao">${ico('enviar')}${t('st.pedirConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
@@ -9215,7 +9214,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
-    if (reg && (temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
+    if (reg && (temRegras(reg) || recibosDe(reg).length) && reg.status !== 'cancelado') {
       const s = situacaoDe(reg);
       const saldo = reg.status === 'quitado' ? 0 : s.saldo;
       html += `<div class="summary summary-2">
@@ -9232,8 +9231,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function pagamentosHTML(reg) {
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
-    const locais = pagamentosLocaisDe(reg);
-    if (!temRegras(reg) && !recibos.length && !locais.length) return '';
+    if (!temRegras(reg) && !recibos.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -9249,10 +9247,6 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
-    }
-    if (locais.length) {
-      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map(x =>
-        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}</small></span></li>`).join('') + '</ul>';
     }
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
@@ -9272,9 +9266,6 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const em = parteEmissora(m);
     ev.push({ ts: m.dados.ts, tz: m.dados.tz, texto: t('tl.criado', { nome: esc(em.nome) }) });
     if (m.confirmadoEm) ev.push({ ts: m.confirmadoEm.ts, tz: m.confirmadoEm.tz, texto: t('tl.confirmado', { nome: esc(parteOutra(m).nome) }) });
-    for (const x of pagamentosLocaisDe(reg)) {
-      ev.push({ ts: x.ts, tz: x.tz, texto: `${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)} · ${fmt.data(x.dia)}` });
-    }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
     }
@@ -9536,23 +9527,6 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         salvarContato(parte); reRender(); toast(t('toast.contatoSalvo', { nome: parte.nome }));
         break;
       }
-      case 'pagamento-local': {
-        if (!reg || !reg.soRegistro || !emAberto(reg)) break;
-        const saldo = situacaoDe(reg).saldo;
-        if (saldo <= 0) break;
-        const hojeISO = isoDeDia(hojeDia());
-        const resp = await perguntar({
-          titulo: t('modal.pagamentoT'), texto: t('modal.pagamento', { nome: reg.outro, saldo: dinheiro(saldo, reg) }), ok: t('modal.pagamentoOk'),
-          valor: { moeda: reg.moeda, casas: reg.casas, padrao: Math.min(saldo, situacaoDe(reg).proxima?.restante || saldo), rotulo: t('modal.valorRecebido') },
-          data: hojeISO, dataMin: isoDeDia(Math.min(reg.de, hojeDia())), dataMax: hojeISO
-        });
-        if (!resp) break;
-        if (resp.valor <= 0 || resp.valor > saldo) { toast(t('modal.valorInvalido')); break; }
-        const agora = momentoDe(new Date());
-        upsert({ k: reg.k, pagamentosLocais: [...pagamentosLocaisDe(reg), { ...resp, ...agora, valor: resp.valor }], atualizadoEm: Date.now() });
-        reRender(); toast(t('toast.recibo.pagamento', { nome: reg.outro }));
-        break;
-      }
       case 'pagamento': emitirRecibo('pagamento'); break;
       case 'quitar-assinado': emitirRecibo('quitacao'); break;
       case 'cancelar': emitirRecibo('cancelamento'); break;
@@ -9596,10 +9570,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   const visao = () => (lerTexto(K.visao) === 'pessoas' ? 'pessoas' : 'lista');
   function definirVisao(v) {
     gravarTexto(K.visao, v === 'pessoas' ? 'pessoas' : null);
-    $('input[name="visao"]').forEach(i => { i.checked = i.value === visao(); });
+    $$('input[name="visao"]').forEach(i => { i.checked = i.value === visao(); });
     renderLista();
   }
-  $('input[name="visao"]').forEach(i => i.addEventListener('change', () => definirVisao(i.value)));
+  $$('input[name="visao"]').forEach(i => i.addEventListener('change', () => definirVisao(i.value)));
   $('#busca').addEventListener('input', () => renderLista());
   $('#ordem').addEventListener('change', () => { gravarTexto(K.ordem, $('#ordem').value); renderLista(); });
   const chavePessoa = r => (r.outroPub ? 'pub:' + r.outroPub : 'nome:' + normNome(r.outro));
@@ -9627,7 +9601,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     renderLembreteBackup();
     renderVencimentos();
     renderLucro();
-    $('input[name="visao"]').forEach(i => { i.checked = i.value === visao(); });
+    $$('input[name="visao"]').forEach(i => { i.checked = i.value === visao(); });
     const ordemSalva = lerTexto(K.ordem);
     if (['recentes', 'vencimento', 'valor', 'nome'].includes(ordemSalva)) $('#ordem').value = ordemSalva;
     renderLista();
@@ -9867,10 +9841,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       dica.textContent = g.dataset.dica; dica.hidden = false;
       const a = area.getBoundingClientRect(), b = g.getBoundingClientRect();
       dica.style.left = Math.max(0, Math.min(a.width - dica.offsetWidth, b.left - a.left + b.width / 2 - dica.offsetWidth / 2)) + 'px';
-      $('.barra', caixa).forEach(x => x.classList.toggle('on', x === g));
+      $$('.barra', caixa).forEach(x => x.classList.toggle('on', x === g));
     };
-    const esconder = () => { dica.hidden = true; $('.barra', caixa).forEach(x => x.classList.remove('on')); };
-    $('.barra', caixa).forEach(g => {
+    const esconder = () => { dica.hidden = true; $$('.barra', caixa).forEach(x => x.classList.remove('on')); };
+    $$('.barra', caixa).forEach(g => {
       g.addEventListener('pointerenter', () => mostrarDica(g));
       g.addEventListener('focus', () => mostrarDica(g));
       g.addEventListener('pointerleave', esconder);
@@ -9933,10 +9907,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     D.idLongoDe(D._interno.deB64url(perfil.pub)).then(x => { $('#perfilIdLongo').textContent = x; });
     $('#avatar').textContent = inicial(perfil.nome);
     $('#f-nome-ajuste').value = perfil.nome;
-    $('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
-    $('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
-    $('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
-    $('input[name="texto"]').forEach(i => { i.checked = i.value === (raiz.dataset.texto || 'normal'); });
+    $$('input[name="ui"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
+    $$('input[name="tema"]').forEach(i => { i.checked = i.value === temaPref(); });
+    $$('input[name="idioma"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    $$('input[name="texto"]').forEach(i => { i.checked = i.value === (raiz.dataset.texto || 'normal'); });
     pintarBotaoMoeda($('#btnMoedaPadrao'), moedaPadrao());
     renderTravaAjustes();
     renderIcones();
@@ -10273,8 +10247,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
 
   /* ---------------- onboarding ---------------- */
   function prepararBoasVindas() {
-    $('input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
-    $('input[name="idioma-bv"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
+    $$('input[name="ui-bv"]').forEach(i => { i.checked = i.value === raiz.dataset.ui; });
+    $$('input[name="idioma-bv"]').forEach(i => { i.checked = i.value === DebtIDIdioma.atual(); });
     passoBV('#bv0'); mostrar('#formRestaurarBV', false); $('#msgBV').innerHTML = '';
   }
   function passoBV(id) {
@@ -10335,10 +10309,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const lang = DebtIDIdioma.aplicar(l);
     D.definirIdioma(lang);
     if (salvar) gravarTexto(K.idioma, lang);
-    $('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
+    $$('input[name="idioma"],input[name="idioma-bv"]').forEach(i => { i.checked = i.value === lang; });
     if (v > 0) campo('valor').value = textoValor(v, moedaForm);
     for (const [n, x] of taxas) if (x >= 0 && campo(n).value.trim()) campo(n).value = fmt.numEntrada(Math.round(x * 10000) / 10000);
-    $('.field.invalid').forEach(f => limparErroCampo(f));
+    $$('.field.invalid').forEach(f => limparErroCampo(f));
     ['#msgConf', '#msgBackup', '#msgBV'].forEach(id => { $(id).innerHTML = ''; });
     aplicarTema();
     pintarMoedas();
