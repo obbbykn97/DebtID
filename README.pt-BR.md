@@ -7,7 +7,7 @@
 <p align="center">Calculadora e registro de empréstimos em qualquer moeda. Os dois lados assinam, e um QR code deixa qualquer pessoa conferir o registro em segundos.<br>
 Funciona sem internet, sem conta e sem servidor, em 12 idiomas.</p>
 
----
+[Baixar APK](https://github.com/obbbykn97/DebtID-multi/releases/latest) · [Como funciona](#como-funciona) · [Segurança](#segurança) · [Código](#para-quem-quer-mexer-no-código)
 
 ## Baixar
 
@@ -17,12 +17,26 @@ Também dá para usar no computador: baixe o arquivo `web/dist/index.html` e abr
 
 ## Como funciona
 
-1. Quem registra o empréstimo escolhe a moeda e informa o valor, a taxa e as datas. Se quiser, também define parcelas, multa por atraso e uma observação. O DebtID gera um código assinado e mostra o QR code dele.
-2. A outra pessoa lê o QR code no DebtID dela, confere os valores e confirma com a própria assinatura.
-3. Quem registrou lê de volta o QR code de confirmação. A partir daí, o empréstimo está validado pelos dois, nos dois celulares.
-4. Quando o dinheiro volta, quem emprestou assina um recibo e quem deve lê o QR dele. O pagamento aparece nos dois celulares, e quem pagou guarda a prova.
+| Você quer… | Use… |
+| --- | --- |
+| Controlar uma dívida no seu aparelho | **Só registrar** |
+| Registrar um acordo entre duas pessoas | **Quem empresta** ou **Quem pega emprestado**, com troca de códigos |
+| Registrar um pagamento com confirmação dos dois | Uma solicitação de pagamento, seguida da resposta assinada |
 
-Qualquer um dos dois pode começar o registro.
+1. Informe a pessoa, a moeda, o valor e as datas. Juros, parcelas e encargos de atraso são opcionais.
+2. Compartilhe o QR ou o código. A outra pessoa abre no DebtID, confere os dados e assina.
+3. Importe a confirmação de volta no primeiro aparelho. Agora os dois têm o acordo confirmado.
+4. Para registrar um pagamento, qualquer uma das partes pode enviar uma solicitação. A outra aprova ou rejeita; a resposta precisa voltar ao solicitante.
+
+Uma solicitação pendente não reduz o saldo. Os aparelhos não sincronizam pela internet: cada atualização depende da troca de códigos.
+
+## O que mudou na versão 2.0
+
+- Tela inicial com valores a pagar e a receber por moeda, vencimentos e registros recentes.
+- Pagamentos pessoais podem ser corrigidos ou anulados, preservando o histórico.
+- Pagamentos e estornos com confirmação assinada pelas duas partes. O estorno preserva o evento original.
+- Multa fixa ou percentual e juros de atraso simples ou compostos, com prévia do saldo por data.
+- Tema escuro com fundo preto e cartões em verde-oliva, mantendo o tema claro.
 
 ## Recursos
 
@@ -53,7 +67,7 @@ Qualquer um dos dois pode começar o registro.
 
 ### Idiomas e aparência
 
-- 12 idiomas, os mais falados do mundo segundo o Ethnologue: inglês, chinês (mandarim), hindi, espanhol, árabe, francês, bengali, português, indonésio, urdu, russo e alemão. Em árabe e urdu, que se leem da direita para a esquerda, a tela se espelha.
+- 12 idiomas: inglês, chinês (mandarim), hindi, espanhol, árabe, francês, bengali, português, indonésio, urdu, russo e alemão. Em árabe e urdu, que se leem da direita para a esquerda, a tela se espelha.
 - Duas aparências, *Profissional* e *Soft*, com tema claro e escuro, opção de texto grande e 36 ícones de app para escolher.
 
 ## Segurança
