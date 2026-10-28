@@ -179,6 +179,20 @@
                     <div class="control"><input id="f-mora" name="mora" type="text" inputmode="decimal" placeholder="Ex.: 1" data-i18n-ph="form.moraPh"><span class="affix end">%</span></div>
                     <div class="err" id="e-mora"></div>
                   </div>
+                  <div class="field span2"><label class="atraso-ativar" for="f-regrasNovas"><input id="f-regrasNovas" type="checkbox"><span data-i18n="atraso.avancado">Outras regras de atraso (multa fixa ou juros compostos)</span></label></div>
+                  <div class="span2" id="camposAtrasoNovos" hidden>
+                    <div class="grid">
+                      <div class="field"><label for="f-multaTipo" data-i18n="atraso.multaTipo">Tipo de multa</label><div class="control"><select id="f-multaTipo"><option value="nenhuma" data-i18n="atraso.nenhuma">Nenhuma</option><option value="fixa" data-i18n="atraso.fixa">Valor fixo</option><option value="percentual" data-i18n="atraso.percentual">Percentual</option></select></div></div>
+                      <div class="field" id="campoNovaMulta" hidden><label for="f-novaMultaValor" data-i18n="atraso.multaValor">Valor ou percentual da multa</label><div class="control"><input id="f-novaMultaValor" type="text" inputmode="decimal" placeholder="0"></div></div>
+                      <div class="field"><label for="f-moraTipo" data-i18n="atraso.moraTipo">Juros por atraso</label><div class="control"><select id="f-moraTipo"><option value="nenhuma" data-i18n="atraso.nenhuma">Nenhum</option><option value="simples" data-i18n="atraso.simples">Simples</option><option value="composta" data-i18n="atraso.composta">Compostos</option></select></div></div>
+                      <div class="field" id="campoNovaMora" hidden><label for="f-novaMoraTaxa" data-i18n="atraso.moraTaxa">Taxa da mora (%)</label><div class="control"><input id="f-novaMoraTaxa" type="text" inputmode="decimal" placeholder="Ex.: 1"></div></div>
+                      <div class="field" id="campoMoraPeriodo" hidden><label for="f-moraPeriodo" data-i18n="atraso.periodo">Período da taxa</label><div class="control"><select id="f-moraPeriodo"><option value="dia" data-i18n="atraso.dia">Ao dia</option><option value="mes" selected data-i18n="atraso.mes">Ao mês</option><option value="ano" data-i18n="atraso.ano">Ao ano</option></select></div></div>
+                      <div class="field" id="campoCapitalizacao" hidden><label for="f-capitalizacao" data-i18n="atraso.capitalizacao">Capitalização</label><div class="control"><select id="f-capitalizacao"><option value="dia" data-i18n="atraso.dia">Diária</option><option value="mes" data-i18n="atraso.mes">Mensal</option></select></div></div>
+                      <div class="field span2"><label class="atraso-ativar" for="f-incluirMulta"><input id="f-incluirMulta" type="checkbox"><span data-i18n="atraso.incluirMulta">Incluir a multa na base dos juros (verifique a legalidade)</span></label></div>
+                      <div class="field span2"><label for="f-previaAtraso" data-i18n="atraso.dataPrevia">Simular saldo na data</label><div class="control"><input id="f-previaAtraso" type="date"></div><p class="hint" id="previaEncargos"></p></div>
+                    </div>
+                    <p class="hint" data-i18n="atraso.aviso">Juros sobre multa e capitalização podem ser limitados por lei. A outra pessoa precisa aceitar as condições assinadas. Clientes antigos não leem as novas regras.</p>
+                  </div>
                   <p class="hint span2" data-i18n="dica.atraso">Opcional. Valem só depois do vencimento, sobre o valor que faltar pagar. Combinem valores razoáveis: a lei pode limitar multas e juros.</p>
                   <div class="field span2" data-f="obs">
                     <label for="f-obs"><span data-i18n="form.obs">Observação</span> <small id="contaObs">0/140</small></label>
