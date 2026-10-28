@@ -72,7 +72,8 @@
   };
   const acharReg = m => (m && m.hash ? registros.find(r => r.k === m.hash) : null) || null;
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
-  const pagamentosDe = r => recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).map(x => ({ dia: x.dia, valor: x.valor }));
+  const pagamentosLocaisDe = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
@@ -1124,7 +1125,7 @@
       titulo = t('st.pessoalT');
       texto = t('st.pessoal', { nome: esc(outra.nome) }) + atraso;
       if (d.dp < hojeDia() && !atraso) texto += ' ' + t('st.venceu', { data: fmt.data(d.dp) });
-      botoes = (sou === 'credor' ? btnPagamento + btnQuitarAss : btnQuitarLocal) +
+      botoes = `<button class="btn btn-primary" type="button" data-acao="pagamento-local">${ico('plus')}${t('st.pagamento')}</button>` + btnQuitarLocal +
                `<button class="btn" type="button" data-acao="pedir-confirmacao">${ico('enviar')}${t('st.pedirConf')}</button>`;
     } else if (ctx === 'recebida') {
       const souDevedor = m.emissor === 'credor';
@@ -1249,7 +1250,7 @@
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
-    if (reg && (temRegras(reg) || recibosDe(reg).length) && reg.status !== 'cancelado') {
+    if (reg && (temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
       const s = situacaoDe(reg);
       const saldo = reg.status === 'quitado' ? 0 : s.saldo;
       html += `<div class="summary summary-2">
@@ -1266,7 +1267,8 @@
   function pagamentosHTML(reg) {
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
-    if (!temRegras(reg) && !recibos.length) return '';
+    const locais = pagamentosLocaisDe(reg);
+    if (!temRegras(reg) && !recibos.length && !locais.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -1282,6 +1284,10 @@
     }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
+    }
+    if (locais.length) {
+      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map(x =>
+        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}</small></span></li>`).join('') + '</ul>';
     }
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
@@ -1301,6 +1307,9 @@
     const em = parteEmissora(m);
     ev.push({ ts: m.dados.ts, tz: m.dados.tz, texto: t('tl.criado', { nome: esc(em.nome) }) });
     if (m.confirmadoEm) ev.push({ ts: m.confirmadoEm.ts, tz: m.confirmadoEm.tz, texto: t('tl.confirmado', { nome: esc(parteOutra(m).nome) }) });
+    for (const x of pagamentosLocaisDe(reg)) {
+      ev.push({ ts: x.ts, tz: x.tz, texto: `${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)} · ${fmt.data(x.dia)}` });
+    }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
     }
@@ -1560,6 +1569,23 @@
         const ok = await perguntar({ titulo: t('modal.contatoT'), texto: t('modal.contato', { nome: parte.nome, id: parte.idLongo || parte.id }), ok: t('modal.contatoOk') });
         if (!ok) break;
         salvarContato(parte); reRender(); toast(t('toast.contatoSalvo', { nome: parte.nome }));
+        break;
+      }
+      case 'pagamento-local': {
+        if (!reg || !reg.soRegistro || !emAberto(reg)) break;
+        const saldo = situacaoDe(reg).saldo;
+        if (saldo <= 0) break;
+        const hojeISO = isoDeDia(hojeDia());
+        const resp = await perguntar({
+          titulo: t('modal.pagamentoT'), texto: t('modal.pagamento', { nome: reg.outro, saldo: dinheiro(saldo, reg) }), ok: t('modal.pagamentoOk'),
+          valor: { moeda: reg.moeda, casas: reg.casas, padrao: Math.min(saldo, situacaoDe(reg).proxima?.restante || saldo), rotulo: t('modal.valorRecebido') },
+          data: hojeISO, dataMin: isoDeDia(Math.min(reg.de, hojeDia())), dataMax: hojeISO
+        });
+        if (!resp) break;
+        if (resp.valor <= 0 || resp.valor > saldo) { toast(t('modal.valorInvalido')); break; }
+        const agora = momentoDe(new Date());
+        upsert({ k: reg.k, pagamentosLocais: [...pagamentosLocaisDe(reg), { ...resp, ...agora, valor: resp.valor }], atualizadoEm: Date.now() });
+        reRender(); toast(t('toast.recibo.pagamento', { nome: reg.outro }));
         break;
       }
       case 'pagamento': emitirRecibo('pagamento'); break;
