@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-rPIQcyicbr+5ZlWlcEmI1y/yaYhVLH5/Yp3qld3djMM=' 'sha256-QYyYERPNQDUQXf5wqZlkgd7eWLDxRaIUaX/W/3gObjU=' 'sha256-BbcIAACWH8PBdPrgkPMjgie+02DvZBRrRdIjG5vL5jw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-tTosyBh0YPxTOKZguSO+yab0pgUJ5FIYInIHZvXlnQ0=' 'sha256-q899VRVtJ2nioPLQjANTPscHZbBUPbGv2kyUe+MIZbE=' 'sha256-HCKp21bsWXUd8gr8fOOLzr0ftETP7QIDThLtAaSmFN0='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -1496,7 +1496,7 @@ const DebtIDTextos = {
   pt: {
     "meta.descricao": "DebtID: calculadora e registro de empréstimos em qualquer moeda, assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
     "nav.secoes": "Seções", "nav.navegacao": "Navegação",
-    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "Anular este pagamento? Ele deixará de contar no saldo, mas continuará no histórico.", "local.edicao": "Pagamento corrigido", "local.avisarEdicao": "Confira o valor e a data.", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
 
     "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
@@ -1899,7 +1899,7 @@ const DebtIDTextos = {
   en: {
     "meta.descricao": "DebtID: a loan calculator and IOU in any currency, signed by both sides, with a QR code. Everything stays on your device.",
     "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
+    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "local.editar": "Edit", "local.anular": "Void", "local.anulado": "Voided", "local.confirmarAnular": "Void this payment? It will no longer count toward the balance, but remains in history.", "local.edicao": "Payment corrected", "local.avisarEdicao": "Check the amount and date.", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
 
     "hero.eyebrow": "Loan records · signed by both sides",
@@ -2302,7 +2302,7 @@ const DebtIDTextos = {
   es: {
     "meta.descricao": "DebtID: calculadora y registro de préstamos en cualquier moneda, firmado por las dos partes, con código QR. Todo queda en tu dispositivo.",
     "nav.secoes": "Secciones", "nav.navegacao": "Navegación",
-    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "¿Anular este pago? Ya no contará en el saldo, pero permanecerá en el historial.", "local.edicao": "Pago corregido", "local.avisarEdicao": "Revisa el importe y la fecha.", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Cambiar a modo claro", "tema.paraEscuro": "Cambiar a modo oscuro",
 
     "hero.eyebrow": "Registro de préstamos · firmado por los dos",
@@ -2753,7 +2753,7 @@ const DebtIDIdioma = (() => {
 DebtIDTextos.ar = {
   "meta.descricao": "DebtID: حاسبة قروض وإقرار بدين بأي عملة، يوقّعه الطرفان، مع رمز QR. كل شيء يبقى على جهازك.",
   "nav.secoes": "الأقسام", "nav.navegacao": "التنقل",
-  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
+  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "local.editar": "تعديل", "local.anular": "إلغاء", "local.anulado": "ملغى", "local.confirmarAnular": "هل تريد إلغاء هذه الدفعة؟ ستبقى في السجل ولن تُحتسب في الرصيد.", "local.edicao": "تم تصحيح الدفعة", "local.avisarEdicao": "تحقق من المبلغ والتاريخ.", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
   "tema.paraClaro": "التبديل إلى الوضع الفاتح", "tema.paraEscuro": "التبديل إلى الوضع الداكن",
 
   "hero.eyebrow": "سجل القروض · بتوقيع الطرفين",
@@ -3157,7 +3157,7 @@ DebtIDTextos.ar = {
 DebtIDTextos.bn = {
   "meta.descricao": "DebtID: যেকোনো মুদ্রায় ধারের হিসাব ও রসিদ, দুই পক্ষের স্বাক্ষরসহ, QR কোড দিয়ে। সবকিছু আপনার ডিভাইসেই থাকে।",
   "nav.secoes": "বিভাগ", "nav.navegacao": "নেভিগেশন",
-  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
+  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "local.editar": "সম্পাদনা", "local.anular": "বাতিল", "local.anulado": "বাতিল", "local.confirmarAnular": "এই পেমেন্ট বাতিল করবেন? হিসাব থেকে বাদ যাবে, তবে ইতিহাসে থাকবে।", "local.edicao": "পেমেন্ট সংশোধিত", "local.avisarEdicao": "পরিমাণ ও তারিখ যাচাই করুন।", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
   "tema.paraClaro": "লাইট মোডে যান", "tema.paraEscuro": "ডার্ক মোডে যান",
 
   "hero.eyebrow": "ধারের রেকর্ড · দুই পক্ষের স্বাক্ষর",
@@ -3561,7 +3561,7 @@ DebtIDTextos.bn = {
 DebtIDTextos.de = {
   "meta.descricao": "DebtID: Darlehensrechner und Schuldschein in jeder Währung, von beiden Seiten unterschrieben, mit QR-Code. Alles bleibt auf deinem Gerät.",
   "nav.secoes": "Bereiche", "nav.navegacao": "Navigation",
-  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
+  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "local.editar": "Bearbeiten", "local.anular": "Stornieren", "local.anulado": "Storniert", "local.confirmarAnular": "Diese Zahlung stornieren? Sie zählt nicht mehr zum Saldo, bleibt aber im Verlauf.", "local.edicao": "Zahlung korrigiert", "local.avisarEdicao": "Betrag und Datum prüfen.", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
   "tema.paraClaro": "Zum hellen Modus wechseln", "tema.paraEscuro": "Zum dunklen Modus wechseln",
 
   "hero.eyebrow": "Darlehen festhalten · von beiden Seiten unterschrieben",
@@ -3965,7 +3965,7 @@ DebtIDTextos.de = {
 DebtIDTextos.fr = {
   "meta.descricao": "DebtID : calculatrice et reconnaissance de dette dans n'importe quelle devise, signée par les deux parties, avec un code QR. Tout reste sur votre appareil.",
   "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
+  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "local.editar": "Modifier", "local.anular": "Annuler", "local.anulado": "Annulé", "local.confirmarAnular": "Annuler ce paiement ? Il ne comptera plus dans le solde mais restera dans l'historique.", "local.edicao": "Paiement corrigé", "local.avisarEdicao": "Vérifiez le montant et la date.", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
   "tema.paraClaro": "Passer en mode clair", "tema.paraEscuro": "Passer en mode sombre",
 
   "hero.eyebrow": "Registre de prêts · signé par les deux parties",
@@ -4369,7 +4369,7 @@ DebtIDTextos.fr = {
 DebtIDTextos.hi = {
   "meta.descricao": "DebtID: किसी भी मुद्रा में उधार का कैलकुलेटर और रसीद, दोनों पक्षों के हस्ताक्षर के साथ, QR कोड सहित। सब कुछ आपके डिवाइस पर ही रहता है।",
   "nav.secoes": "भाग", "nav.navegacao": "नेविगेशन",
-  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
+  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "local.editar": "संपादित करें", "local.anular": "रद्द करें", "local.anulado": "रद्द", "local.confirmarAnular": "यह भुगतान रद्द करें? शेष राशि में नहीं गिना जाएगा, लेकिन इतिहास में रहेगा।", "local.edicao": "भुगतान सुधारा गया", "local.avisarEdicao": "राशि और तारीख जाँचें।", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
   "tema.paraClaro": "लाइट मोड पर जाएँ", "tema.paraEscuro": "डार्क मोड पर जाएँ",
 
   "hero.eyebrow": "उधार का रिकॉर्ड · दोनों पक्षों के हस्ताक्षर",
@@ -4773,7 +4773,7 @@ DebtIDTextos.hi = {
 DebtIDTextos.id = {
   "meta.descricao": "DebtID: kalkulator pinjaman dan surat pengakuan utang dalam mata uang apa pun, ditandatangani kedua pihak, dengan kode QR. Semuanya tetap di perangkat Anda.",
   "nav.secoes": "Bagian", "nav.navegacao": "Navigasi",
-  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
+  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "local.editar": "Ubah", "local.anular": "Batalkan", "local.anulado": "Dibatalkan", "local.confirmarAnular": "Batalkan pembayaran ini? Tidak lagi dihitung dalam saldo tetapi tetap ada di riwayat.", "local.edicao": "Pembayaran dikoreksi", "local.avisarEdicao": "Periksa jumlah dan tanggal.", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
   "tema.paraClaro": "Beralih ke mode terang", "tema.paraEscuro": "Beralih ke mode gelap",
 
   "hero.eyebrow": "Catatan pinjaman · ditandatangani kedua pihak",
@@ -5177,7 +5177,7 @@ DebtIDTextos.id = {
 DebtIDTextos.ru = {
   "meta.descricao": "DebtID: калькулятор займов и расписка в любой валюте, подписанная обеими сторонами, с QR-кодом. Всё остаётся на вашем устройстве.",
   "nav.secoes": "Разделы", "nav.navegacao": "Навигация",
-  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
+  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "local.editar": "Изменить", "local.anular": "Аннулировать", "local.anulado": "Аннулировано", "local.confirmarAnular": "Аннулировать платёж? Он не будет учтён в остатке, но останется в истории.", "local.edicao": "Платёж исправлен", "local.avisarEdicao": "Проверьте сумму и дату.", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
   "tema.paraClaro": "Включить светлую тему", "tema.paraEscuro": "Включить тёмную тему",
 
   "hero.eyebrow": "Учёт займов · подписано обеими сторонами",
@@ -5581,7 +5581,7 @@ DebtIDTextos.ru = {
 DebtIDTextos.ur = {
   "meta.descricao": "DebtID: کسی بھی کرنسی میں قرض کا کیلکولیٹر اور رسید، دونوں فریقوں کے دستخط کے ساتھ، QR کوڈ سمیت۔ سب کچھ آپ کے آلے پر ہی رہتا ہے۔",
   "nav.secoes": "حصے", "nav.navegacao": "نیویگیشن",
-  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
+  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "local.editar": "ترمیم", "local.anular": "منسوخ", "local.anulado": "منسوخ", "local.confirmarAnular": "یہ ادائیگی منسوخ کریں؟ بقایا میں شمار نہیں ہوگی لیکن تاریخ میں رہے گی۔", "local.edicao": "ادائیگی درست کی گئی", "local.avisarEdicao": "رقم اور تاریخ چیک کریں۔", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
   "tema.paraClaro": "لائٹ موڈ پر جائیں", "tema.paraEscuro": "ڈارک موڈ پر جائیں",
 
   "hero.eyebrow": "قرض کا ریکارڈ · دونوں فریقوں کے دستخط",
@@ -5985,7 +5985,7 @@ DebtIDTextos.ur = {
 DebtIDTextos.zh = {
   "meta.descricao": "DebtID：支持任意货币的借款计算器和借条，双方签名，附二维码。所有数据都留在你的设备上。",
   "nav.secoes": "栏目", "nav.navegacao": "导航",
-  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
+  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "local.editar": "编辑", "local.anular": "作废", "local.anulado": "已作废", "local.confirmarAnular": "作废这笔付款？它将不再计入余额，但会保留在历史记录中。", "local.edicao": "付款已更正", "local.avisarEdicao": "请核对金额和日期。", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
   "tema.paraClaro": "切换到浅色模式", "tema.paraEscuro": "切换到深色模式",
 
   "hero.eyebrow": "借款记录 · 双方签名",
@@ -7233,6 +7233,11 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     };
   }
 
+  // Local entries can be annulled without deleting the historical record.
+  function pagamentosLocaisAtivos(lista) {
+    return (Array.isArray(lista) ? lista : []).filter(p => p && !p.anulado && Number.isSafeInteger(p.valor) && p.valor > 0);
+  }
+
   /* =================== password-protected backup =================== */
   // v1: 210,000 PBKDF2 rounds (still opens) · v2: 600,000 rounds (OWASP's figure for PBKDF2-SHA256)
   const MAGICO = enc.encode('DIDB');
@@ -7911,7 +7916,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
-    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
+    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao, pagamentosLocaisAtivos,
     exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };
@@ -7993,7 +7998,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   };
   const acharReg = m => (m && m.hash ? registros.find(r => r.k === m.hash) : null) || null;
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
-  const pagamentosLocaisDe = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
   const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
@@ -9082,7 +9088,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       titulo = t('st.quitadoT');
       texto = t(reg.quitadoAssinado ? 'st.quitadoAssinado' : 'st.quitado', { data: fmt.data(diaQuitado(reg)) });
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (!reg.quitadoAssinado) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
+      if (!reg.quitadoAssinado && !reg.quitadoPorPagamentoLocal) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
       if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub) botoes += btnQuitarAss;
     } else if (ctx === 'cancelado') {
       const rc = recibosDe(reg).find(x => x.tipo === 'cancelamento');
@@ -9172,7 +9178,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
-    if (reg && (temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
+    if (reg && (reg.soRegistro || temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
       const s = situacaoDe(reg);
       const saldo = reg.status === 'quitado' ? 0 : s.saldo;
       html += `<div class="summary summary-2">
@@ -9189,8 +9195,8 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
   function pagamentosHTML(reg) {
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
-    const locais = pagamentosLocaisDe(reg);
-    if (!temRegras(reg) && !recibos.length && !locais.length) return '';
+    const locais = pagamentosLocaisTodos(reg);
+    if (!reg.soRegistro && !temRegras(reg) && !recibos.length && !locais.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -9208,8 +9214,10 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
     }
     if (locais.length) {
-      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map(x =>
-        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}</small></span></li>`).join('') + '</ul>';
+      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map((x, i) =>
+        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}${x.anulado ? ' · ' + t('local.anulado') : ''}</small></span>
+         ${x.anulado ? '' : `<button class="btn btn-ghost" type="button" data-acao="editar-pagamento-local" data-index="${i}">${t('local.editar')}</button>
+         <button class="btn btn-ghost" type="button" data-acao="anular-pagamento-local" data-index="${i}">${t('local.anular')}</button>`}</li>`).join('') + '</ul>';
     }
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
@@ -9229,8 +9237,12 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     const em = parteEmissora(m);
     ev.push({ ts: m.dados.ts, tz: m.dados.tz, texto: t('tl.criado', { nome: esc(em.nome) }) });
     if (m.confirmadoEm) ev.push({ ts: m.confirmadoEm.ts, tz: m.confirmadoEm.tz, texto: t('tl.confirmado', { nome: esc(parteOutra(m).nome) }) });
-    for (const x of pagamentosLocaisDe(reg)) {
+    for (const x of pagamentosLocaisTodos(reg)) {
+      if (x.anulado) continue;
       ev.push({ ts: x.ts, tz: x.tz, texto: `${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)} · ${fmt.data(x.dia)}` });
+    }
+    for (const x of (reg && reg.historicoLocal || [])) {
+      ev.push({ ts: x.ts, tz: x.tz, texto: t(x.tipo === 'edicao' ? 'local.edicao' : 'local.anulado') + ' · ' + dinheiro(x.valor, reg) });
     }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
@@ -9450,6 +9462,24 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     }
   }
 
+  function salvarPagamentoLocal(reg, lista, tipo = null, anterior = null) {
+    const s = situacaoDe({ ...reg, pagamentosLocais: lista });
+    const quitou = s.saldo === 0 && D.pagamentosLocaisAtivos(lista).length > 0;
+    const agora = momentoDe(new Date());
+    const patch = { k: reg.k, pagamentosLocais: lista, atualizadoEm: Date.now() };
+    if (tipo) patch.historicoLocal = [...(reg.historicoLocal || []), { ...agora, tipo, valor: anterior.valor, dia: anterior.dia }];
+    // Only automatic settlements may be reopened by correcting a payment.
+    if (reg.status === 'registrado' || reg.quitadoPorPagamentoLocal) {
+      patch.status = quitou ? 'quitado' : 'registrado';
+      patch.quitadoPorPagamentoLocal = quitou;
+      patch.quitadoAssinado = false;
+      patch.quitadoDia = quitou ? Math.max(...D.pagamentosLocaisAtivos(lista).map(x => x.dia)) : null;
+      patch.quitadoEm = quitou ? Date.now() : null;
+    }
+    upsert(patch);
+    reRender();
+  }
+
   document.addEventListener('click', async e => {
     const b = e.target.closest('[data-acao]');
     if (!b) return;
@@ -9513,8 +9543,32 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
         if (!resp) break;
         if (resp.valor <= 0 || resp.valor > saldo) { toast(t('modal.valorInvalido')); break; }
         const agora = momentoDe(new Date());
-        upsert({ k: reg.k, pagamentosLocais: [...pagamentosLocaisDe(reg), { ...resp, ...agora, valor: resp.valor }], atualizadoEm: Date.now() });
-        reRender(); toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        const id = Array.from(crypto.getRandomValues(new Uint32Array(2))).join('-');
+        salvarPagamentoLocal(reg, [...pagamentosLocaisTodos(reg), { ...resp, ...agora, id }]);
+        toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        break;
+      }
+      case 'editar-pagamento-local': case 'anular-pagamento-local': {
+        if (!reg || !reg.soRegistro) break;
+        const i = Number(b.dataset.index), todos = pagamentosLocaisTodos(reg), antes = todos[i];
+        if (!Number.isSafeInteger(i) || i < 0 || !antes || antes.anulado) break;
+        if (acao === 'anular-pagamento-local') {
+          const ok = await perguntar({ titulo: t('local.anular'), texto: t('local.confirmarAnular'), ok: t('modal.confirmar'), perigo: true });
+          if (!ok) break;
+          const lista = todos.slice(); lista[i] = { ...antes, anulado: true };
+          salvarPagamentoLocal(reg, lista, 'anulacao', antes);
+        } else {
+          const resp = await perguntar({
+            titulo: t('local.editar'), texto: t('local.avisarEdicao'), ok: t('modal.confirmar'),
+            valor: { moeda: reg.moeda, casas: reg.casas, padrao: antes.valor },
+            data: isoDeDia(antes.dia), dataMin: isoDeDia(Math.min(reg.de, hojeDia())), dataMax: isoDeDia(hojeDia())
+          });
+          if (!resp) break;
+          const lista = todos.slice(); lista[i] = { ...antes, valor: resp.valor, dia: resp.dia };
+          const saldo = situacaoDe({ ...reg, pagamentosLocais: lista });
+          if (saldo.credito > 0) { toast(t('modal.valorInvalido')); break; }
+          salvarPagamentoLocal(reg, lista, 'edicao', antes);
+        }
         break;
       }
       case 'pagamento': emitirRecibo('pagamento'); break;
@@ -9533,7 +9587,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
           ok: t('modal.quitarOk'), data: hojeISO, dataMax: hojeISO
         });
         if (!r) break;
-        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, atualizadoEm: Date.now() });
+        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, quitadoPorPagamentoLocal: false, atualizadoEm: Date.now() });
         reRender(); toast(t('toast.quitado')); break;
       }
       case 'desquitar': {
