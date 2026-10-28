@@ -21,7 +21,7 @@
 }
 /* Soft, dark */
 :root[data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
+  --bg:#121116; --surface:#1B1A20; --card:#24232A; --field:#17161B; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
   --line:#EDE7DE; --rule:#EDE7DE; --dash:#4C4852; --placeholder:#6F6973; --key-bg:#0D0C10; --key-note:#A9A39B; --red:#FF6B7A;
   color-scheme:dark;
 }
@@ -39,7 +39,7 @@
 }
 /* Professional, dark */
 :root[data-ui="pro"][data-theme="dark"]{
-  --bg:#000000; --surface:#000000; --card:#101014; --field:#08080A;
+  --bg:#0D0D0D; --surface:#0D0D0D; --card:#141414; --field:#121212;
   --ink:#F2F2F2; --ink-2:#CFCFCF; --muted:#8C8C8C; --line:#F2F2F2; --rule:#2E2E2E; --dash:#333333;
   --placeholder:#5E5E5E; --key-bg:#000000; --key-note:#8C8C8C; --red:#FF6B5C;
   --band:#000000; --info:#1E1E1E;
