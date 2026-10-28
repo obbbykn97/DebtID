@@ -141,6 +141,7 @@
     } else if (estornosDe(reg).some(x => x.rid === m.rid || x.alvoRid === m.alvoRid)) return false;
     const patch = {k:reg.k,pedidosAssinados:pendentes,atualizadoEm:Date.now()};
     if (m.aprovado && m.operacao === 'pagamento') {
+      if (m.valor > situacaoDe(reg).saldo) throw new D.ChaveErro('RECIBO_OUTRO');
       patch.movimentosAssinados = [...movimentosAssinadosDe(reg),{rid:m.rid,valor:m.valor,dia:m.dia,codigo:m.codigo,ts:m.respondente.ts,tz:m.respondente.tz}];
     }
     if (m.aprovado && m.operacao === 'estorno') {
@@ -1409,7 +1410,9 @@
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
     const locais = pagamentosLocaisTodos(reg);
-    if (!reg.soRegistro && !temRegras(reg) && !recibos.length && !locais.length) return '';
+    const movimentos = movimentosAssinadosDe(reg), estornos = estornosDe(reg), pedidos = pendentesDe(reg);
+    const estornados = new Set(estornos.map(x => x.alvoRid));
+    if (!reg.soRegistro && !temRegras(reg) && !recibos.length && !locais.length && !movimentos.length && !pedidos.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -1439,11 +1442,23 @@
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
         `<li><span class="pc-main"><b>${esc(nomeTipoRecibo(x.tipo))}${x.valor ? ' · ' + dinheiro(x.valor, reg) : ''}</b><small>${t('pg.reciboDia', { data: fmt.data(x.dia), quando: fmt.momento(x.ts, x.tz) })}</small></span>
-         <button class="btn btn-ghost" type="button" data-acao="ver-recibo" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button></li>`).join('') + '</ul>';
+         <button class="btn btn-ghost" type="button" data-acao="ver-recibo" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button>
+         ${x.tipo !== 'cancelamento' && reg.tipoCodigo === 'validado' && !estornados.has(normalizarRid(x.rid)) ?
+           `<button class="btn btn-ghost" type="button" data-acao="solicitar-estorno" data-rid="${esc(x.rid)}">${t('pay.estornar')}</button>` : ''}</li>`).join('') + '</ul>';
     } else if (reg.papel === 'credor' && emAberto(reg)) {
       html += `<p class="hint">${t('pg.semRecibosCredor')}</p>`;
     } else if (emAberto(reg)) {
       html += `<p class="hint">${t('pg.semRecibosDevedor')}</p>`;
+    }
+    if (movimentos.length) {
+      html += `<h4>${t('pay.confirmados')}</h4><ul class="recibos">` + movimentos.map(x =>
+        `<li><span class="pc-main"><b>${dinheiro(x.valor,reg)}</b><small>${fmt.data(x.dia)}${estornados.has(x.rid) ? ' · ' + t('pay.estornado') : ''}</small></span>
+        ${estornados.has(x.rid) ? '' : `<button class="btn btn-ghost" type="button" data-acao="solicitar-estorno" data-rid="${esc(x.rid)}">${t('pay.estornar')}</button>`}</li>`).join('') + '</ul>';
+    }
+    if (pedidos.length) {
+      html += `<h4>${t('pay.pedidos')}</h4><ul class="recibos">` + pedidos.map(x =>
+        `<li><span class="pc-main"><b>${t('pay.'+x.operacao)} · ${dinheiro(x.valor,reg)}</b><small>${t('pay.'+x.status)}</small></span>
+         <button class="btn btn-ghost" type="button" data-acao="ver-pedido" data-rid="${esc(x.rid)}">${ico('qr')}${t('pg.verRecibo')}</button></li>`).join('') + '</ul>';
     }
     return html + '</section>';
   }
@@ -1460,6 +1475,12 @@
     }
     for (const x of (reg && reg.historicoLocal || [])) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t(x.tipo === 'edicao' ? 'local.edicao' : 'local.anulado') + ' · ' + dinheiro(x.valor, reg) });
+    }
+    for (const x of movimentosAssinadosDe(reg)) {
+      ev.push({ts:x.ts,tz:x.tz,texto:t('pay.confirmado')+' · '+dinheiro(x.valor,reg)});
+    }
+    for (const x of estornosDe(reg)) {
+      ev.push({ts:x.ts,tz:x.tz,texto:t('pay.estornado')+' · '+dinheiro(x.valor,reg)});
     }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
