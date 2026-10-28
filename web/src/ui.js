@@ -66,7 +66,7 @@
       k: m.hash, id: m.idHex, papel, status, codigo: m.codigo, tipoCodigo: m.tipo,
       outro: outro.nome, outroPub: outro.pub || null, outroId: outro.id || null,
       moeda: m.dados.moeda, casas: m.dados.casas, valor: m.dados.valor, total: m.calc.total, de: m.dados.de, dp: m.dados.dp,
-      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0,
+      obs: m.dados.obs || '', parcelas: m.dados.parcelas || 1, multa: m.dados.multa || 0, mora: m.dados.mora || 0, encargosAtraso: m.dados.encargosAtraso || null,
       atualizadoEm: Date.now()
     };
   };
@@ -75,7 +75,7 @@
   const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
   const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
   const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
-  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
+  const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0, encargosAtraso: r.encargosAtraso || null });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
   const diaLocal = dt => diaUTC(dt.getFullYear(), dt.getMonth(), dt.getDate());
@@ -84,7 +84,7 @@
   const momentoDe = dt => ({ ts: Math.floor(dt.getTime() / 1000), tz: Math.round(-dt.getTimezoneOffset() / 15) });
   const situacaoDe = (r, dia = hojeDia()) => D.situacao(dadosDe(r), r.total, pagamentosDe(r), dia);
   const emAberto = r => r.status === 'validado' || r.status === 'registrado';
-  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0;
+  const temRegras = r => (r.parcelas || 1) > 1 || r.multa > 0 || r.mora > 0 || !!r.encargosAtraso;
   // currency of a loan model's data or of a stored record (old ones have none: reais)
   const infoDe = d => D.infoMoeda(d.moeda || 'BRL', d.casas == null ? 2 : d.casas);
   const dinheiro = (v, d) => fmt.dinheiro(Math.round(v), infoDe(d));
@@ -601,12 +601,35 @@
     atualizaDicas();
   }
   const lerTaxaCampo = n => { const v = campo(n).value.trim(); if (!v) return 0; const x = D.lerNumero(v, false); return Number.isFinite(x) ? Math.round(x * 10000) : NaN; };
+  function lerEncargosNovos() {
+    if (!$('#f-regrasNovas').checked) return null;
+    const multaTipo = $('#f-multaTipo').value, moraTipo = $('#f-moraTipo').value;
+    const v = $('#f-novaMultaValor').value.trim(), tx = $('#f-novaMoraTaxa').value.trim();
+    const m = v ? D.lerNumero(v, multaTipo === 'fixa') : 0;
+    const t = tx ? D.lerNumero(tx, false) : 0;
+    const multaValor = Math.round(m * (multaTipo === 'fixa' ? 10 ** D.MOEDAS[moedaForm].casas : 10000));
+    const moraTaxa = Math.round(t * 10000);
+    if (!Number.isFinite(multaValor) || !Number.isFinite(moraTaxa) || multaValor < 0 || moraTaxa < 0 ||
+        multaValor > (multaTipo === 'fixa' ? D.LIMITES.valor : D.LIMITES.multa) || moraTaxa > D.LIMITES.taxa) throw new RangeError('encargos');
+    return { multaTipo, multaValor: multaTipo === 'nenhuma' ? 0 : multaValor,
+      moraTipo, moraTaxa: moraTipo === 'nenhuma' ? 0 : moraTaxa,
+      moraPeriodo: $('#f-moraPeriodo').value, capitalizacao: $('#f-capitalizacao').value,
+      incluirMultaNaBase: $('#f-incluirMulta').checked && multaTipo !== 'nenhuma' };
+  }
+
   function pintarContatoForm() {
     const caixa = $('#fixado');
     caixa.hidden = !contatoForm;
     if (contatoForm) caixa.querySelector('span').textContent = t('form.fixado', { nome: nomeContato(contatoForm), id: contatoForm.id });
   }
   function atualizaDicas() {
+    const novo = $('#f-regrasNovas').checked;
+    $('#camposAtrasoNovos').hidden = !novo;
+    ['multa','mora'].forEach(k => $('[data-f="' + k + '"]', form).hidden = novo);
+    $('#campoNovaMulta').hidden = !novo || $('#f-multaTipo').value === 'nenhuma';
+    const temMora = novo && $('#f-moraTipo').value !== 'nenhuma';
+    $('#campoNovaMora').hidden = $('#campoMoraPeriodo').hidden = !temMora;
+    $('#campoCapitalizacao').hidden = !temMora || $('#f-moraTipo').value !== 'composta';
     const composto = marcado('tipo') === 'compostos';
     const opTotal = $('#m-total');
     opTotal.disabled = composto; // compound interest needs a period (month or year)
@@ -641,6 +664,17 @@
       dica = t('dica.parcelasPrevia', { n, valor: fmt.dinheiro(lista[0].valor, D.MOEDAS[moedaForm]), dias: fmt.dias(Math.round((dp - de) / n)), primeira: fmt.data(lista[0].dia) });
     }
     $('#hintParcelas').textContent = dica;
+    const prev = $('#previaEncargos');
+    prev.textContent = '';
+    if (novo && temPrevia) {
+      try {
+        const e = lerEncargosNovos(), simulado = diaDeISO($('#f-previaAtraso').value) ?? dp + 30;
+        if (simulado >= de) {
+          const s = D.situacao({ de, dp, parcelas: emParcelas ? n : 1, encargosAtraso:e }, total, [], simulado);
+          prev.textContent = t('atraso.previa', { x: fmt.dinheiro(s.saldo, D.MOEDAS[moedaForm]), data:fmt.data(simulado) });
+        }
+      } catch { prev.textContent = t('atraso.invalido'); }
+    }
     const obs = campo('obs').value;
     $('#contaObs').textContent = `${obs.length}/140`;
   }
@@ -694,7 +728,12 @@
       else if (de != null && dp != null && parcelas > dp - de) erros.parcelas = t('erro.parcelasPrazo');
       else if (Number.isSafeInteger(total) && total < parcelas) erros.parcelas = t('erro.parcelasValor');
     }
-    const multa = lerTaxaCampo('multa'), mora = lerTaxaCampo('mora');
+    let encargosAtraso = null;
+    if ($('#f-regrasNovas').checked) {
+      try { encargosAtraso = lerEncargosNovos(); }
+      catch { erros.multa = t('atraso.invalido'); }
+    }
+    const multa = encargosAtraso ? 0 : lerTaxaCampo('multa'), mora = encargosAtraso ? 0 : lerTaxaCampo('mora');
     if (!Number.isFinite(multa) || multa > D.LIMITES.multa) erros.multa = t('erro.multa');
     if (!Number.isFinite(mora) || mora > D.LIMITES.taxa) erros.mora = t('erro.mora');
     const obs = limparNome(campo('obs').value);
@@ -704,7 +743,7 @@
       erros,
       dados: {
         papel: marcado('papel') === 'devedor' ? 'devedor' : 'credor', nomeOutro: outro, moeda: moedaForm, valor, taxa, modo, composto, de, dp,
-        obs, parcelas, multa: multa || 0, mora: mora || 0, pubOutro: contatoForm ? contatoForm.pub : null
+        obs, parcelas, multa: multa || 0, mora: mora || 0, encargosAtraso, pubOutro: contatoForm ? contatoForm.pub : null
       }
     };
   }
@@ -725,6 +764,10 @@
   }
   function limparFormulario() {
     ['outro', 'valor', 'taxa', 'obs', 'multa', 'mora'].forEach(n => { campo(n).value = ''; });
+    $('#f-regrasNovas').checked = $('#f-incluirMulta').checked = false;
+    $('#f-multaTipo').value = $('#f-moraTipo').value = 'nenhuma';
+    $('#f-moraPeriodo').value = 'mes'; $('#f-capitalizacao').value = 'dia';
+    $('#f-novaMultaValor').value = $('#f-novaMoraTaxa').value = $('#f-previaAtraso').value = '';
     campo('parcelas').value = '3';
     $('#pg-unica').checked = true;
     contatoForm = null; pintarContatoForm();
@@ -766,7 +809,17 @@
     if (d.parcelas > 1) { $('#pg-parcelas').checked = true; campo('parcelas').value = String(d.parcelas); } else $('#pg-unica').checked = true;
     campo('multa').value = d.multa ? fmt.numEntrada(d.multa / 10000) : '';
     campo('mora').value = d.mora ? fmt.numEntrada(d.mora / 10000) : '';
-    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora);
+    $('#f-regrasNovas').checked = !!d.encargosAtraso;
+    const e = d.encargosAtraso;
+    $('#f-multaTipo').value = e ? e.multaTipo : 'nenhuma';
+    $('#f-novaMultaValor').value = e && e.multaValor ? fmt.numEntrada(e.multaValor / (e.multaTipo === 'fixa' ? 10 ** d.casas : 10000)) : '';
+    $('#f-moraTipo').value = e ? e.moraTipo : 'nenhuma';
+    $('#f-novaMoraTaxa').value = e && e.moraTaxa ? fmt.numEntrada(e.moraTaxa / 10000) : '';
+    $('#f-moraPeriodo').value = e ? e.moraPeriodo : 'mes';
+    $('#f-capitalizacao').value = e ? e.capitalizacao : 'dia';
+    $('#f-incluirMulta').checked = !!(e && e.incluirMultaNaBase);
+    $('#f-previaAtraso').value = '';
+    $('#maisOpcoes').open = !!(d.obs || d.parcelas > 1 || d.multa || d.mora || e);
     const c = outra.pub ? contatoDe(outra.pub) : null;
     contatoForm = c; pintarContatoForm();
     atualizaDicas();
@@ -1258,7 +1311,7 @@
       html += `<div class="summary summary-2">
         <div class="stat s-2"><span>${t('res.pago')}</span>${valorStat(dinheiro(s.pago, reg))}<small>${t('res.pagoNota', { n: pagamentosDe(reg).length })}</small></div>
         <div class="stat s-1"><span>${t('res.saldo')}</span>${valorStat(dinheiro(saldo, reg))}<small>${t(s.encargos ? 'res.saldoEncargos' : 'res.saldoNota')}</small></div>
-        ${reg.multa || reg.mora ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
+        ${(reg.multa || reg.mora || reg.encargosAtraso) ? `<div class="stat s-4"><span>${t('res.encargos')}</span>${valorStat(dinheiro(s.encargos, reg))}<small>${t('res.encargosNota')}</small></div>` : ''}
         ${s.proxima && reg.status !== 'quitado' ? `<div class="stat s-3"><span>${t('res.proxima')}</span><b>${fmt.dataCurta(s.proxima.dia)}</b><small>${t('res.proximaNota', { n: s.proxima.n, de: reg.parcelas || 1, valor: dinheiro(s.proxima.restante, reg) })}</small></div>` : ''}
       </div>`;
     }
@@ -1283,6 +1336,10 @@
         else { estado = t('pg.aVencer'); cls = ''; }
         return `<li class="${cls}"><span class="pc-n">${p.n}/${reg.parcelas || 1}</span><span class="pc-main"><b>${dinheiro(p.valor, reg)}</b><small>${t('pg.vence', { data: fmt.data(p.dia) })}</small></span><span class="pc-estado">${estado}</span></li>`;
       }).join('') + '</ol>';
+    }
+    if (reg.encargosAtraso) {
+      const e = reg.encargosAtraso;
+      html += `<p class="hint">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })} ${t('atraso.aviso')}</p>`;
     }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
@@ -1383,6 +1440,10 @@
     if (d.parcelas > 1) {
       const lista = D.parcelasDe(d, c.total);
       extras += `<p class="rc-text">${t('rc.parcelas', { n: d.parcelas, lista: lista.map(p => t('rc.parcelaItem', { n: p.n, valor: dinheiro(p.valor, d), data: fmt.data(p.dia) })).join('; ') })}</p>`;
+    }
+    if (d.encargosAtraso) {
+      const e = d.encargosAtraso;
+      extras += `<p class="rc-text">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })}</p>`;
     }
     if (d.multa || d.mora) extras += `<p class="rc-text">${t(d.multa && d.mora ? 'rc.atraso' : d.multa ? 'rc.atrasoMulta' : 'rc.atrasoMora', { multa: fmt.taxa(d.multa || 0), mora: fmt.taxa(d.mora || 0) })}</p>`;
     const recibos = recibosDe(reg).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).sort((a, b) => a.dia - b.dia);
