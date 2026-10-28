@@ -180,7 +180,7 @@
                     <div class="err" id="e-mora"></div>
                   </div>
                   <div class="field span2"><label class="atraso-ativar" for="f-regrasNovas"><input id="f-regrasNovas" type="checkbox"><span data-i18n="atraso.avancado">Outras regras de atraso (multa fixa ou juros compostos)</span></label></div>
-                  <div class="span2" id="camposAtrasoNovos" hidden>
+                  <div class="field span2" data-f="atraso" id="camposAtrasoNovos" hidden>
                     <div class="grid">
                       <div class="field"><label for="f-multaTipo" data-i18n="atraso.multaTipo">Tipo de multa</label><div class="control"><select id="f-multaTipo"><option value="nenhuma" data-i18n="atraso.nenhuma">Nenhuma</option><option value="fixa" data-i18n="atraso.fixa">Valor fixo</option><option value="percentual" data-i18n="atraso.percentual">Percentual</option></select></div></div>
                       <div class="field" id="campoNovaMulta" hidden><label for="f-novaMultaValor" data-i18n="atraso.multaValor">Valor ou percentual da multa</label><div class="control"><input id="f-novaMultaValor" type="text" inputmode="decimal" placeholder="0"></div></div>
@@ -192,6 +192,7 @@
                       <div class="field span2"><label for="f-previaAtraso" data-i18n="atraso.dataPrevia">Simular saldo na data</label><div class="control"><input id="f-previaAtraso" type="date"></div><p class="hint" id="previaEncargos"></p></div>
                     </div>
                     <p class="hint" data-i18n="atraso.aviso">Juros sobre multa e capitalização podem ser limitados por lei. A outra pessoa precisa aceitar as condições assinadas. Clientes antigos não leem as novas regras.</p>
+                    <div class="err" id="e-atraso"></div>
                   </div>
                   <p class="hint span2" data-i18n="dica.atraso">Opcional. Valem só depois do vencimento, sobre o valor que faltar pagar. Combinem valores razoáveis: a lei pode limitar multas e juros.</p>
                   <div class="field span2" data-f="obs">

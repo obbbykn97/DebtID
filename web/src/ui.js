@@ -731,14 +731,14 @@
     let encargosAtraso = null;
     if ($('#f-regrasNovas').checked) {
       try { encargosAtraso = lerEncargosNovos(); }
-      catch { erros.multa = t('atraso.invalido'); }
+      catch { erros.atraso = t('atraso.invalido'); }
     }
     const multa = encargosAtraso ? 0 : lerTaxaCampo('multa'), mora = encargosAtraso ? 0 : lerTaxaCampo('mora');
     if (!Number.isFinite(multa) || multa > D.LIMITES.multa) erros.multa = t('erro.multa');
     if (!Number.isFinite(mora) || mora > D.LIMITES.taxa) erros.mora = t('erro.mora');
     const obs = limparNome(campo('obs').value);
     if (new TextEncoder().encode(obs).length > D.LIMITES.obsBytes) erros.obs = t('erro.obs');
-    if (Object.keys(erros).some(k => ['parcelas', 'multa', 'mora', 'obs'].includes(k))) $('#maisOpcoes').open = true;
+    if (Object.keys(erros).some(k => ['parcelas', 'multa', 'mora', 'obs', 'atraso'].includes(k))) $('#maisOpcoes').open = true;
     return {
       erros,
       dados: {
@@ -1339,7 +1339,7 @@
     }
     if (reg.encargosAtraso) {
       const e = reg.encargosAtraso;
-      html += `<p class="hint">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })} ${t('atraso.aviso')}</p>`;
+      html += `<p class="hint">${textoEncargosAtraso(reg)} ${t('atraso.aviso')}</p>`;
     }
     if (reg.multa || reg.mora) {
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
@@ -1385,6 +1385,19 @@
     ev.sort((a, b) => a.ts - b.ts);
     return `<section class="panel linha-tempo" aria-labelledby="t-tl"><h3 id="t-tl">${t('tl.titulo')}</h3><ol>` +
       ev.map(e => `<li><small>${fmt.momento(e.ts, e.tz)}</small><span>${e.texto}</span></li>`).join('') + '</ol></section>';
+  }
+
+  function textoEncargosAtraso(d) {
+    const e = d.encargosAtraso;
+    if (!e) return '';
+    const multa = e.multaTipo === 'nenhuma' ? t('atraso.nenhuma')
+      : e.multaTipo === 'fixa' ? t('atraso.fixa') + ': ' + dinheiro(e.multaValor, d)
+      : t('atraso.percentual') + ': ' + fmt.taxa(e.multaValor);
+    const mora = e.moraTipo === 'nenhuma' ? t('atraso.nenhuma')
+      : t('atraso.' + e.moraTipo) + ': ' + fmt.taxa(e.moraTaxa);
+    const texto = t('atraso.resumo', { multa, mora, periodo:t('atraso.' + e.moraPeriodo) });
+    return texto + (e.moraTipo === 'composta' ? ' ' + t('atraso.capitalizacao') + ': ' + t('atraso.' + e.capitalizacao) : '')
+      + (e.incluirMultaNaBase ? ' ' + t('atraso.incluirMulta') : '');
   }
 
   function textoJuros(d, c) {
@@ -1443,7 +1456,7 @@
     }
     if (d.encargosAtraso) {
       const e = d.encargosAtraso;
-      extras += `<p class="rc-text">${t('atraso.resumo', { multa:t('atraso.' + e.multaTipo), mora:t('atraso.' + e.moraTipo), periodo:t('atraso.' + e.moraPeriodo) })}</p>`;
+      extras += `<p class="rc-text">${textoEncargosAtraso(d)}</p>`;
     }
     if (d.multa || d.mora) extras += `<p class="rc-text">${t(d.multa && d.mora ? 'rc.atraso' : d.multa ? 'rc.atrasoMulta' : 'rc.atrasoMora', { multa: fmt.taxa(d.multa || 0), mora: fmt.taxa(d.mora || 0) })}</p>`;
     const recibos = recibosDe(reg).filter(x => x.tipo !== 'cancelamento' && x.valor > 0).sort((a, b) => a.dia - b.dia);
