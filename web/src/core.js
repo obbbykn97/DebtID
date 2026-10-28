@@ -719,6 +719,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       };
     }
     const versao = dados[0];
+    if (versao === 6 && (dados[1] === 4 || dados[1] === 5)) return lerMovimentoAssinado(dados, codigo);
     if (!TAGS[versao]) throw new ChaveErro('VERSAO');
     const tipo = dados[1];
     if (tipo === RECIBO && versao >= 4) return lerRecibo(dados, codigo);
@@ -763,6 +764,81 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
       confirmadoEm: c ? { ts: c.ts, tz: c.tz } : null,
       bruto: { p: d, pBytes, sig1, versao }
     };
+  }
+
+  /* =================== bilateral payment requests (v6 messages) =================== */
+  const ASS_REQ = enc.encode('DebtID/v6/pedido'), ASS_RESP = enc.encode('DebtID/v6/resposta');
+  const SOLICITACAO = 4, RESPOSTA = 5;
+  function mensagemMovimento(m) {
+    const e = new Escritor();
+    e.bytes(hexParaBytes(m.hash)); e.bytes(hexParaBytes(m.idHex));
+    e.byte(m.operacao === 'estorno' ? 1 : 0);
+    e.bytes(m.alvoRid ? hexParaBytes(m.alvoRid) : new Uint8Array(8));
+    e.texto(m.moeda); e.byte(m.casas);
+    e.num(m.valor); e.num(m.dia); e.bytes(hexParaBytes(m.rid));
+    e.num(m.ts); e.num(m.tz + 64); e.bytes(m.pub); e.texto(m.nome);
+    return e.fim();
+  }
+  const pertence = (pub,m) => [m.credor.pub,m.devedor.pub].includes(b64url(pub));
+  async function criarSolicitacaoPagamento(perfil, m, { valor, dia, operacao = 'pagamento', alvoRid = null }) {
+    if (!m || m.tipo !== 'validado' || !pertence(pubDoPerfil(perfil),m)) throw new ChaveErro('OUTRA_PESSOA');
+    if (!Number.isSafeInteger(valor) || valor < 1 || valor > LIMITES.valor ||
+        !Number.isSafeInteger(dia) || dia < m.dados.de || dia > 120000) throw new RangeError('pagamento');
+    if (operacao !== 'pagamento' && operacao !== 'estorno') throw new RangeError('tipo');
+    if (operacao === 'estorno' && !/^[a-f0-9]{16}$/.test(alvoRid || '')) throw new RangeError('referência de estorno');
+    const { ts, tz } = agora();
+    const msg = { hash:m.hash,idHex:m.idHex,operacao,alvoRid,moeda:m.dados.moeda,casas:m.dados.casas,
+      valor,dia,rid:hex(crypto.getRandomValues(new Uint8Array(8))),ts,tz,pub:pubDoPerfil(perfil),nome:perfil.nome };
+    const corpo = mensagemMovimento(msg), sig = await assinar(perfil, juntar(ASS_REQ, corpo));
+    return embalar(juntar([6,SOLICITACAO], corpo, sig));
+  }
+  async function responderSolicitacaoPagamento(perfil, codigo, aprovado) {
+    const m = await lerCodigo(codigo);
+    if (!m || !m.tipo.startsWith('solicitacao-')) throw new ChaveErro('NAO_E_PROPOSTA');
+    const minha = pubDoPerfil(perfil);
+    if (iguais(minha, deB64url(m.solicitante.pub))) throw new ChaveErro('PROPRIA');
+    const { ts, tz } = agora(), e = new Escritor();
+    e.byte(aprovado ? 1 : 0); e.num(ts); e.num(tz + 64); e.bytes(minha); e.texto(perfil.nome);
+    const rb = e.fim();
+    const sig = await assinar(perfil, juntar(ASS_RESP, m.bruto.corpo, m.bruto.sig, rb));
+    return embalar(juntar([6,RESPOSTA], m.bruto.corpo, m.bruto.sig, rb, sig));
+  }
+  async function lerMovimentoAssinado(dados, codigo) {
+    const L = new Leitor(dados); L.i = 2;
+    const ini = L.i, hash = L.bytes(16), id = L.bytes(6), op = L.byte(), alvo = L.bytes(8);
+    if (op !== 0 && op !== 1) throw new ChaveErro('CORROMPIDA');
+    const moeda = L.texto(), casas = L.byte(), valor = L.num(), dia = L.num(), rid = L.bytes(8),
+      ts = L.num(), tz = L.num() - 64, pub = L.bytes(33), nome = L.texto();
+    const corpo = L.b.slice(ini,L.i), sig = L.bytes(64);
+    if (!CODIGO_MOEDA_VALIDO.test(moeda) || casas > 9 || valor < 1 || valor > LIMITES.valor ||
+        dia > 120000 || ts > 8e9 || tz < -60 || tz > 60 || !sBaixo(sig) ||
+        !(await confere(pub,juntar(ASS_REQ,corpo),sig))) throw new ChaveErro('CORROMPIDA');
+    const operacao = op ? 'estorno' : 'pagamento';
+    const alvoRid = op ? hex(alvo) : null;
+    if (!op && alvo.some(n => n !== 0)) throw new ChaveErro('CORROMPIDA');
+    let respondente = null, aprovado = null;
+    if (dados[1] === RESPOSTA) {
+      const iniR = L.i, ok = L.byte(), ts2 = L.num(), tz2 = L.num() - 64, pub2 = L.bytes(33), nome2 = L.texto();
+      const rb = L.b.slice(iniR,L.i), sig2 = L.bytes(64);
+      if (ok > 1 || ts2 > 8e9 || tz2 < -60 || tz2 > 60 || iguais(pub,pub2) || !sBaixo(sig2) ||
+          !(await confere(pub2,juntar(ASS_RESP,corpo,sig,rb),sig2))) throw new ChaveErro('ASSINATURA');
+      respondente = { nome:nome2,...(await identificacao(pub2)),ts:ts2,tz:tz2 };
+      aprovado = !!ok;
+    }
+    if (!L.acabou()) throw new ChaveErro('CORROMPIDA');
+    return { tipo:(respondente ? 'confirmacao-' : 'solicitacao-') + operacao, codigo,hash:hex(hash),
+      idHex:hex(id).toUpperCase(),operacao,alvoRid,moeda,casas,valor,dia,rid:hex(rid),
+      solicitante:{nome,...(await identificacao(pub)),ts,tz},respondente,aprovado,bruto:{corpo,sig} };
+  }
+  function conferirMovimento(m, mensagem) {
+    if (!m || m.tipo !== 'validado' || !mensagem || !/^(solicitacao|confirmacao)-(pagamento|estorno)$/.test(mensagem.tipo)) return 'NAO_E_EMPRESTIMO';
+    if (mensagem.hash !== m.hash || mensagem.idHex !== m.idHex || mensagem.moeda !== m.dados.moeda ||
+        mensagem.casas !== m.dados.casas || mensagem.dia < m.dados.de || mensagem.valor < 1) return 'OUTRO_EMPRESTIMO';
+    if (![m.credor.pub,m.devedor.pub].includes(mensagem.solicitante.pub)) return 'OUTRA_PESSOA';
+    if (mensagem.respondente &&
+        (![m.credor.pub,m.devedor.pub].includes(mensagem.respondente.pub) ||
+         mensagem.respondente.pub === mensagem.solicitante.pub)) return 'OUTRA_PESSOA';
+    return null;
   }
 
   /* =================== receipts (payment, settlement, cancellation) =================== */
@@ -1632,7 +1708,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
-    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao, pagamentosLocaisAtivos,
+    criarRecibo, conferirRecibo, criarSolicitacaoPagamento, responderSolicitacaoPagamento, conferirMovimento, TIPOS_RECIBO, parcelasDe, situacao, pagamentosLocaisAtivos,
     exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };
