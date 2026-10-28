@@ -74,7 +74,18 @@
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
   const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
   const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
-  const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
+  const movimentosAssinadosDe = r => (r && Array.isArray(r.movimentosAssinados) ? r.movimentosAssinados : []);
+  const estornosDe = r => (r && Array.isArray(r.estornosAssinados) ? r.estornosAssinados : []);
+  const pendentesDe = r => (r && Array.isArray(r.pedidosAssinados) ? r.pedidosAssinados : []);
+  const normalizarRid = rid => String(rid || '').padStart(16, '0');
+  const pagamentoOriginalDe = (r,rid) => [...movimentosAssinadosDe(r),...recibosDe(r).filter(x => x.tipo !== 'cancelamento')]
+    .find(x => normalizarRid(x.rid) === rid);
+  const pagamentosDe = r => {
+    const estornados = new Set(estornosDe(r).map(x => x.alvoRid));
+    return [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0 && !estornados.has(normalizarRid(x.rid))),
+      ...movimentosAssinadosDe(r).filter(x => !estornados.has(normalizarRid(x.rid))),
+      ...pagamentosLocaisDe(r)].map(x => ({ dia:x.dia,valor:x.valor }));
+  };
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0, encargosAtraso: r.encargosAtraso || null });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
   const diaUTC = (ano, mes, dia) => Math.round(Date.UTC(ano, mes, dia) / 86400000);
@@ -114,6 +125,44 @@
       Object.assign(patch, { status: 'quitado', quitadoDia: r.dia, quitadoEm: r.ts * 1000, quitadoAssinado: true });
     }
     return { reg: upsert(patch), novo: true };
+  }
+
+  function salvarPedidoAssinado(reg, m) {
+    if (pendentesDe(reg).some(x => x.rid === m.rid && x.operacao === m.operacao)) return reg;
+    return upsert({ k:reg.k, pedidosAssinados:[...pendentesDe(reg), {
+      rid:m.rid,operacao:m.operacao,valor:m.valor,dia:m.dia,codigo:m.codigo,alvoRid:m.alvoRid,status:'pendente'
+    }],atualizadoEm:Date.now() });
+  }
+  function registrarRespostaAssinada(reg,m) {
+    if (!m.respondente || D.conferirMovimento(atual.m,m) || reg.soRegistro) throw new D.ChaveErro('RECIBO_OUTRO');
+    const pendentes = pendentesDe(reg).map(p => p.rid === m.rid ? {...p,status:m.aprovado ? 'confirmado' : 'rejeitado'} : p);
+    if (m.operacao === 'pagamento') {
+      if (movimentosAssinadosDe(reg).some(x => x.rid === m.rid)) return false;
+    } else if (estornosDe(reg).some(x => x.rid === m.rid || x.alvoRid === m.alvoRid)) return false;
+    const patch = {k:reg.k,pedidosAssinados:pendentes,atualizadoEm:Date.now()};
+    if (m.aprovado && m.operacao === 'pagamento') {
+      patch.movimentosAssinados = [...movimentosAssinadosDe(reg),{rid:m.rid,valor:m.valor,dia:m.dia,codigo:m.codigo,ts:m.respondente.ts,tz:m.respondente.tz}];
+    }
+    if (m.aprovado && m.operacao === 'estorno') {
+      const original = pagamentoOriginalDe(reg,m.alvoRid);
+      if (!original || original.valor !== m.valor || original.dia !== m.dia ||
+          estornosDe(reg).some(x => x.alvoRid === m.alvoRid)) throw new D.ChaveErro('RECIBO_OUTRO');
+      patch.estornosAssinados = [...estornosDe(reg),{rid:m.rid,alvoRid:m.alvoRid,valor:m.valor,dia:m.dia,codigo:m.codigo,ts:m.respondente.ts,tz:m.respondente.tz}];
+    }
+    const prox = {...reg,...patch};
+    const saldo = situacaoDe(prox).saldo;
+    if (m.aprovado && reg.status !== 'cancelado' && (reg.status === 'validado' || reg.quitadoPorMovimento ||
+        (m.operacao === 'estorno' && recibosDe(reg).some(x => normalizarRid(x.rid) === m.alvoRid && x.tipo === 'quitacao')))) {
+      if (saldo === 0 && pagamentosDe(prox).length) {
+        patch.status = 'quitado'; patch.quitadoAssinado = true; patch.quitadoPorMovimento = true;
+        patch.quitadoDia = m.dia; patch.quitadoEm = Date.now();
+      } else if (reg.quitadoPorMovimento || m.operacao === 'estorno') {
+        patch.status = 'validado'; patch.quitadoAssinado = false; patch.quitadoPorMovimento = false;
+        patch.quitadoDia = null; patch.quitadoEm = null;
+      }
+    }
+    upsert(patch);
+    return true;
   }
 
   // Records saved by older versions get the new fields (fingerprint, the other person's key...).
