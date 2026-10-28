@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-BEppyLk4P1bWQAYlfawdPKsOvPmDw+XmmtX16AKPsWA=' 'sha256-pgb/W/I4GLVNI1D2hVsRi5NoTdF/1Tn03/I+Qh43M4E=' 'sha256-FGtSYMbHXRL6haay5gA5/hMUARQa8ZwIpvgKHaZexRA='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-BEppyLk4P1bWQAYlfawdPKsOvPmDw+XmmtX16AKPsWA=' 'sha256-al7Ay52Voghr/kPgL6sVqAPztJuubpJuhSdqQyW87F8=' 'sha256-FGtSYMbHXRL6haay5gA5/hMUARQa8ZwIpvgKHaZexRA='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -7027,7 +7027,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (versao >= 5) {
       const mi = L.byte(), multaValor = L.num(), mo = L.byte(), moraTaxa = L.num();
       const pe = L.byte(), ca = L.byte(), incluir = L.byte();
-      if (incluir > 1 || (x & EXTRA.atraso)) throw new ChaveErro('CORROMPIDA');
+      if (incluir > 1 || multa || mora) throw new ChaveErro('CORROMPIDA');
       try {
         encargosAtraso = normalizarEncargosAtraso({
           multaTipo:MULTAS[mi], multaValor, moraTipo:MORAS[mo], moraTaxa,
