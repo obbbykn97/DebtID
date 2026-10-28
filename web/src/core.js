@@ -622,7 +622,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     if (versao >= 5) {
       const mi = L.byte(), multaValor = L.num(), mo = L.byte(), moraTaxa = L.num();
       const pe = L.byte(), ca = L.byte(), incluir = L.byte();
-      if (incluir > 1 || (x & EXTRA.atraso)) throw new ChaveErro('CORROMPIDA');
+      if (incluir > 1 || multa || mora) throw new ChaveErro('CORROMPIDA');
       try {
         encargosAtraso = normalizarEncargosAtraso({
           multaTipo:MULTAS[mi], multaValor, moraTipo:MORAS[mo], moraTaxa,
