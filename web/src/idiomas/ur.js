@@ -2,7 +2,7 @@
 DebtIDTextos.ur = {
   "meta.descricao": "DebtID: کسی بھی کرنسی میں قرض کا کیلکولیٹر اور رسید، دونوں فریقوں کے دستخط کے ساتھ، QR کوڈ سمیت۔ سب کچھ آپ کے آلے پر ہی رہتا ہے۔",
   "nav.secoes": "حصے", "nav.navegacao": "نیویگیشن",
-  "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
+  "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
   "tema.paraClaro": "لائٹ موڈ پر جائیں", "tema.paraEscuro": "ڈارک موڈ پر جائیں",
 
   "hero.eyebrow": "قرض کا ریکارڈ · دونوں فریقوں کے دستخط",

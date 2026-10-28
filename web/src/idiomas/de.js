@@ -2,7 +2,7 @@
 DebtIDTextos.de = {
   "meta.descricao": "DebtID: Darlehensrechner und Schuldschein in jeder Währung, von beiden Seiten unterschrieben, mit QR-Code. Alles bleibt auf deinem Gerät.",
   "nav.secoes": "Bereiche", "nav.navegacao": "Navigation",
-  "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
+  "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
   "tema.paraClaro": "Zum hellen Modus wechseln", "tema.paraEscuro": "Zum dunklen Modus wechseln",
 
   "hero.eyebrow": "Darlehen festhalten · von beiden Seiten unterschrieben",

@@ -2,7 +2,7 @@
 DebtIDTextos.hi = {
   "meta.descricao": "DebtID: किसी भी मुद्रा में उधार का कैलकुलेटर और रसीद, दोनों पक्षों के हस्ताक्षर के साथ, QR कोड सहित। सब कुछ आपके डिवाइस पर ही रहता है।",
   "nav.secoes": "भाग", "nav.navegacao": "नेविगेशन",
-  "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
+  "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
   "tema.paraClaro": "लाइट मोड पर जाएँ", "tema.paraEscuro": "डार्क मोड पर जाएँ",
 
   "hero.eyebrow": "उधार का रिकॉर्ड · दोनों पक्षों के हस्ताक्षर",

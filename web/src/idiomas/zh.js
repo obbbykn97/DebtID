@@ -2,7 +2,7 @@
 DebtIDTextos.zh = {
   "meta.descricao": "DebtID：支持任意货币的借款计算器和借条，双方签名，附二维码。所有数据都留在你的设备上。",
   "nav.secoes": "栏目", "nav.navegacao": "导航",
-  "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
+  "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
   "tema.paraClaro": "切换到浅色模式", "tema.paraEscuro": "切换到深色模式",
 
   "hero.eyebrow": "借款记录 · 双方签名",

@@ -2,7 +2,7 @@
 DebtIDTextos.ar = {
   "meta.descricao": "DebtID: حاسبة قروض وإقرار بدين بأي عملة، يوقّعه الطرفان، مع رمز QR. كل شيء يبقى على جهازك.",
   "nav.secoes": "الأقسام", "nav.navegacao": "التنقل",
-  "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
+  "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
   "tema.paraClaro": "التبديل إلى الوضع الفاتح", "tema.paraEscuro": "التبديل إلى الوضع الداكن",
 
   "hero.eyebrow": "سجل القروض · بتوقيع الطرفين",

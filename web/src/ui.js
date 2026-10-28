@@ -519,7 +519,7 @@
   };
 
   /* ---------------- navigation ---------------- */
-  const VIEWS = ['inicio', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
+  const VIEWS = ['inicio', 'novo', 'conferir', 'registros', 'ajustes', 'detalhe', 'boas-vindas'];
   let atual = null;
   function rota() {
     let v = location.hash.replace('#', '') || 'inicio';
@@ -532,7 +532,8 @@
     $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v || (v === 'detalhe' && a.dataset.nav === 'registros')));
     document.body.classList.toggle('boas-vindas', v === 'boas-vindas');
     document.body.classList.toggle('com-abas', v !== 'boas-vindas');
-    if (v === 'inicio') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
+    if (v === 'inicio') renderInicio();
+    if (v === 'novo') $('#assinaComo').textContent = perfil ? perfil.nome : '—';
     if (v === 'registros') renderRegistros();
     if (v === 'ajustes') renderAjustes();
     if (v === 'boas-vindas') prepararBoasVindas();
@@ -547,7 +548,7 @@
     if (!a) return;
     e.preventDefault();
     const alvo = document.getElementById(a.dataset.rolar);
-    if (location.hash !== '#inicio' && location.hash !== '') { irPara('inicio'); }
+    if (location.hash !== '#novo') { irPara('novo'); }
     setTimeout(() => alvo.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 30);
   });
 
@@ -768,7 +769,7 @@
     const c = outra.pub ? contatoDe(outra.pub) : null;
     contatoForm = c; pintarContatoForm();
     atualizaDicas();
-    irPara('inicio');
+    irPara('novo');
     setTimeout(() => $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' }), 60);
   }
 
@@ -1532,6 +1533,13 @@
     const b = e.target.closest('[data-acao]');
     if (!b) return;
     const acao = b.dataset.acao;
+    if (acao === 'escolher-tipo') {
+      $('#p-' + (b.dataset.papel === 'devedor' ? 'devedor' : 'credor')).checked = true;
+      $(b.dataset.pessoal === 'true' ? '#c-so' : '#c-pedir').checked = true;
+      atualizaDicas();
+      $('#novo-form').scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     if (acao === 'ler-qr') return lerEAbrir();
     if (acao === 'copiar-backup') return toast(t(await copiar($('#codigoBackup').textContent) ? 'toast.backupCopiado' : 'toast.semCopiarCurto'));
     if (acao === 'enviar-backup') return compartilhar($('#codigoBackup').textContent);
@@ -1654,6 +1662,26 @@
   }
   const saldoAberto = r => (emAberto(r) ? situacaoDe(r).saldo : 0);
 
+  function renderInicio() {
+    const dia = hojeDia(), abertos = registros.filter(emAberto);
+    $('#inicioTotais').innerHTML =
+      `<div class="stat s-2"><span>${t('reg.receber')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'credor'), saldoAberto)}</div>` +
+      `<div class="stat s-3"><span>${t('reg.pagar')}</span>${somasPorMoeda(abertos.filter(r => r.papel === 'devedor'), saldoAberto)}</div>`;
+    const vencendo = [];
+    for (const r of abertos) {
+      const p = situacaoDe(r, dia).parcelas.find(x => x.restante > 0 && x.dia <= dia + 30);
+      if (p) vencendo.push({ r, p });
+    }
+    vencendo.sort((a,b) => a.p.dia - b.p.dia);
+    const v = $('#inicioVencimentos');
+    v.hidden = !vencendo.length;
+    v.innerHTML = vencendo.length ? `<h2>${t('venc.titulo')}</h2><div class="lista">` +
+      vencendo.slice(0, 3).map(({ r }) => linhaRegistro(r, dia)).join('') + '</div>' : '';
+    const recentes = registros.slice().sort((a,b) => (b.atualizadoEm || b.criadoEm || 0) - (a.atualizadoEm || a.criadoEm || 0)).slice(0, 5);
+    $('#inicioRecentes').innerHTML = recentes.length ? recentes.map(r => linhaRegistro(r, dia)).join('')
+      : `<p class="hint">${t('inicio.vazio')}</p>`;
+  }
+
   function renderRegistros() {
     const abertos = registros.filter(emAberto);
     $('#totais').innerHTML =
@@ -1693,7 +1721,7 @@
     const filtro = ($('input[name="filtro"]:checked') || {}).value || 'todos';
     $('#filtrosLista').hidden = visao() === 'pessoas';
     if (!registros.length) {
-      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#inicio">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
+      el.innerHTML = `<div class="vazio"><b>${t('reg.vazioT')}</b><p>${t('reg.vazio')}</p><a class="btn btn-primary" href="#novo">${ico('plus')}${t('comum.novoRegistro')}</a></div>`;
       $('#pessoaFiltro').innerHTML = '';
       return;
     }
