@@ -2,7 +2,7 @@
 DebtIDTextos.fr = {
   "meta.descricao": "DebtID : calculatrice et reconnaissance de dette dans n'importe quelle devise, signée par les deux parties, avec un code QR. Tout reste sur votre appareil.",
   "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
+  "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "local.editar": "Modifier", "local.anular": "Annuler", "local.anulado": "Annulé", "local.confirmarAnular": "Annuler ce paiement ? Il ne comptera plus dans le solde mais restera dans l'historique.", "local.edicao": "Paiement corrigé", "local.avisarEdicao": "Vérifiez le montant et la date.", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
   "tema.paraClaro": "Passer en mode clair", "tema.paraEscuro": "Passer en mode sombre",
 
   "hero.eyebrow": "Registre de prêts · signé par les deux parties",

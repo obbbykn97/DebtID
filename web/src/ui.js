@@ -72,7 +72,8 @@
   };
   const acharReg = m => (m && m.hash ? registros.find(r => r.k === m.hash) : null) || null;
   const recibosDe = r => (r && Array.isArray(r.recibos) ? r.recibos : []);
-  const pagamentosLocaisDe = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosLocaisTodos = r => (r && r.soRegistro && Array.isArray(r.pagamentosLocais) ? r.pagamentosLocais : []);
+  const pagamentosLocaisDe = r => D.pagamentosLocaisAtivos(pagamentosLocaisTodos(r));
   const pagamentosDe = r => [...recibosDe(r).filter(x => x.tipo !== 'cancelamento' && x.valor > 0), ...pagamentosLocaisDe(r)].map(x => ({ dia: x.dia, valor: x.valor }));
   const dadosDe = r => ({ de: r.de, dp: r.dp, parcelas: r.parcelas || 1, multa: r.multa || 0, mora: r.mora || 0 });
   // day number (days since 1970) of a calendar date, and of a moment in the device's time zone
@@ -1161,7 +1162,7 @@
       titulo = t('st.quitadoT');
       texto = t(reg.quitadoAssinado ? 'st.quitadoAssinado' : 'st.quitado', { data: fmt.data(diaQuitado(reg)) });
       extraHTML = identidadeHTML(parteNaoEu(m));
-      if (!reg.quitadoAssinado) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
+      if (!reg.quitadoAssinado && !reg.quitadoPorPagamentoLocal) botoes = `<button class="btn" type="button" data-acao="desquitar">${ico('desfazer')}${t('st.desfazer')}</button>`;
       if (!reg.quitadoAssinado && sou === 'credor' && m.credor.pub === perfil.pub) botoes += btnQuitarAss;
     } else if (ctx === 'cancelado') {
       const rc = recibosDe(reg).find(x => x.tipo === 'cancelamento');
@@ -1251,7 +1252,7 @@
       <div class="stat s-3"><span>${t('res.prazo')}</span><b>${fmt.dias(c.dias)}</b><small>${fmt.dataCurta(d.de)} ${DebtIDIdioma.rtl() ? '←' : '→'} ${fmt.dataCurta(d.dp)}</small></div>
       <div class="stat s-4"><span>${t('res.juros')}</span>${valorStat(fmt.dinheiro4(c.jurosCentavos, infoDe(d)))}<small>${t('res.jurosNota')}</small></div>
     </div>`;
-    if (reg && (temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
+    if (reg && (reg.soRegistro || temRegras(reg) || pagamentosDe(reg).length) && reg.status !== 'cancelado') {
       const s = situacaoDe(reg);
       const saldo = reg.status === 'quitado' ? 0 : s.saldo;
       html += `<div class="summary summary-2">
@@ -1268,8 +1269,8 @@
   function pagamentosHTML(reg) {
     if (!reg || reg.tipoCodigo === 'v1') return '';
     const recibos = recibosDe(reg).slice().sort((a, b) => a.ts - b.ts);
-    const locais = pagamentosLocaisDe(reg);
-    if (!temRegras(reg) && !recibos.length && !locais.length) return '';
+    const locais = pagamentosLocaisTodos(reg);
+    if (!reg.soRegistro && !temRegras(reg) && !recibos.length && !locais.length) return '';
     const dia = hojeDia(), s = situacaoDe(reg, dia);
     let html = `<section class="panel pagamentos" aria-labelledby="t-pag"><h3 id="t-pag">${t('pg.titulo')}</h3>`;
     if ((reg.parcelas || 1) > 1 || reg.multa || reg.mora) {
@@ -1287,8 +1288,10 @@
       html += `<p class="hint">${t('pg.regras', { multa: fmt.taxa(reg.multa || 0), mora: fmt.taxa(reg.mora || 0) })}${s.encargos ? ' ' + t('pg.encargosHoje', { x: dinheiro(s.encargos, reg) }) : ''}</p>`;
     }
     if (locais.length) {
-      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map(x =>
-        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}</small></span></li>`).join('') + '</ul>';
+      html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + locais.map((x, i) =>
+        `<li><span class="pc-main"><b>${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)}</b><small>${fmt.data(x.dia)}${x.anulado ? ' · ' + t('local.anulado') : ''}</small></span>
+         ${x.anulado ? '' : `<button class="btn btn-ghost" type="button" data-acao="editar-pagamento-local" data-index="${i}">${t('local.editar')}</button>
+         <button class="btn btn-ghost" type="button" data-acao="anular-pagamento-local" data-index="${i}">${t('local.anular')}</button>`}</li>`).join('') + '</ul>';
     }
     if (recibos.length) {
       html += `<h4>${t('pg.recibos')}</h4><ul class="recibos">` + recibos.map(x =>
@@ -1308,8 +1311,12 @@
     const em = parteEmissora(m);
     ev.push({ ts: m.dados.ts, tz: m.dados.tz, texto: t('tl.criado', { nome: esc(em.nome) }) });
     if (m.confirmadoEm) ev.push({ ts: m.confirmadoEm.ts, tz: m.confirmadoEm.tz, texto: t('tl.confirmado', { nome: esc(parteOutra(m).nome) }) });
-    for (const x of pagamentosLocaisDe(reg)) {
+    for (const x of pagamentosLocaisTodos(reg)) {
+      if (x.anulado) continue;
       ev.push({ ts: x.ts, tz: x.tz, texto: `${t('recibo.pagamento')} · ${dinheiro(x.valor, reg)} · ${fmt.data(x.dia)}` });
+    }
+    for (const x of (reg && reg.historicoLocal || [])) {
+      ev.push({ ts: x.ts, tz: x.tz, texto: t(x.tipo === 'edicao' ? 'local.edicao' : 'local.anulado') + ' · ' + dinheiro(x.valor, reg) });
     }
     for (const x of recibosDe(reg)) {
       ev.push({ ts: x.ts, tz: x.tz, texto: t('tl.recibo.' + x.tipo, { valor: x.valor ? dinheiro(x.valor, reg) : '', data: fmt.data(x.dia), nome: esc(m.credor.nome) }) });
@@ -1529,6 +1536,24 @@
     }
   }
 
+  function salvarPagamentoLocal(reg, lista, tipo = null, anterior = null) {
+    const s = situacaoDe({ ...reg, pagamentosLocais: lista });
+    const quitou = s.saldo === 0 && D.pagamentosLocaisAtivos(lista).length > 0;
+    const agora = momentoDe(new Date());
+    const patch = { k: reg.k, pagamentosLocais: lista, atualizadoEm: Date.now() };
+    if (tipo) patch.historicoLocal = [...(reg.historicoLocal || []), { ...agora, tipo, valor: anterior.valor, dia: anterior.dia }];
+    // Only automatic settlements may be reopened by correcting a payment.
+    if (reg.status === 'registrado' || reg.quitadoPorPagamentoLocal) {
+      patch.status = quitou ? 'quitado' : 'registrado';
+      patch.quitadoPorPagamentoLocal = quitou;
+      patch.quitadoAssinado = false;
+      patch.quitadoDia = quitou ? Math.max(...D.pagamentosLocaisAtivos(lista).map(x => x.dia)) : null;
+      patch.quitadoEm = quitou ? Date.now() : null;
+    }
+    upsert(patch);
+    reRender();
+  }
+
   document.addEventListener('click', async e => {
     const b = e.target.closest('[data-acao]');
     if (!b) return;
@@ -1592,8 +1617,32 @@
         if (!resp) break;
         if (resp.valor <= 0 || resp.valor > saldo) { toast(t('modal.valorInvalido')); break; }
         const agora = momentoDe(new Date());
-        upsert({ k: reg.k, pagamentosLocais: [...pagamentosLocaisDe(reg), { ...resp, ...agora, valor: resp.valor }], atualizadoEm: Date.now() });
-        reRender(); toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        const id = Array.from(crypto.getRandomValues(new Uint32Array(2))).join('-');
+        salvarPagamentoLocal(reg, [...pagamentosLocaisTodos(reg), { ...resp, ...agora, id }]);
+        toast(t('toast.recibo.pagamento', { nome: reg.outro }));
+        break;
+      }
+      case 'editar-pagamento-local': case 'anular-pagamento-local': {
+        if (!reg || !reg.soRegistro) break;
+        const i = Number(b.dataset.index), todos = pagamentosLocaisTodos(reg), antes = todos[i];
+        if (!Number.isSafeInteger(i) || i < 0 || !antes || antes.anulado) break;
+        if (acao === 'anular-pagamento-local') {
+          const ok = await perguntar({ titulo: t('local.anular'), texto: t('local.confirmarAnular'), ok: t('modal.confirmar'), perigo: true });
+          if (!ok) break;
+          const lista = todos.slice(); lista[i] = { ...antes, anulado: true };
+          salvarPagamentoLocal(reg, lista, 'anulacao', antes);
+        } else {
+          const resp = await perguntar({
+            titulo: t('local.editar'), texto: t('local.avisarEdicao'), ok: t('modal.confirmar'),
+            valor: { moeda: reg.moeda, casas: reg.casas, padrao: antes.valor },
+            data: isoDeDia(antes.dia), dataMin: isoDeDia(Math.min(reg.de, hojeDia())), dataMax: isoDeDia(hojeDia())
+          });
+          if (!resp) break;
+          const lista = todos.slice(); lista[i] = { ...antes, valor: resp.valor, dia: resp.dia };
+          const saldo = situacaoDe({ ...reg, pagamentosLocais: lista });
+          if (saldo.credito > 0) { toast(t('modal.valorInvalido')); break; }
+          salvarPagamentoLocal(reg, lista, 'edicao', antes);
+        }
         break;
       }
       case 'pagamento': emitirRecibo('pagamento'); break;
@@ -1612,7 +1661,7 @@
           ok: t('modal.quitarOk'), data: hojeISO, dataMax: hojeISO
         });
         if (!r) break;
-        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, atualizadoEm: Date.now() });
+        upsert({ k: reg.k, status: 'quitado', quitadoEm: Date.now(), quitadoDia: r.dia, quitadoAssinado: false, quitadoPorPagamentoLocal: false, atualizadoEm: Date.now() });
         reRender(); toast(t('toast.quitado')); break;
       }
       case 'desquitar': {

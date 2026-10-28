@@ -2,7 +2,7 @@
 DebtIDTextos.bn = {
   "meta.descricao": "DebtID: যেকোনো মুদ্রায় ধারের হিসাব ও রসিদ, দুই পক্ষের স্বাক্ষরসহ, QR কোড দিয়ে। সবকিছু আপনার ডিভাইসেই থাকে।",
   "nav.secoes": "বিভাগ", "nav.navegacao": "নেভিগেশন",
-  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
+  "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "local.editar": "সম্পাদনা", "local.anular": "বাতিল", "local.anulado": "বাতিল", "local.confirmarAnular": "এই পেমেন্ট বাতিল করবেন? হিসাব থেকে বাদ যাবে, তবে ইতিহাসে থাকবে।", "local.edicao": "পেমেন্ট সংশোধিত", "local.avisarEdicao": "পরিমাণ ও তারিখ যাচাই করুন।", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
   "tema.paraClaro": "লাইট মোডে যান", "tema.paraEscuro": "ডার্ক মোডে যান",
 
   "hero.eyebrow": "ধারের রেকর্ড · দুই পক্ষের স্বাক্ষর",

@@ -2,7 +2,7 @@
 DebtIDTextos.ru = {
   "meta.descricao": "DebtID: калькулятор займов и расписка в любой валюте, подписанная обеими сторонами, с QR-кодом. Всё остаётся на вашем устройстве.",
   "nav.secoes": "Разделы", "nav.navegacao": "Навигация",
-  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
+  "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "local.editar": "Изменить", "local.anular": "Аннулировать", "local.anulado": "Аннулировано", "local.confirmarAnular": "Аннулировать платёж? Он не будет учтён в остатке, но останется в истории.", "local.edicao": "Платёж исправлен", "local.avisarEdicao": "Проверьте сумму и дату.", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
   "tema.paraClaro": "Включить светлую тему", "tema.paraEscuro": "Включить тёмную тему",
 
   "hero.eyebrow": "Учёт займов · подписано обеими сторонами",

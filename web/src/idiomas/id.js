@@ -2,7 +2,7 @@
 DebtIDTextos.id = {
   "meta.descricao": "DebtID: kalkulator pinjaman dan surat pengakuan utang dalam mata uang apa pun, ditandatangani kedua pihak, dengan kode QR. Semuanya tetap di perangkat Anda.",
   "nav.secoes": "Bagian", "nav.navegacao": "Navigasi",
-  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
+  "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "local.editar": "Ubah", "local.anular": "Batalkan", "local.anulado": "Dibatalkan", "local.confirmarAnular": "Batalkan pembayaran ini? Tidak lagi dihitung dalam saldo tetapi tetap ada di riwayat.", "local.edicao": "Pembayaran dikoreksi", "local.avisarEdicao": "Periksa jumlah dan tanggal.", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
   "tema.paraClaro": "Beralih ke mode terang", "tema.paraEscuro": "Beralih ke mode gelap",
 
   "hero.eyebrow": "Catatan pinjaman · ditandatangani kedua pihak",

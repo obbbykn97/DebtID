@@ -842,6 +842,11 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     };
   }
 
+  // Local entries can be annulled without deleting the historical record.
+  function pagamentosLocaisAtivos(lista) {
+    return (Array.isArray(lista) ? lista : []).filter(p => p && !p.anulado && Number.isSafeInteger(p.valor) && p.valor > 0);
+  }
+
   /* =================== password-protected backup =================== */
   // v1: 210,000 PBKDF2 rounds (still opens) · v2: 600,000 rounds (OWASP's figure for PBKDF2-SHA256)
   const MAGICO = enc.encode('DIDB');
@@ -1520,7 +1525,7 @@ ZWG|2|ZiG|ZiG|ZiG|m|ZiG|ZiG|ZiG (ouro do Zimbábue)|Zimbabwe Gold (ZiG)|`;
     calcular, ceilCentavos, fmt, extenso, lerNumero, definirIdioma, LIMITES, MODOS, ChaveErro,
     MOEDAS, CODIGOS_MOEDAS, MOEDAS_POPULARES, infoMoeda,
     criarPerfil, idDe, idLongoDe, criarProposta, confirmarProposta, lerCodigo, extrairCodigo,
-    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao,
+    criarRecibo, conferirRecibo, TIPOS_RECIBO, parcelasDe, situacao, pagamentosLocaisAtivos,
     exportarBackup, importarBackup, forcaSenha, hashPin, conferirPin, chaveTrava, QR,
     _interno: { embalar, desembalar, comprimir, descomprimir, b64url, deB64url, checksum, sBaixo, normalizarS, ORDEM }
   };

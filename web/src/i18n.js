@@ -8,7 +8,7 @@ const DebtIDTextos = {
   pt: {
     "meta.descricao": "DebtID: calculadora e registro de empréstimos em qualquer moeda, assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.",
     "nav.secoes": "Seções", "nav.navegacao": "Navegação",
-    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "Anular este pagamento? Ele deixará de contar no saldo, mas continuará no histórico.", "local.edicao": "Pagamento corrigido", "local.avisarEdicao": "Confira o valor e a data.", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
 
     "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
@@ -411,7 +411,7 @@ const DebtIDTextos = {
   en: {
     "meta.descricao": "DebtID: a loan calculator and IOU in any currency, signed by both sides, with a QR code. Everything stays on your device.",
     "nav.secoes": "Sections", "nav.navegacao": "Navigation",
-    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
+    "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "local.editar": "Edit", "local.anular": "Void", "local.anulado": "Voided", "local.confirmarAnular": "Void this payment? It will no longer count toward the balance, but remains in history.", "local.edicao": "Payment corrected", "local.avisarEdicao": "Check the amount and date.", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
 
     "hero.eyebrow": "Loan records · signed by both sides",
@@ -814,7 +814,7 @@ const DebtIDTextos = {
   es: {
     "meta.descricao": "DebtID: calculadora y registro de préstamos en cualquier moneda, firmado por las dos partes, con código QR. Todo queda en tu dispositivo.",
     "nav.secoes": "Secciones", "nav.navegacao": "Navegación",
-    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
+    "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "¿Anular este pago? Ya no contará en el saldo, pero permanecerá en el historial.", "local.edicao": "Pago corregido", "local.avisarEdicao": "Revisa el importe y la fecha.", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Cambiar a modo claro", "tema.paraEscuro": "Cambiar a modo oscuro",
 
     "hero.eyebrow": "Registro de préstamos · firmado por los dos",
