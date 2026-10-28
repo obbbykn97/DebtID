@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141414">
 <meta name="description" content="DebtID: calculadora e registro de empréstimos assinado pelos dois lados, com QR code. Tudo fica no seu aparelho.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-FRcPpAzHLixNRN263JMq92T5S1LVT0f8xZnqYIS7bUA=' 'sha256-ovg/FuAABdMstpH9mcC9xVX/Ccm+/TNqnSi4Ipsompw=' 'sha256-kpiZq3eAl/fhH7xHQG7Zz51ZAdkqCk3QZwCBWgO0XHw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EG+JtnTcE+z5W80ZYWEEYukZdnNnmH0K6m5XoBG5Qks=' 'sha256-Kx0MiKZtasO3+9xkmHzWp5Heu/1b4xFGpCGmuq0FHbM=' 'sha256-ovg/FuAABdMstpH9mcC9xVX/Ccm+/TNqnSi4Ipsompw=' 'sha256-kpiZq3eAl/fhH7xHQG7Zz51ZAdkqCk3QZwCBWgO0XHw='; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DebtID</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' rx='56' fill='%230E0E0E'/%3E%3Cg transform='translate(19.2 19.2) scale(.85)'%3E%3Crect x='64' y='52' width='36' height='152' rx='6' fill='%23fff'/%3E%3Cpath d='M116 52A76 76 0 0 1 116 204V168A40 40 0 0 0 116 88Z' fill='%23fff'/%3E%3Ccircle cx='133' cy='128' r='13' fill='%239DBF3E'/%3E%3C/g%3E%3C/svg%3E">
 <script>
@@ -49,8 +49,8 @@
 }
 /* Soft, dark */
 :root[data-theme="dark"]{
-  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411; --ink:#F3EFE9; --ink-2:#D3CDC5; --muted:#A8A199;
-  --line:#EDE7DE; --rule:#EDE7DE; --dash:#4C4852; --placeholder:#6F6973; --key-bg:#0D0C10; --key-note:#A9A39B; --red:#FF6B7A;
+  --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411; --ink:#F5F7F2; --ink-2:#CED6CA; --muted:#9DA69B;
+  --line:#EDE7DE; --rule:#EDE7DE; --dash:#4C4852; --placeholder:#6F6973; --key-bg:#0D0C10; --key-note:#A9A39B; --red:#EE716E;
   color-scheme:dark;
 }
 /* Professional, light */
@@ -68,8 +68,8 @@
 /* Professional, dark */
 :root[data-ui="pro"][data-theme="dark"]{
   --bg:#000000; --surface:#111411; --card:#1B2119; --field:#111411;
-  --ink:#F2F2F2; --ink-2:#CFCFCF; --muted:#8C8C8C; --line:#F2F2F2; --rule:#2E2E2E; --dash:#333333;
-  --placeholder:#5E5E5E; --key-bg:#000000; --key-note:#8C8C8C; --red:#FF6B5C;
+  --ink:#F5F7F2; --ink-2:#CED6CA; --muted:#9DA69B; --line:#F2F2F2; --rule:#2E2E2E; --dash:#333333;
+  --placeholder:#5E5E5E; --key-bg:#000000; --key-note:#8C8C8C; --red:#EE716E;
   --band:#000000; --info:#1E1E1E;
   color-scheme:dark;
 }
@@ -152,22 +152,10 @@ body.boas-vindas .tabbar,body.boas-vindas .nav{display:none !important}
 @media (prefers-reduced-motion:no-preference){.view.on{animation:entra .28s ease both}}
 @keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-/* ---------- Soft hero ---------- */
-.hero{display:grid;gap:28px;padding:34px 0 30px;align-items:center}
-.eyebrow{margin:0 0 12px;font-size:15px;color:var(--muted)}
+/* ---------- shared typography and links ---------- */
 h1{font-family:var(--display);font-weight:900;font-size:clamp(35px,10.2vw,84px);line-height:.95;letter-spacing:-.03em;margin:0 0 18px;text-transform:uppercase}
-.lead{font-size:17px;max-width:33em;margin:0 0 20px;color:var(--ink-2);text-wrap:pretty}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px;padding:0;list-style:none}
-.chips li{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;padding:5px 12px 5px 9px;border:2px solid var(--line);border-radius:999px;box-shadow:2px 2px 0 var(--line);color:var(--on)}
-.chips .ico{width:16px;height:16px}
-.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
 .link-arrow{display:inline-flex;align-items:center;gap:6px;font-weight:700;text-decoration:none;border-bottom:2px solid var(--line);padding-bottom:1px;background:none;border-top:0;border-inline-start:0;border-inline-end:0;cursor:pointer;padding-inline:0}
 .link-arrow .ico{width:16px;height:16px}
-.hero-art{display:none}
-@media (min-width:860px){
-  .hero{grid-template-columns:1.12fr .88fr;padding:52px 0 44px}
-  .hero-art{display:block;max-width:420px;justify-self:end;width:100%}
-}
 
 /* ---------- sections and panels ---------- */
 .block{margin-top:30px;scroll-margin-top:20px}
@@ -238,6 +226,7 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 .btns{display:flex;flex-wrap:wrap;gap:12px}
 .btns .btn{flex:1 1 200px}
 @media (max-width:639px){.form-foot .btn:not(.btn-ghost){width:100%}}
+
 
 /* ---------- figures ---------- */
 .summary{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -451,28 +440,6 @@ h3{font-size:17px;font-weight:800;margin:0 0 10px}
 [data-ui="pro"] .tabbar{background:var(--band);border-top:1px solid var(--rule)}
 [data-ui="pro"] .tabbar a{border:0;border-radius:0;color:var(--band-muted);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em}
 [data-ui="pro"] .tabbar a.on{background:none;color:var(--band-ink);box-shadow:inset 0 2px 0 var(--accent)}
-
-/* professional hero */
-.hero-pro{background:var(--band);color:var(--band-ink);padding:26px 0 40px}
-.hp-eyebrow{margin:0 0 12px;color:var(--accent);font-size:clamp(14px,3.6vw,18px);font-weight:500;text-transform:uppercase;letter-spacing:.02em}
-.hp-title{font-family:var(--display);font-weight:800;font-size:clamp(34px,8.4vw,64px);line-height:1;letter-spacing:-.01em;margin:0 0 14px;text-transform:uppercase}
-.hp-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 28px;margin-bottom:34px}
-.hp-sub{margin:0;font-size:clamp(26px,6.4vw,48px);font-weight:800;line-height:1.05;text-transform:uppercase;letter-spacing:-.01em}
-.hp-sub span{color:var(--band-muted)}
-.hp-sub em{font-style:normal;color:var(--coral)}
-.hp-feats{display:grid;gap:18px;border-top:1px solid #2E2E2E;padding-top:24px}
-@media (min-width:760px){.hp-feats{grid-template-columns:repeat(3,1fr);gap:28px}}
-.hp-feats>div{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center}
-.hp-dot{grid-row:span 2;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#111;display:grid;place-items:center;align-self:start}
-.hp-dot .ico{width:17px;height:17px}
-.hp-feats b{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-.hp-feats small{font-size:12.5px;color:var(--band-muted);text-transform:uppercase;letter-spacing:.01em;line-height:1.45}
-.hp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:26px;padding-bottom:4px}
-.hp-stats>div{display:flex;align-items:center;gap:10px;min-width:0}
-.hp-stats b{font-size:clamp(30px,8vw,54px);font-weight:800;line-height:1}
-.hp-stats span{font-size:clamp(10px,2.6vw,14px);font-weight:600;color:var(--muted);text-transform:uppercase;line-height:1.25;letter-spacing:.02em}
-[data-ui="pro"] .hero-pro .btn-inv{color:var(--band-ink);border-color:var(--band-ink);background:transparent}
-[data-ui="pro"] .hero-pro .btn-inv:hover{background:var(--band-ink);color:var(--band)}
 
 /* typography and blocks */
 [data-ui="pro"] h2{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:-.005em;font-size:clamp(22px,5.6vw,32px)}
@@ -800,6 +767,10 @@ body.travado{overflow:hidden}
 [data-ui="pro"] .trava-marca .bm-a{fill:var(--ink)} /* the lock screen is light: the logo goes dark */
 [data-ui="pro"] .linha-tempo ol{border-inline-start:1px solid var(--line)}
 
+:root[data-ui="pro"] .btn-primary{background:#A3C65B;color:#0B0E07;border-color:#A3C65B}
+:root[data-ui="pro"] .btn-primary:hover{background:#B4D571;color:#0B0E07}
+:root[data-ui="pro"] .btn:focus-visible{outline:3px solid #A3C65B;outline-offset:3px}
+
 /* =====================================================================
    Print: only the receipt, always light
    ===================================================================== */
@@ -879,7 +850,7 @@ code,.mo-cod,.rc-ref{direction:ltr;unicode-bidi:isolate}
 /* Arabic, Urdu, Hindi and Bengali: letter spacing would break joined letters and stacked marks,
    and the tight headline line height would clip marks above and below the letters */
 :root:is([lang|="ar"],[lang|="ur"],[lang|="hi"],[lang|="bn"]) *{letter-spacing:0!important}
-:root:is([lang|="ar"],[lang|="ur"],[lang|="hi"],[lang|="bn"]) :is(h1,h2,h3,.bv-title,.stat b,.hp-sub){line-height:1.4}
+:root:is([lang|="ar"],[lang|="ur"],[lang|="hi"],[lang|="bn"]) :is(h1,h2,h3,.bv-title,.stat b){line-height:1.4}
 :root[lang|="ur"] body{line-height:1.8}
 :root[lang|="ur"] :is(h1,h2,h3,.bv-title){line-height:1.7}
 /* questions asked from the lock screen (forgot the PIN, key lost) appear above it */
@@ -894,11 +865,6 @@ body.trava-aberta .modal{z-index:90}
 .inicio-recentes h2,.inicio-proximos h2{font-size:1.15rem;margin:0 0 14px}
 .entrada-opcoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
 .entrada-opcoes .btn{white-space:normal;min-height:60px;padding-inline:10px}
-:root[data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E}
-:root[data-ui="pro"][data-theme="dark"]{--ink:#F5F7F2;--ink-2:#CED6CA;--muted:#9DA69B;--red:#EE716E;--band:#000}
-:root[data-ui="pro"] .btn-primary{background:#A3C65B;color:#0B0E07;border-color:#A3C65B}
-:root[data-ui="pro"] .btn-primary:hover{background:#B4D571;color:#0B0E07}
-:root[data-ui="pro"] .btn:focus-visible{outline:3px solid #A3C65B;outline-offset:3px}
 @media(max-width:540px){.entrada-opcoes{grid-template-columns:1fr}.inicio-totais .stat{padding:14px 10px}.inicio-totais .stat b{font-size:clamp(19px,5vw,27px)}}
 </style>
 </head>
@@ -1514,19 +1480,7 @@ const DebtIDTextos = {
     "nav.inicio": "Início", "inicio.titulo": "Visão geral", "inicio.recentes": "Registros recentes", "inicio.vazio": "Você ainda não tem registros.", "novo.escolha": "Como você quer registrar esta dívida?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "Anular este pagamento? Ele deixará de contar no saldo, mas continuará no histórico.", "local.edicao": "Pagamento corrigido", "local.avisarEdicao": "Confira o valor e a data.", "atraso.previa": "Saldo simulado em {data}: {x}", "atraso.invalido": "Confira os valores e as taxas de atraso.", "atraso.resumo": "Cobrança por atraso: multa {multa}; juros {mora} ({periodo}).", "atraso.aviso": "Multas e juros compostos podem ter restrições legais. As duas pessoas devem aceitar essas regras; versões antigas não conseguem ler os novos contratos.", "atraso.avancado": "Configurar multas e juros por atraso", "atraso.multaTipo": "Tipo de multa", "atraso.nenhuma": "Nenhuma", "atraso.fixa": "Valor fixo", "atraso.percentual": "Percentual", "atraso.multaValor": "Valor ou percentual da multa", "atraso.moraTipo": "Juros por atraso", "atraso.simples": "Simples", "atraso.composta": "Compostos", "atraso.moraTaxa": "Taxa dos juros por atraso (%)", "atraso.periodo": "Período da taxa", "atraso.dia": "Ao dia", "atraso.mes": "Ao mês", "atraso.ano": "Ao ano", "atraso.capitalizacao": "Capitalização", "atraso.incluirMulta": "Incluir a multa no cálculo dos juros (verifique a legislação)", "atraso.dataPrevia": "Simular saldo na data", "pay.codigo": "Código de pagamento", "pay.envie": "Mostre este QR ou envie o código à outra pessoa. O saldo só muda após importar a aprovação assinada.", "pay.solicitar": "Solicitar pagamento", "pay.informar": "Informe o valor e a data para a outra pessoa confirmar.", "pay.gerar": "Gerar código", "pay.pendente": "Aguardando confirmação", "pay.estornar": "Solicitar estorno", "pay.estornarConf": "Solicitar estorno de {valor}? A outra pessoa também precisará aprovar.", "pay.pedidos": "Solicitações de pagamento", "pay.confirmados": "Pagamentos confirmados", "pay.estornado": "Estornado", "pay.confirmado": "Pagamento confirmado pelos dois", "pay.rejeitado": "Solicitação rejeitada", "pay.duplicado": "Este código já foi registrado", "pay.solicitacao": "Confirmação de pagamento", "pay.verificar": "{nome} informou {valor} em {data}. Confirme apenas se concordar com esse registro.", "pay.aprovar": "Aprovar", "pay.rejeitar": "Rejeitar", "pay.rejeitarConf": "Deseja realmente rejeitar esta solicitação?", "pay.pagamento": "Pagamento", "pay.estorno": "Estorno", "nav.novo": "Novo", "nav.conferir": "Conferir", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Mudar para modo claro", "tema.paraEscuro": "Mudar para modo escuro",
 
-    "hero.eyebrow": "Registro de empréstimos · assinado pelos dois",
-    "hero.titulo": "Quem empresta, registra.",
-    "hero.lead": "Calcule os juros, registre e peça para a outra pessoa confirmar. Cada um assina com uma chave que fica só no próprio celular, e ninguém pode dizer depois que não combinou.",
-    "hero.chip1": "Juros simples e compostos", "hero.chip2": "Assinado pelos dois", "hero.chip3": "QR code",
-    "comum.novoRegistro": "Novo registro", "hero.ler": "Ler um código",
-    "art.recibo": "RECIBO", "art.selo": "assinado pelos dois", "art.valor": "0,0026",
-    "hp.eyebrow": "Calcule · Registre · Comprove",
-    "hp.sub": "<span>Assinado pelos dois,</span> <em>conferido em segundos</em>",
-    "hp.f1t": "Assinatura digital", "hp.f1": "Credor e devedor assinam com chaves que ficam só no celular de cada um.",
-    "hp.f2t": "QR code", "hp.f2": "Mostre o QR e a outra pessoa confere em segundos.",
-    "hp.f3t": "Sem servidor", "hp.f3": "Nada sai do aparelho. Funciona até sem internet.",
-    "hp.s1": "assinaturas<br>por registro", "hp.s2": "servidores<br>no caminho", "hp.s3": "QR code<br>para conferir",
-
+    "comum.novoRegistro": "Novo registro", "art.recibo": "RECIBO", "art.selo": "assinado pelos dois", "art.valor": "0,0026",
     "form.passo": "Passo 1 de 3",
     "form.papel": "Neste empréstimo, eu sou…", "form.credor": "Quem empresta", "form.devedor": "Quem pega emprestado",
     "form.outroDevedor": "Nome de quem pega emprestado", "form.outroCredor": "Nome de quem empresta", "form.outroPh": "Ex.: Bruno Lima",
@@ -1917,19 +1871,7 @@ const DebtIDTextos = {
     "nav.inicio": "Home", "inicio.titulo": "Overview", "inicio.recentes": "Recent records", "inicio.vazio": "You have no records yet.", "novo.escolha": "How do you want to record this debt?", "local.editar": "Edit", "local.anular": "Void", "local.anulado": "Voided", "local.confirmarAnular": "Void this payment? It will no longer count toward the balance, but remains in history.", "local.edicao": "Payment corrected", "local.avisarEdicao": "Check the amount and date.", "atraso.previa": "Projected balance on {data}: {x}", "atraso.invalido": "Check the late fees and rates.", "atraso.resumo": "Late charges: fee {multa}; interest {mora} ({periodo}).", "atraso.aviso": "Late fees and compound interest may be restricted by law. Both parties must agree; older app versions cannot read these contracts.", "atraso.avancado": "Configure late fees and interest", "atraso.multaTipo": "Late fee type", "atraso.nenhuma": "None", "atraso.fixa": "Fixed amount", "atraso.percentual": "Percentage", "atraso.multaValor": "Fee amount or percentage", "atraso.moraTipo": "Late interest", "atraso.simples": "Simple", "atraso.composta": "Compound", "atraso.moraTaxa": "Late interest rate (%)", "atraso.periodo": "Rate period", "atraso.dia": "Daily", "atraso.mes": "Monthly", "atraso.ano": "Yearly", "atraso.capitalizacao": "Compounding", "atraso.incluirMulta": "Include late fee in the interest base (check applicable law)", "atraso.dataPrevia": "Project balance on date", "pay.codigo": "Payment code", "pay.envie": "Show this QR or send the code to the other person. The balance changes only after importing the signed approval.", "pay.solicitar": "Request payment", "pay.informar": "Enter the amount and date for the other person to confirm.", "pay.gerar": "Generate code", "pay.pendente": "Awaiting approval", "pay.estornar": "Request reversal", "pay.estornarConf": "Request reversal of {valor}? The other person must approve too.", "pay.pedidos": "Payment requests", "pay.confirmados": "Confirmed payments", "pay.estornado": "Reversed", "pay.confirmado": "Payment confirmed by both parties", "pay.rejeitado": "Request rejected", "pay.duplicado": "This code has already been recorded", "pay.solicitacao": "Payment confirmation", "pay.verificar": "{nome} reported {valor} on {data}. Approve only if you agree with the record.", "pay.aprovar": "Approve", "pay.rejeitar": "Reject", "pay.rejeitarConf": "Are you sure you want to reject this request?", "pay.pagamento": "Payment", "pay.estorno": "Reversal", "nav.novo": "New", "nav.conferir": "Verify", "nav.registros": "Records", "nav.ajustes": "Settings",
     "tema.paraClaro": "Switch to light mode", "tema.paraEscuro": "Switch to dark mode",
 
-    "hero.eyebrow": "Loan records · signed by both sides",
-    "hero.titulo": "Lend it. Log it.",
-    "hero.lead": "Work out the interest, record the loan and ask the other person to confirm. Each side signs with a key that never leaves their own phone, so nobody can later say they never agreed.",
-    "hero.chip1": "Simple & compound interest", "hero.chip2": "Signed by both sides", "hero.chip3": "QR code",
-    "comum.novoRegistro": "New record", "hero.ler": "Read a code",
-    "art.recibo": "RECEIPT", "art.selo": "signed by both sides", "art.valor": "0.0026",
-    "hp.eyebrow": "Calculate · Record · Prove",
-    "hp.sub": "<span>Signed by both sides,</span> <em>checked in seconds</em>",
-    "hp.f1t": "Digital signature", "hp.f1": "Lender and borrower sign with keys that stay on their own phones.",
-    "hp.f2t": "QR code", "hp.f2": "Show the QR and the other person verifies it in seconds.",
-    "hp.f3t": "No server", "hp.f3": "Nothing leaves the device. Works even offline.",
-    "hp.s1": "signatures<br>per record", "hp.s2": "servers<br>in between", "hp.s3": "QR code<br>to verify",
-
+    "comum.novoRegistro": "New record", "art.recibo": "RECEIPT", "art.selo": "signed by both sides", "art.valor": "0.0026",
     "form.passo": "Step 1 of 3",
     "form.papel": "In this loan, I am…", "form.credor": "The lender", "form.devedor": "The borrower",
     "form.outroDevedor": "Borrower's name", "form.outroCredor": "Lender's name", "form.outroPh": "e.g. Bruno Lima",
@@ -2320,19 +2262,7 @@ const DebtIDTextos = {
     "nav.inicio": "Inicio", "inicio.titulo": "Resumen", "inicio.recentes": "Registros recientes", "inicio.vazio": "Todavía no tienes registros.", "novo.escolha": "¿Cómo quieres registrar esta deuda?", "local.editar": "Editar", "local.anular": "Anular", "local.anulado": "Anulado", "local.confirmarAnular": "¿Anular este pago? Ya no contará en el saldo, pero permanecerá en el historial.", "local.edicao": "Pago corregido", "local.avisarEdicao": "Revisa el importe y la fecha.", "atraso.previa": "Saldo previsto para {data}: {x}", "atraso.invalido": "Revisa los cargos y tasas de demora.", "atraso.resumo": "Cargos por demora: multa {multa}; intereses {mora} ({periodo}).", "atraso.aviso": "Las multas y los intereses compuestos pueden estar limitados por ley. Ambas partes deben aceptar las condiciones; las versiones antiguas no pueden leer estos contratos.", "atraso.avancado": "Configurar multas e intereses de demora", "atraso.multaTipo": "Tipo de multa", "atraso.nenhuma": "Ninguna", "atraso.fixa": "Importe fijo", "atraso.percentual": "Porcentaje", "atraso.multaValor": "Importe o porcentaje de la multa", "atraso.moraTipo": "Intereses de demora", "atraso.simples": "Simples", "atraso.composta": "Compuestos", "atraso.moraTaxa": "Tasa de interés de demora (%)", "atraso.periodo": "Período de la tasa", "atraso.dia": "Diaria", "atraso.mes": "Mensual", "atraso.ano": "Anual", "atraso.capitalizacao": "Capitalización", "atraso.incluirMulta": "Incluir multa en la base de intereses (consulta la ley)", "atraso.dataPrevia": "Simular saldo en la fecha", "pay.codigo": "Código de pago", "pay.envie": "Muestra el QR o envía el código a la otra persona. El saldo solo cambia cuando se importa la aprobación firmada.", "pay.solicitar": "Solicitar pago", "pay.informar": "Introduce el importe y la fecha para que la otra persona confirme.", "pay.gerar": "Generar código", "pay.pendente": "Pendiente de confirmación", "pay.estornar": "Solicitar reversión", "pay.estornarConf": "¿Solicitar reversión de {valor}? La otra persona también debe aprobarla.", "pay.pedidos": "Solicitudes de pago", "pay.confirmados": "Pagos confirmados", "pay.estornado": "Revertido", "pay.confirmado": "Pago confirmado por ambas partes", "pay.rejeitado": "Solicitud rechazada", "pay.duplicado": "Este código ya está registrado", "pay.solicitacao": "Confirmación de pago", "pay.verificar": "{nome} informó {valor} el {data}. Aprueba solo si estás de acuerdo.", "pay.aprovar": "Aprobar", "pay.rejeitar": "Rechazar", "pay.rejeitarConf": "¿Seguro que quieres rechazar esta solicitud?", "pay.pagamento": "Pago", "pay.estorno": "Reversión", "nav.novo": "Nuevo", "nav.conferir": "Verificar", "nav.registros": "Registros", "nav.ajustes": "Ajustes",
     "tema.paraClaro": "Cambiar a modo claro", "tema.paraEscuro": "Cambiar a modo oscuro",
 
-    "hero.eyebrow": "Registro de préstamos · firmado por los dos",
-    "hero.titulo": "Quien presta, registra.",
-    "hero.lead": "Calcula los intereses, registra y pide a la otra persona que confirme. Cada uno firma con una clave que queda solo en su propio teléfono, y nadie puede decir después que no lo acordó.",
-    "hero.chip1": "Interés simple y compuesto", "hero.chip2": "Firmado por los dos", "hero.chip3": "Código QR",
-    "comum.novoRegistro": "Nuevo registro", "hero.ler": "Leer un código",
-    "art.recibo": "RECIBO", "art.selo": "firmado por los dos", "art.valor": "0,0026",
-    "hp.eyebrow": "Calcula · Registra · Comprueba",
-    "hp.sub": "<span>Firmado por los dos,</span> <em>verificado en segundos</em>",
-    "hp.f1t": "Firma digital", "hp.f1": "Acreedor y deudor firman con claves que quedan solo en el teléfono de cada uno.",
-    "hp.f2t": "Código QR", "hp.f2": "Muestra el QR y la otra persona lo verifica en segundos.",
-    "hp.f3t": "Sin servidor", "hp.f3": "Nada sale del dispositivo. Funciona incluso sin internet.",
-    "hp.s1": "firmas<br>por registro", "hp.s2": "servidores<br>en el camino", "hp.s3": "código QR<br>para verificar",
-
+    "comum.novoRegistro": "Nuevo registro", "art.recibo": "RECIBO", "art.selo": "firmado por los dos", "art.valor": "0,0026",
     "form.passo": "Paso 1 de 3",
     "form.papel": "En este préstamo, yo soy…", "form.credor": "Quien presta", "form.devedor": "Quien pide prestado",
     "form.outroDevedor": "Nombre de quien pide prestado", "form.outroCredor": "Nombre de quien presta", "form.outroPh": "Ej.: Bruno Lima",
@@ -2771,19 +2701,7 @@ DebtIDTextos.ar = {
   "nav.inicio": "الرئيسية", "inicio.titulo": "نظرة عامة", "inicio.recentes": "السجلات الأخيرة", "inicio.vazio": "لا توجد سجلات بعد.", "novo.escolha": "كيف تريد تسجيل هذا الدين؟", "local.editar": "تعديل", "local.anular": "إلغاء", "local.anulado": "ملغى", "local.confirmarAnular": "هل تريد إلغاء هذه الدفعة؟ ستبقى في السجل ولن تُحتسب في الرصيد.", "local.edicao": "تم تصحيح الدفعة", "local.avisarEdicao": "تحقق من المبلغ والتاريخ.", "atraso.previa": "الرصيد المتوقع في {data}: {x}", "atraso.invalido": "تحقق من رسوم التأخير وأسعار الفائدة.", "atraso.resumo": "رسوم التأخير: غرامة {multa}؛ فائدة {mora} ({periodo}).", "atraso.aviso": "قد يقيّد القانون الغرامات والفائدة المركبة. يجب موافقة الطرفين؛ الإصدارات القديمة لا تستطيع قراءة هذه العقود.", "atraso.avancado": "إعداد غرامات وفوائد التأخير", "atraso.multaTipo": "نوع الغرامة", "atraso.nenhuma": "لا شيء", "atraso.fixa": "مبلغ ثابت", "atraso.percentual": "نسبة مئوية", "atraso.multaValor": "قيمة الغرامة أو نسبتها", "atraso.moraTipo": "فوائد التأخير", "atraso.simples": "بسيطة", "atraso.composta": "مركبة", "atraso.moraTaxa": "معدل فوائد التأخير (%)", "atraso.periodo": "مدة المعدل", "atraso.dia": "يوميًا", "atraso.mes": "شهريًا", "atraso.ano": "سنويًا", "atraso.capitalizacao": "الرسملة", "atraso.incluirMulta": "إضافة الغرامة إلى أساس الفائدة (تحقق من القانون)", "atraso.dataPrevia": "محاكاة الرصيد بتاريخ", "pay.codigo": "رمز الدفع", "pay.envie": "أظهر رمز QR أو أرسله للطرف الآخر. لا يتغير الرصيد حتى استيراد الموافقة الموقعة.", "pay.solicitar": "طلب إثبات الدفع", "pay.informar": "أدخل المبلغ والتاريخ ليؤكدهما الطرف الآخر.", "pay.gerar": "إنشاء الرمز", "pay.pendente": "بانتظار الموافقة", "pay.estornar": "طلب إلغاء", "pay.estornarConf": "هل تريد طلب إلغاء {valor}؟ يجب أن يوافق الطرف الآخر.", "pay.pedidos": "طلبات الدفع", "pay.confirmados": "المدفوعات المؤكدة", "pay.estornado": "ملغى", "pay.confirmado": "تم تأكيد الدفع من الطرفين", "pay.rejeitado": "تم رفض الطلب", "pay.duplicado": "تم تسجيل هذا الرمز مسبقًا", "pay.solicitacao": "تأكيد الدفع", "pay.verificar": "أبلغ {nome} عن دفع {valor} في {data}. وافق فقط إذا كان صحيحًا.", "pay.aprovar": "موافقة", "pay.rejeitar": "رفض", "pay.rejeitarConf": "هل تريد حقًا رفض هذا الطلب؟", "pay.pagamento": "دفع", "pay.estorno": "إلغاء", "nav.novo": "جديد", "nav.conferir": "تحقّق", "nav.registros": "السجلات", "nav.ajustes": "الإعدادات",
   "tema.paraClaro": "التبديل إلى الوضع الفاتح", "tema.paraEscuro": "التبديل إلى الوضع الداكن",
 
-  "hero.eyebrow": "سجل القروض · بتوقيع الطرفين",
-  "hero.titulo": "أقرضت؟ سجّل.",
-  "hero.lead": "احسب الفائدة، وسجّل القرض، واطلب من الطرف الآخر أن يؤكد. يوقّع كل طرف بمفتاح لا يغادر هاتفه أبدًا، فلا يستطيع أحد أن يقول لاحقًا إنه لم يوافق.",
-  "hero.chip1": "فائدة بسيطة ومركبة", "hero.chip2": "بتوقيع الطرفين", "hero.chip3": "رمز QR",
-  "comum.novoRegistro": "سجل جديد", "hero.ler": "قراءة رمز",
-  "art.recibo": "إيصال", "art.selo": "بتوقيع الطرفين", "art.valor": "0.0026",
-  "hp.eyebrow": "احسب · سجّل · أثبت",
-  "hp.sub": "<span>بتوقيع الطرفين،</span> <em>والتحقق في ثوانٍ</em>",
-  "hp.f1t": "توقيع رقمي", "hp.f1": "يوقّع المُقرِض والمقترض بمفاتيح تبقى على هاتف كل منهما.",
-  "hp.f2t": "رمز QR", "hp.f2": "اعرض الرمز، فيتحقق منه الطرف الآخر في ثوانٍ.",
-  "hp.f3t": "بلا خادم", "hp.f3": "لا شيء يغادر الجهاز. يعمل حتى دون اتصال بالإنترنت.",
-  "hp.s1": "توقيعات<br>لكل سجل", "hp.s2": "خوادم<br>في المنتصف", "hp.s3": "رمز QR<br>للتحقق",
-
+  "comum.novoRegistro": "سجل جديد", "art.recibo": "إيصال", "art.selo": "بتوقيع الطرفين", "art.valor": "0.0026",
   "form.passo": "الخطوة 1 من 3",
   "form.papel": "في هذا القرض، أنا…", "form.credor": "المُقرِض", "form.devedor": "المقترض",
   "form.outroDevedor": "اسم المقترض", "form.outroCredor": "اسم المُقرِض", "form.outroPh": "مثلًا Bruno Lima",
@@ -3175,19 +3093,7 @@ DebtIDTextos.bn = {
   "nav.inicio": "হোম", "inicio.titulo": "সারসংক্ষেপ", "inicio.recentes": "সাম্প্রতিক রেকর্ড", "inicio.vazio": "এখনও কোনো রেকর্ড নেই।", "novo.escolha": "আপনি কীভাবে এই ঋণ নথিভুক্ত করতে চান?", "local.editar": "সম্পাদনা", "local.anular": "বাতিল", "local.anulado": "বাতিল", "local.confirmarAnular": "এই পেমেন্ট বাতিল করবেন? হিসাব থেকে বাদ যাবে, তবে ইতিহাসে থাকবে।", "local.edicao": "পেমেন্ট সংশোধিত", "local.avisarEdicao": "পরিমাণ ও তারিখ যাচাই করুন।", "atraso.previa": "{data} তারিখে সম্ভাব্য বকেয়া: {x}", "atraso.invalido": "বিলম্বের ফি ও সুদের হার যাচাই করুন।", "atraso.resumo": "বিলম্বের খরচ: জরিমানা {multa}; সুদ {mora} ({periodo})।", "atraso.aviso": "জরিমানা ও চক্রবৃদ্ধি সুদ আইনে সীমিত হতে পারে। উভয় পক্ষের সম্মতি প্রয়োজন; পুরোনো সংস্করণ এই চুক্তি পড়তে পারে না।", "atraso.avancado": "বিলম্বের জরিমানা ও সুদ নির্ধারণ", "atraso.multaTipo": "জরিমানার ধরন", "atraso.nenhuma": "নেই", "atraso.fixa": "নির্দিষ্ট পরিমাণ", "atraso.percentual": "শতাংশ", "atraso.multaValor": "জরিমানার পরিমাণ বা হার", "atraso.moraTipo": "বিলম্বের সুদ", "atraso.simples": "সরল", "atraso.composta": "চক্রবৃদ্ধি", "atraso.moraTaxa": "বিলম্বের সুদের হার (%)", "atraso.periodo": "হারের সময়কাল", "atraso.dia": "দৈনিক", "atraso.mes": "মাসিক", "atraso.ano": "বার্ষিক", "atraso.capitalizacao": "চক্রবৃদ্ধির মেয়াদ", "atraso.incluirMulta": "সুদের ভিত্তিতে জরিমানা যোগ করুন (আইন দেখুন)", "atraso.dataPrevia": "তারিখ অনুযায়ী বকেয়া হিসাব করুন", "pay.codigo": "পেমেন্ট কোড", "pay.envie": "এই QR দেখান বা অন্য ব্যক্তিকে কোড পাঠান। স্বাক্ষরিত অনুমোদন আমদানি করলেই বকেয়া বদলাবে।", "pay.solicitar": "পেমেন্টের অনুরোধ", "pay.informar": "অন্য পক্ষের অনুমোদনের জন্য পরিমাণ ও তারিখ দিন।", "pay.gerar": "কোড তৈরি করুন", "pay.pendente": "অনুমোদনের অপেক্ষায়", "pay.estornar": "বাতিলের অনুরোধ", "pay.estornarConf": "{valor} বাতিলের অনুরোধ করবেন? অন্য পক্ষের অনুমতি লাগবে।", "pay.pedidos": "পেমেন্টের অনুরোধ", "pay.confirmados": "নিশ্চিত পেমেন্ট", "pay.estornado": "বাতিল", "pay.confirmado": "উভয় পক্ষ পেমেন্ট নিশ্চিত করেছেন", "pay.rejeitado": "অনুরোধ প্রত্যাখ্যাত", "pay.duplicado": "এই কোড আগেই যোগ হয়েছে", "pay.solicitacao": "পেমেন্ট নিশ্চিতকরণ", "pay.verificar": "{nome} {data} তারিখে {valor} দেওয়ার কথা জানিয়েছেন। সঠিক হলে অনুমোদন করুন।", "pay.aprovar": "অনুমোদন", "pay.rejeitar": "প্রত্যাখ্যান", "pay.rejeitarConf": "নিশ্চিতভাবে এই অনুরোধ প্রত্যাখ্যান করবেন?", "pay.pagamento": "পেমেন্ট", "pay.estorno": "বাতিল", "nav.novo": "নতুন", "nav.conferir": "যাচাই", "nav.registros": "রেকর্ড", "nav.ajustes": "সেটিংস",
   "tema.paraClaro": "লাইট মোডে যান", "tema.paraEscuro": "ডার্ক মোডে যান",
 
-  "hero.eyebrow": "ধারের রেকর্ড · দুই পক্ষের স্বাক্ষর",
-  "hero.titulo": "ধার দিলেন? লিখে রাখুন।",
-  "hero.lead": "সুদ হিসাব করুন, ধার রেকর্ড করুন আর অন্যজনকে নিশ্চিত করতে বলুন। দুজনেই এমন চাবি দিয়ে স্বাক্ষর করেন যা কখনো নিজের ফোন ছেড়ে যায় না, তাই পরে কেউ বলতে পারে না যে তিনি রাজি হননি।",
-  "hero.chip1": "সরল ও চক্রবৃদ্ধি সুদ", "hero.chip2": "দুই পক্ষের স্বাক্ষর", "hero.chip3": "QR কোড",
-  "comum.novoRegistro": "নতুন রেকর্ড", "hero.ler": "কোড পড়ুন",
-  "art.recibo": "রসিদ", "art.selo": "দুই পক্ষের স্বাক্ষর", "art.valor": "0.0026",
-  "hp.eyebrow": "হিসাব · রেকর্ড · প্রমাণ",
-  "hp.sub": "<span>দুই পক্ষের স্বাক্ষর,</span> <em>কয়েক সেকেন্ডে যাচাই</em>",
-  "hp.f1t": "ডিজিটাল স্বাক্ষর", "hp.f1": "পাওনাদার আর দেনাদার এমন চাবি দিয়ে স্বাক্ষর করেন যা নিজের ফোনেই থাকে।",
-  "hp.f2t": "QR কোড", "hp.f2": "QR দেখান, অন্যজন কয়েক সেকেন্ডে যাচাই করে নেবেন।",
-  "hp.f3t": "কোনো সার্ভার নেই", "hp.f3": "কিছুই ডিভাইসের বাইরে যায় না। ইন্টারনেট ছাড়াও চলে।",
-  "hp.s1": "স্বাক্ষর<br>প্রতি রেকর্ডে", "hp.s2": "সার্ভার<br>মাঝখানে", "hp.s3": "QR কোড<br>যাচাইয়ের জন্য",
-
+  "comum.novoRegistro": "নতুন রেকর্ড", "art.recibo": "রসিদ", "art.selo": "দুই পক্ষের স্বাক্ষর", "art.valor": "0.0026",
   "form.passo": "ধাপ ১ / ৩",
   "form.papel": "এই ধারে আমি…", "form.credor": "পাওনাদার", "form.devedor": "দেনাদার",
   "form.outroDevedor": "দেনাদারের নাম", "form.outroCredor": "পাওনাদারের নাম", "form.outroPh": "যেমন Bruno Lima",
@@ -3579,19 +3485,7 @@ DebtIDTextos.de = {
   "nav.inicio": "Start", "inicio.titulo": "Übersicht", "inicio.recentes": "Letzte Einträge", "inicio.vazio": "Noch keine Einträge vorhanden.", "novo.escolha": "Wie möchten Sie diese Schuld erfassen?", "local.editar": "Bearbeiten", "local.anular": "Stornieren", "local.anulado": "Storniert", "local.confirmarAnular": "Diese Zahlung stornieren? Sie zählt nicht mehr zum Saldo, bleibt aber im Verlauf.", "local.edicao": "Zahlung korrigiert", "local.avisarEdicao": "Betrag und Datum prüfen.", "atraso.previa": "Prognostizierter Saldo am {data}: {x}", "atraso.invalido": "Bitte Verzugsgebühren und Zinssätze prüfen.", "atraso.resumo": "Verzugskosten: Gebühr {multa}; Zinsen {mora} ({periodo}).", "atraso.aviso": "Verzugsgebühren und Zinseszinsen können gesetzlich begrenzt sein. Beide Parteien müssen zustimmen; ältere Versionen können diese Verträge nicht lesen.", "atraso.avancado": "Verzugsgebühren und Zinsen einstellen", "atraso.multaTipo": "Art der Verzugsgebühr", "atraso.nenhuma": "Keine", "atraso.fixa": "Fester Betrag", "atraso.percentual": "Prozentsatz", "atraso.multaValor": "Gebührenbetrag oder Prozentsatz", "atraso.moraTipo": "Verzugszinsen", "atraso.simples": "Einfach", "atraso.composta": "Zusammengesetzt", "atraso.moraTaxa": "Verzugszinssatz (%)", "atraso.periodo": "Zinszeitraum", "atraso.dia": "Täglich", "atraso.mes": "Monatlich", "atraso.ano": "Jährlich", "atraso.capitalizacao": "Verzinsung", "atraso.incluirMulta": "Gebühr zur Zinsbasis hinzufügen (Gesetz prüfen)", "atraso.dataPrevia": "Saldo für Datum berechnen", "pay.codigo": "Zahlungscode", "pay.envie": "Zeigen Sie diesen QR-Code oder senden Sie ihn der anderen Person. Der Saldo ändert sich erst nach dem Import der signierten Bestätigung.", "pay.solicitar": "Zahlung anfragen", "pay.informar": "Betrag und Datum zur Bestätigung eingeben.", "pay.gerar": "Code erstellen", "pay.pendente": "Wartet auf Bestätigung", "pay.estornar": "Storno anfragen", "pay.estornarConf": "Storno von {valor} anfragen? Die andere Person muss zustimmen.", "pay.pedidos": "Zahlungsanfragen", "pay.confirmados": "Bestätigte Zahlungen", "pay.estornado": "Storniert", "pay.confirmado": "Von beiden bestätigte Zahlung", "pay.rejeitado": "Anfrage abgelehnt", "pay.duplicado": "Code bereits erfasst", "pay.solicitacao": "Zahlungsbestätigung", "pay.verificar": "{nome} meldete {valor} am {data}. Nur bestätigen, wenn dies stimmt.", "pay.aprovar": "Bestätigen", "pay.rejeitar": "Ablehnen", "pay.rejeitarConf": "Diese Anfrage wirklich ablehnen?", "pay.pagamento": "Zahlung", "pay.estorno": "Storno", "nav.novo": "Neu", "nav.conferir": "Prüfen", "nav.registros": "Einträge", "nav.ajustes": "Einstellungen",
   "tema.paraClaro": "Zum hellen Modus wechseln", "tema.paraEscuro": "Zum dunklen Modus wechseln",
 
-  "hero.eyebrow": "Darlehen festhalten · von beiden Seiten unterschrieben",
-  "hero.titulo": "Wer leiht, schreibt auf.",
-  "hero.lead": "Zinsen berechnen, das Darlehen festhalten und die andere Person bestätigen lassen. Jede Seite unterschreibt mit einem Schlüssel, der das eigene Handy nie verlässt. So kann später niemand behaupten, nicht zugestimmt zu haben.",
-  "hero.chip1": "Einfache und Zinseszinsen", "hero.chip2": "Von beiden unterschrieben", "hero.chip3": "QR-Code",
-  "comum.novoRegistro": "Neuer Eintrag", "hero.ler": "Code lesen",
-  "art.recibo": "QUITTUNG", "art.selo": "von beiden unterschrieben", "art.valor": "0,0026",
-  "hp.eyebrow": "Berechnen · Festhalten · Belegen",
-  "hp.sub": "<span>Von beiden unterschrieben,</span> <em>in Sekunden geprüft</em>",
-  "hp.f1t": "Digitale Signatur", "hp.f1": "Gläubiger und Schuldner unterschreiben mit Schlüsseln, die auf dem eigenen Handy bleiben.",
-  "hp.f2t": "QR-Code", "hp.f2": "Zeig den QR-Code, und die andere Person prüft ihn in Sekunden.",
-  "hp.f3t": "Kein Server", "hp.f3": "Nichts verlässt das Gerät. Funktioniert auch offline.",
-  "hp.s1": "Signaturen<br>pro Eintrag", "hp.s2": "Server<br>dazwischen", "hp.s3": "QR-Code<br>zum Prüfen",
-
+  "comum.novoRegistro": "Neuer Eintrag", "art.recibo": "QUITTUNG", "art.selo": "von beiden unterschrieben", "art.valor": "0,0026",
   "form.passo": "Schritt 1 von 3",
   "form.papel": "Bei diesem Darlehen bin ich…", "form.credor": "Gläubiger", "form.devedor": "Schuldner",
   "form.outroDevedor": "Name des Schuldners", "form.outroCredor": "Name des Gläubigers", "form.outroPh": "z. B. Bruno Lima",
@@ -3983,19 +3877,7 @@ DebtIDTextos.fr = {
   "nav.inicio": "Accueil", "inicio.titulo": "Vue d'ensemble", "inicio.recentes": "Enregistrements récents", "inicio.vazio": "Aucun enregistrement pour le moment.", "novo.escolha": "Comment souhaitez-vous enregistrer cette dette ?", "local.editar": "Modifier", "local.anular": "Annuler", "local.anulado": "Annulé", "local.confirmarAnular": "Annuler ce paiement ? Il ne comptera plus dans le solde mais restera dans l'historique.", "local.edicao": "Paiement corrigé", "local.avisarEdicao": "Vérifiez le montant et la date.", "atraso.previa": "Solde prévu au {data} : {x}", "atraso.invalido": "Vérifiez les frais et taux de retard.", "atraso.resumo": "Retard : pénalité {multa} ; intérêts {mora} ({periodo}).", "atraso.aviso": "Les pénalités et intérêts composés peuvent être limités par la loi. Les deux parties doivent accepter ; les anciennes versions ne peuvent pas lire ces contrats.", "atraso.avancado": "Configurer les pénalités et intérêts de retard", "atraso.multaTipo": "Type de pénalité", "atraso.nenhuma": "Aucune", "atraso.fixa": "Montant fixe", "atraso.percentual": "Pourcentage", "atraso.multaValor": "Montant ou pourcentage de la pénalité", "atraso.moraTipo": "Intérêts de retard", "atraso.simples": "Simples", "atraso.composta": "Composés", "atraso.moraTaxa": "Taux des intérêts de retard (%)", "atraso.periodo": "Période du taux", "atraso.dia": "Par jour", "atraso.mes": "Par mois", "atraso.ano": "Par an", "atraso.capitalizacao": "Capitalisation", "atraso.incluirMulta": "Inclure la pénalité dans la base des intérêts (vérifier la loi)", "atraso.dataPrevia": "Simuler le solde à la date", "pay.codigo": "Code de paiement", "pay.envie": "Montrez ce QR ou envoyez le code à l'autre personne. Le solde change après l'import de la validation signée.", "pay.solicitar": "Demander un paiement", "pay.informar": "Saisissez le montant et la date pour confirmation.", "pay.gerar": "Créer le code", "pay.pendente": "En attente de validation", "pay.estornar": "Demander une annulation", "pay.estornarConf": "Annuler {valor} ? L'autre personne doit aussi accepter.", "pay.pedidos": "Demandes de paiement", "pay.confirmados": "Paiements confirmés", "pay.estornado": "Annulé", "pay.confirmado": "Paiement confirmé par les deux parties", "pay.rejeitado": "Demande refusée", "pay.duplicado": "Code déjà enregistré", "pay.solicitacao": "Confirmation de paiement", "pay.verificar": "{nome} a déclaré {valor} le {data}. Validez seulement si vous êtes d'accord.", "pay.aprovar": "Valider", "pay.rejeitar": "Refuser", "pay.rejeitarConf": "Voulez-vous vraiment refuser cette demande ?", "pay.pagamento": "Paiement", "pay.estorno": "Annulation", "nav.novo": "Nouveau", "nav.conferir": "Vérifier", "nav.registros": "Registres", "nav.ajustes": "Paramètres",
   "tema.paraClaro": "Passer en mode clair", "tema.paraEscuro": "Passer en mode sombre",
 
-  "hero.eyebrow": "Registre de prêts · signé par les deux parties",
-  "hero.titulo": "Qui prête, note.",
-  "hero.lead": "Calculez les intérêts, enregistrez le prêt et demandez à l'autre personne de confirmer. Chacun signe avec une clé qui ne quitte jamais son propre téléphone : personne ne pourra dire plus tard qu'il n'était pas d'accord.",
-  "hero.chip1": "Intérêts simples et composés", "hero.chip2": "Signé par les deux parties", "hero.chip3": "Code QR",
-  "comum.novoRegistro": "Nouveau registre", "hero.ler": "Lire un code",
-  "art.recibo": "REÇU", "art.selo": "signé par les deux parties", "art.valor": "0,0026",
-  "hp.eyebrow": "Calculer · Enregistrer · Prouver",
-  "hp.sub": "<span>Signé par les deux parties,</span> <em>vérifié en quelques secondes</em>",
-  "hp.f1t": "Signature numérique", "hp.f1": "Le prêteur et l'emprunteur signent avec des clés qui restent sur leur propre téléphone.",
-  "hp.f2t": "Code QR", "hp.f2": "Montrez le QR et l'autre personne le vérifie en quelques secondes.",
-  "hp.f3t": "Sans serveur", "hp.f3": "Rien ne quitte l'appareil. Fonctionne même hors ligne.",
-  "hp.s1": "signatures<br>par registre", "hp.s2": "serveurs<br>entre vous", "hp.s3": "code QR<br>pour vérifier",
-
+  "comum.novoRegistro": "Nouveau registre", "art.recibo": "REÇU", "art.selo": "signé par les deux parties", "art.valor": "0,0026",
   "form.passo": "Étape 1 sur 3",
   "form.papel": "Dans ce prêt, je suis…", "form.credor": "Le prêteur", "form.devedor": "L'emprunteur",
   "form.outroDevedor": "Nom de l'emprunteur", "form.outroCredor": "Nom du prêteur", "form.outroPh": "ex. Bruno Lima",
@@ -4387,19 +4269,7 @@ DebtIDTextos.hi = {
   "nav.inicio": "होम", "inicio.titulo": "अवलोकन", "inicio.recentes": "हाल के रिकॉर्ड", "inicio.vazio": "अभी कोई रिकॉर्ड नहीं है।", "novo.escolha": "आप यह कर्ज़ कैसे दर्ज करना चाहते हैं?", "local.editar": "संपादित करें", "local.anular": "रद्द करें", "local.anulado": "रद्द", "local.confirmarAnular": "यह भुगतान रद्द करें? शेष राशि में नहीं गिना जाएगा, लेकिन इतिहास में रहेगा।", "local.edicao": "भुगतान सुधारा गया", "local.avisarEdicao": "राशि और तारीख जाँचें।", "atraso.previa": "{data} को अनुमानित बकाया: {x}", "atraso.invalido": "देरी के शुल्क और ब्याज दरें जाँचें।", "atraso.resumo": "देरी के शुल्क: जुर्माना {multa}; ब्याज {mora} ({periodo})।", "atraso.aviso": "जुर्माने और चक्रवृद्धि ब्याज पर कानूनी सीमाएँ हो सकती हैं। दोनों पक्षों की सहमति आवश्यक है; पुराने संस्करण ये अनुबंध नहीं पढ़ सकते।", "atraso.avancado": "देरी के शुल्क और ब्याज तय करें", "atraso.multaTipo": "जुर्माने का प्रकार", "atraso.nenhuma": "कोई नहीं", "atraso.fixa": "निश्चित राशि", "atraso.percentual": "प्रतिशत", "atraso.multaValor": "जुर्माने की राशि या प्रतिशत", "atraso.moraTipo": "देरी का ब्याज", "atraso.simples": "साधारण", "atraso.composta": "चक्रवृद्धि", "atraso.moraTaxa": "देरी ब्याज दर (%)", "atraso.periodo": "दर की अवधि", "atraso.dia": "प्रतिदिन", "atraso.mes": "प्रतिमाह", "atraso.ano": "प्रतिवर्ष", "atraso.capitalizacao": "चक्रवृद्धि अवधि", "atraso.incluirMulta": "ब्याज की गणना में जुर्माना जोड़ें (कानून देखें)", "atraso.dataPrevia": "तारीख पर बकाया देखें", "pay.codigo": "भुगतान कोड", "pay.envie": "यह QR दिखाएँ या दूसरे व्यक्ति को कोड भेजें। हस्ताक्षरित स्वीकृति आयात करने के बाद ही बकाया बदलेगा।", "pay.solicitar": "भुगतान अनुरोध", "pay.informar": "दूसरे व्यक्ति की पुष्टि के लिए राशि और तारीख भरें।", "pay.gerar": "कोड बनाएँ", "pay.pendente": "पुष्टि बाकी", "pay.estornar": "रद्द करने का अनुरोध", "pay.estornarConf": "{valor} रद्द करने का अनुरोध? दूसरे व्यक्ति की अनुमति भी चाहिए।", "pay.pedidos": "भुगतान अनुरोध", "pay.confirmados": "पुष्टि किए गए भुगतान", "pay.estornado": "रद्द किया गया", "pay.confirmado": "दोनों पक्षों द्वारा भुगतान की पुष्टि", "pay.rejeitado": "अनुरोध अस्वीकृत", "pay.duplicado": "यह कोड पहले दर्ज है", "pay.solicitacao": "भुगतान की पुष्टि", "pay.verificar": "{nome} ने {data} को {valor} बताया। सहमत होने पर ही स्वीकृत करें।", "pay.aprovar": "स्वीकृत", "pay.rejeitar": "अस्वीकार", "pay.rejeitarConf": "क्या आप यह अनुरोध अस्वीकार करना चाहते हैं?", "pay.pagamento": "भुगतान", "pay.estorno": "रद्द", "nav.novo": "नया", "nav.conferir": "जाँचें", "nav.registros": "रिकॉर्ड", "nav.ajustes": "सेटिंग्स",
   "tema.paraClaro": "लाइट मोड पर जाएँ", "tema.paraEscuro": "डार्क मोड पर जाएँ",
 
-  "hero.eyebrow": "उधार का रिकॉर्ड · दोनों पक्षों के हस्ताक्षर",
-  "hero.titulo": "उधार दिया? लिख लिया।",
-  "hero.lead": "ब्याज निकालें, उधार दर्ज करें और दूसरे व्यक्ति से पुष्टि करवाएँ। दोनों अपनी-अपनी कुंजी से हस्ताक्षर करते हैं, जो कभी उनके फ़ोन से बाहर नहीं जाती। इसलिए बाद में कोई नहीं कह सकता कि उसने हामी नहीं भरी थी।",
-  "hero.chip1": "साधारण और चक्रवृद्धि ब्याज", "hero.chip2": "दोनों पक्षों के हस्ताक्षर", "hero.chip3": "QR कोड",
-  "comum.novoRegistro": "नया रिकॉर्ड", "hero.ler": "कोड पढ़ें",
-  "art.recibo": "रसीद", "art.selo": "दोनों पक्षों के हस्ताक्षर", "art.valor": "0.0026",
-  "hp.eyebrow": "हिसाब · रिकॉर्ड · सबूत",
-  "hp.sub": "<span>दोनों पक्षों के हस्ताक्षर,</span> <em>कुछ सेकंड में जाँच</em>",
-  "hp.f1t": "डिजिटल हस्ताक्षर", "hp.f1": "लेनदार और देनदार उन कुंजियों से हस्ताक्षर करते हैं जो उनके अपने फ़ोन पर रहती हैं।",
-  "hp.f2t": "QR कोड", "hp.f2": "QR दिखाइए, और दूसरा व्यक्ति कुछ सेकंड में उसे जाँच लेता है।",
-  "hp.f3t": "कोई सर्वर नहीं", "hp.f3": "कुछ भी डिवाइस से बाहर नहीं जाता। बिना इंटरनेट के भी चलता है।",
-  "hp.s1": "हस्ताक्षर<br>हर रिकॉर्ड में", "hp.s2": "सर्वर<br>बीच में", "hp.s3": "QR कोड<br>जाँच के लिए",
-
+  "comum.novoRegistro": "नया रिकॉर्ड", "art.recibo": "रसीद", "art.selo": "दोनों पक्षों के हस्ताक्षर", "art.valor": "0.0026",
   "form.passo": "चरण 1 / 3",
   "form.papel": "इस उधार में मैं हूँ…", "form.credor": "लेनदार", "form.devedor": "देनदार",
   "form.outroDevedor": "देनदार का नाम", "form.outroCredor": "लेनदार का नाम", "form.outroPh": "जैसे Bruno Lima",
@@ -4791,19 +4661,7 @@ DebtIDTextos.id = {
   "nav.inicio": "Beranda", "inicio.titulo": "Ringkasan", "inicio.recentes": "Catatan terbaru", "inicio.vazio": "Belum ada catatan.", "novo.escolha": "Bagaimana Anda ingin mencatat utang ini?", "local.editar": "Ubah", "local.anular": "Batalkan", "local.anulado": "Dibatalkan", "local.confirmarAnular": "Batalkan pembayaran ini? Tidak lagi dihitung dalam saldo tetapi tetap ada di riwayat.", "local.edicao": "Pembayaran dikoreksi", "local.avisarEdicao": "Periksa jumlah dan tanggal.", "atraso.previa": "Saldo perkiraan pada {data}: {x}", "atraso.invalido": "Periksa biaya dan suku bunga keterlambatan.", "atraso.resumo": "Biaya keterlambatan: denda {multa}; bunga {mora} ({periodo}).", "atraso.aviso": "Denda dan bunga majemuk mungkin dibatasi hukum. Kedua pihak harus setuju; versi lama tidak dapat membaca kontrak ini.", "atraso.avancado": "Atur denda dan bunga keterlambatan", "atraso.multaTipo": "Jenis denda", "atraso.nenhuma": "Tidak ada", "atraso.fixa": "Jumlah tetap", "atraso.percentual": "Persentase", "atraso.multaValor": "Jumlah atau persentase denda", "atraso.moraTipo": "Bunga keterlambatan", "atraso.simples": "Sederhana", "atraso.composta": "Majemuk", "atraso.moraTaxa": "Suku bunga keterlambatan (%)", "atraso.periodo": "Periode bunga", "atraso.dia": "Harian", "atraso.mes": "Bulanan", "atraso.ano": "Tahunan", "atraso.capitalizacao": "Kapitalisasi", "atraso.incluirMulta": "Sertakan denda sebagai dasar bunga (periksa hukum)", "atraso.dataPrevia": "Simulasikan saldo pada tanggal", "pay.codigo": "Kode pembayaran", "pay.envie": "Tunjukkan QR ini atau kirim kode ke pihak lain. Saldo berubah setelah persetujuan bertanda tangan diimpor.", "pay.solicitar": "Ajukan pembayaran", "pay.informar": "Masukkan jumlah dan tanggal untuk dikonfirmasi pihak lain.", "pay.gerar": "Buat kode", "pay.pendente": "Menunggu persetujuan", "pay.estornar": "Ajukan pembatalan", "pay.estornarConf": "Batalkan {valor}? Pihak lain juga harus menyetujui.", "pay.pedidos": "Permintaan pembayaran", "pay.confirmados": "Pembayaran terkonfirmasi", "pay.estornado": "Dibatalkan", "pay.confirmado": "Pembayaran disetujui kedua pihak", "pay.rejeitado": "Permintaan ditolak", "pay.duplicado": "Kode sudah tercatat", "pay.solicitacao": "Konfirmasi pembayaran", "pay.verificar": "{nome} melaporkan {valor} pada {data}. Setujui jika catatan ini benar.", "pay.aprovar": "Setujui", "pay.rejeitar": "Tolak", "pay.rejeitarConf": "Yakin ingin menolak permintaan ini?", "pay.pagamento": "Pembayaran", "pay.estorno": "Pembatalan", "nav.novo": "Baru", "nav.conferir": "Periksa", "nav.registros": "Catatan", "nav.ajustes": "Pengaturan",
   "tema.paraClaro": "Beralih ke mode terang", "tema.paraEscuro": "Beralih ke mode gelap",
 
-  "hero.eyebrow": "Catatan pinjaman · ditandatangani kedua pihak",
-  "hero.titulo": "Meminjamkan? Catat.",
-  "hero.lead": "Hitung bunganya, catat pinjamannya, lalu minta pihak lain mengonfirmasi. Masing-masing menandatangani dengan kunci yang tidak pernah keluar dari ponselnya sendiri, jadi tidak ada yang bisa bilang belakangan bahwa ia tidak setuju.",
-  "hero.chip1": "Bunga sederhana & majemuk", "hero.chip2": "Ditandatangani kedua pihak", "hero.chip3": "Kode QR",
-  "comum.novoRegistro": "Catatan baru", "hero.ler": "Baca kode",
-  "art.recibo": "KUITANSI", "art.selo": "ditandatangani kedua pihak", "art.valor": "0,0026",
-  "hp.eyebrow": "Hitung · Catat · Buktikan",
-  "hp.sub": "<span>Ditandatangani kedua pihak,</span> <em>diperiksa dalam hitungan detik</em>",
-  "hp.f1t": "Tanda tangan digital", "hp.f1": "Pemberi pinjaman dan peminjam menandatangani dengan kunci yang tetap di ponsel masing-masing.",
-  "hp.f2t": "Kode QR", "hp.f2": "Tunjukkan QR-nya, dan pihak lain memeriksanya dalam hitungan detik.",
-  "hp.f3t": "Tanpa server", "hp.f3": "Tidak ada yang keluar dari perangkat. Tetap jalan tanpa internet.",
-  "hp.s1": "tanda tangan<br>per catatan", "hp.s2": "server<br>di tengah", "hp.s3": "kode QR<br>untuk memeriksa",
-
+  "comum.novoRegistro": "Catatan baru", "art.recibo": "KUITANSI", "art.selo": "ditandatangani kedua pihak", "art.valor": "0,0026",
   "form.passo": "Langkah 1 dari 3",
   "form.papel": "Dalam pinjaman ini, saya…", "form.credor": "Pemberi pinjaman", "form.devedor": "Peminjam",
   "form.outroDevedor": "Nama peminjam", "form.outroCredor": "Nama pemberi pinjaman", "form.outroPh": "mis. Bruno Lima",
@@ -5195,19 +5053,7 @@ DebtIDTextos.ru = {
   "nav.inicio": "Главная", "inicio.titulo": "Обзор", "inicio.recentes": "Недавние записи", "inicio.vazio": "Записей пока нет.", "novo.escolha": "Как вы хотите записать этот долг?", "local.editar": "Изменить", "local.anular": "Аннулировать", "local.anulado": "Аннулировано", "local.confirmarAnular": "Аннулировать платёж? Он не будет учтён в остатке, но останется в истории.", "local.edicao": "Платёж исправлен", "local.avisarEdicao": "Проверьте сумму и дату.", "atraso.previa": "Прогноз остатка на {data}: {x}", "atraso.invalido": "Проверьте штрафы и ставки за просрочку.", "atraso.resumo": "Просрочка: штраф {multa}; проценты {mora} ({periodo}).", "atraso.aviso": "Штрафы и сложные проценты могут ограничиваться законом. Обе стороны должны согласиться; старые версии не читают такие договоры.", "atraso.avancado": "Настроить штрафы и проценты за просрочку", "atraso.multaTipo": "Тип штрафа", "atraso.nenhuma": "Нет", "atraso.fixa": "Фиксированная сумма", "atraso.percentual": "Процент", "atraso.multaValor": "Сумма или процент штрафа", "atraso.moraTipo": "Проценты за просрочку", "atraso.simples": "Простые", "atraso.composta": "Сложные", "atraso.moraTaxa": "Ставка процентов за просрочку (%)", "atraso.periodo": "Период ставки", "atraso.dia": "В день", "atraso.mes": "В месяц", "atraso.ano": "В год", "atraso.capitalizacao": "Капитализация", "atraso.incluirMulta": "Включить штраф в базу процентов (проверьте закон)", "atraso.dataPrevia": "Рассчитать остаток на дату", "pay.codigo": "Код платежа", "pay.envie": "Покажите QR-код или отправьте код другой стороне. Остаток изменится только после импорта подписанного подтверждения.", "pay.solicitar": "Запросить платёж", "pay.informar": "Введите сумму и дату для подтверждения другой стороной.", "pay.gerar": "Создать код", "pay.pendente": "Ожидает подтверждения", "pay.estornar": "Запросить отмену", "pay.estornarConf": "Запросить отмену {valor}? Другой стороне также нужно согласиться.", "pay.pedidos": "Запросы платежей", "pay.confirmados": "Подтверждённые платежи", "pay.estornado": "Отменён", "pay.confirmado": "Платёж подтверждён обеими сторонами", "pay.rejeitado": "Запрос отклонён", "pay.duplicado": "Этот код уже сохранён", "pay.solicitacao": "Подтверждение платежа", "pay.verificar": "{nome} указал(а) {valor} от {data}. Подтверждайте только если согласны.", "pay.aprovar": "Подтвердить", "pay.rejeitar": "Отклонить", "pay.rejeitarConf": "Точно отклонить этот запрос?", "pay.pagamento": "Платёж", "pay.estorno": "Отмена", "nav.novo": "Новый", "nav.conferir": "Проверить", "nav.registros": "Записи", "nav.ajustes": "Настройки",
   "tema.paraClaro": "Включить светлую тему", "tema.paraEscuro": "Включить тёмную тему",
 
-  "hero.eyebrow": "Учёт займов · подписано обеими сторонами",
-  "hero.titulo": "Дал в долг — запиши.",
-  "hero.lead": "Посчитайте проценты, запишите заём и попросите другого человека подтвердить. Каждый подписывает ключом, который никогда не покидает его телефон, поэтому потом никто не скажет, что не соглашался.",
-  "hero.chip1": "Простые и сложные проценты", "hero.chip2": "Подпись обеих сторон", "hero.chip3": "QR-код",
-  "comum.novoRegistro": "Новая запись", "hero.ler": "Считать код",
-  "art.recibo": "РАСПИСКА", "art.selo": "подписано обеими сторонами", "art.valor": "0,0026",
-  "hp.eyebrow": "Посчитать · Записать · Доказать",
-  "hp.sub": "<span>Подписано обеими сторонами,</span> <em>проверяется за секунды</em>",
-  "hp.f1t": "Цифровая подпись", "hp.f1": "Кредитор и должник подписывают ключами, которые остаются на их собственных телефонах.",
-  "hp.f2t": "QR-код", "hp.f2": "Покажите QR-код, и другой человек проверит его за секунды.",
-  "hp.f3t": "Без сервера", "hp.f3": "Ничто не покидает устройство. Работает даже без интернета.",
-  "hp.s1": "подписи<br>в каждой записи", "hp.s2": "серверов<br>посередине", "hp.s3": "QR-код<br>для проверки",
-
+  "comum.novoRegistro": "Новая запись", "art.recibo": "РАСПИСКА", "art.selo": "подписано обеими сторонами", "art.valor": "0,0026",
   "form.passo": "Шаг 1 из 3",
   "form.papel": "В этом займе я…", "form.credor": "Кредитор", "form.devedor": "Должник",
   "form.outroDevedor": "Имя должника", "form.outroCredor": "Имя кредитора", "form.outroPh": "например, Bruno Lima",
@@ -5599,19 +5445,7 @@ DebtIDTextos.ur = {
   "nav.inicio": "ہوم", "inicio.titulo": "جائزہ", "inicio.recentes": "حالیہ ریکارڈز", "inicio.vazio": "ابھی کوئی ریکارڈ نہیں۔", "novo.escolha": "آپ یہ قرض کیسے درج کرنا چاہتے ہیں؟", "local.editar": "ترمیم", "local.anular": "منسوخ", "local.anulado": "منسوخ", "local.confirmarAnular": "یہ ادائیگی منسوخ کریں؟ بقایا میں شمار نہیں ہوگی لیکن تاریخ میں رہے گی۔", "local.edicao": "ادائیگی درست کی گئی", "local.avisarEdicao": "رقم اور تاریخ چیک کریں۔", "atraso.previa": "{data} کو متوقع بقایا: {x}", "atraso.invalido": "تاخیر کی فیس اور شرح چیک کریں۔", "atraso.resumo": "تاخیر کے اخراجات: جرمانہ {multa}؛ سود {mora} ({periodo})۔", "atraso.aviso": "جرمانے اور مرکب سود پر قانونی پابندیاں ہو سکتی ہیں۔ دونوں فریقوں کی رضامندی ضروری ہے؛ پرانے ورژن یہ معاہدے نہیں پڑھ سکتے۔", "atraso.avancado": "تاخیر کے جرمانے اور سود مقرر کریں", "atraso.multaTipo": "جرمانے کی قسم", "atraso.nenhuma": "کوئی نہیں", "atraso.fixa": "مقررہ رقم", "atraso.percentual": "فیصد", "atraso.multaValor": "جرمانے کی رقم یا فیصد", "atraso.moraTipo": "تاخیر کا سود", "atraso.simples": "سادہ", "atraso.composta": "مرکب", "atraso.moraTaxa": "تاخیر کی شرح سود (%)", "atraso.periodo": "شرح کی مدت", "atraso.dia": "روزانہ", "atraso.mes": "ماہانہ", "atraso.ano": "سالانہ", "atraso.capitalizacao": "مرکب حساب", "atraso.incluirMulta": "سود کی بنیاد میں جرمانہ شامل کریں (قانون دیکھیں)", "atraso.dataPrevia": "تاریخ پر بقایا دیکھیں", "pay.codigo": "ادائیگی کا کوڈ", "pay.envie": "یہ QR دکھائیں یا دوسرے شخص کو کوڈ بھیجیں۔ دستخط شدہ منظوری درآمد کرنے پر ہی بقایا تبدیل ہوگا۔", "pay.solicitar": "ادائیگی کی درخواست", "pay.informar": "دوسرے فرد کی تصدیق کے لیے رقم اور تاریخ درج کریں۔", "pay.gerar": "کوڈ بنائیں", "pay.pendente": "تصدیق زیرِ انتظار", "pay.estornar": "منسوخی کی درخواست", "pay.estornarConf": "{valor} کی منسوخی مانگیں؟ دوسرے فرد کی منظوری بھی ضروری ہے۔", "pay.pedidos": "ادائیگی کی درخواستیں", "pay.confirmados": "تصدیق شدہ ادائیگیاں", "pay.estornado": "منسوخ", "pay.confirmado": "دونوں فریقوں نے ادائیگی کی تصدیق کی", "pay.rejeitado": "درخواست مسترد", "pay.duplicado": "یہ کوڈ پہلے درج ہو چکا", "pay.solicitacao": "ادائیگی کی تصدیق", "pay.verificar": "{nome} نے {data} کو {valor} درج کیا۔ صرف متفق ہونے پر منظور کریں۔", "pay.aprovar": "منظور", "pay.rejeitar": "مسترد", "pay.rejeitarConf": "کیا واقعی یہ درخواست مسترد کرنا چاہتے ہیں؟", "pay.pagamento": "ادائیگی", "pay.estorno": "منسوخی", "nav.novo": "نیا", "nav.conferir": "تصدیق", "nav.registros": "ریکارڈ", "nav.ajustes": "ترتیبات",
   "tema.paraClaro": "لائٹ موڈ پر جائیں", "tema.paraEscuro": "ڈارک موڈ پر جائیں",
 
-  "hero.eyebrow": "قرض کا ریکارڈ · دونوں فریقوں کے دستخط",
-  "hero.titulo": "قرض دیا؟ لکھ لیا۔",
-  "hero.lead": "سود کا حساب لگائیں، قرض درج کریں اور دوسرے فریق سے تصدیق کروائیں۔ ہر فریق ایسی کلید سے دستخط کرتا ہے جو کبھی اس کے اپنے فون سے باہر نہیں جاتی، اس لیے بعد میں کوئی یہ نہیں کہہ سکتا کہ اس نے ہامی نہیں بھری تھی۔",
-  "hero.chip1": "سادہ اور مرکب سود", "hero.chip2": "دونوں فریقوں کے دستخط", "hero.chip3": "QR کوڈ",
-  "comum.novoRegistro": "نیا ریکارڈ", "hero.ler": "کوڈ پڑھیں",
-  "art.recibo": "رسید", "art.selo": "دونوں فریقوں کے دستخط", "art.valor": "0.0026",
-  "hp.eyebrow": "حساب · ریکارڈ · ثبوت",
-  "hp.sub": "<span>دونوں فریقوں کے دستخط،</span> <em>چند سیکنڈ میں تصدیق</em>",
-  "hp.f1t": "ڈیجیٹل دستخط", "hp.f1": "قرض خواہ اور مقروض ایسی کلیدوں سے دستخط کرتے ہیں جو ان کے اپنے فون پر رہتی ہیں۔",
-  "hp.f2t": "QR کوڈ", "hp.f2": "QR دکھائیں، اور دوسرا فریق چند سیکنڈ میں اس کی تصدیق کر لیتا ہے۔",
-  "hp.f3t": "کوئی سرور نہیں", "hp.f3": "کچھ بھی آلے سے باہر نہیں جاتا۔ انٹرنیٹ کے بغیر بھی چلتا ہے۔",
-  "hp.s1": "دستخط<br>ہر ریکارڈ میں", "hp.s2": "سرور<br>درمیان میں", "hp.s3": "QR کوڈ<br>تصدیق کے لیے",
-
+  "comum.novoRegistro": "نیا ریکارڈ", "art.recibo": "رسید", "art.selo": "دونوں فریقوں کے دستخط", "art.valor": "0.0026",
   "form.passo": "مرحلہ 1 از 3",
   "form.papel": "اس قرض میں میں ہوں…", "form.credor": "قرض خواہ", "form.devedor": "مقروض",
   "form.outroDevedor": "مقروض کا نام", "form.outroCredor": "قرض خواہ کا نام", "form.outroPh": "مثلاً Bruno Lima",
@@ -6003,19 +5837,7 @@ DebtIDTextos.zh = {
   "nav.inicio": "首页", "inicio.titulo": "总览", "inicio.recentes": "最近记录", "inicio.vazio": "暂无记录。", "novo.escolha": "您想如何记录这笔债务？", "local.editar": "编辑", "local.anular": "作废", "local.anulado": "已作废", "local.confirmarAnular": "作废这笔付款？它将不再计入余额，但会保留在历史记录中。", "local.edicao": "付款已更正", "local.avisarEdicao": "请核对金额和日期。", "atraso.previa": "{data} 的预计余额：{x}", "atraso.invalido": "请检查逾期费用和利率。", "atraso.resumo": "逾期费用：罚金 {multa}；利息 {mora}（{periodo}）。", "atraso.aviso": "罚金与复利可能受到法律限制。双方须同意；旧版应用无法读取此类合同。", "atraso.avancado": "设置逾期罚金与利息", "atraso.multaTipo": "罚金类型", "atraso.nenhuma": "无", "atraso.fixa": "固定金额", "atraso.percentual": "百分比", "atraso.multaValor": "罚金金额或比例", "atraso.moraTipo": "逾期利息", "atraso.simples": "单利", "atraso.composta": "复利", "atraso.moraTaxa": "逾期利率 (%)", "atraso.periodo": "利率周期", "atraso.dia": "每日", "atraso.mes": "每月", "atraso.ano": "每年", "atraso.capitalizacao": "复利周期", "atraso.incluirMulta": "将罚金计入计息本金（请核实法律）", "atraso.dataPrevia": "模拟指定日期的余额", "pay.codigo": "付款代码", "pay.envie": "出示此二维码或将代码发送给对方。只有导入已签名的确认后，余额才会更新。", "pay.solicitar": "申请付款确认", "pay.informar": "填写金额和日期供对方确认。", "pay.gerar": "生成代码", "pay.pendente": "等待确认", "pay.estornar": "申请撤销", "pay.estornarConf": "申请撤销 {valor}？对方也必须同意。", "pay.pedidos": "付款申请", "pay.confirmados": "已确认的付款", "pay.estornado": "已撤销", "pay.confirmado": "双方已确认付款", "pay.rejeitado": "申请已拒绝", "pay.duplicado": "此代码已记录", "pay.solicitacao": "付款确认", "pay.verificar": "{nome} 报告于 {data} 付款 {valor}。请仅在信息正确时批准。", "pay.aprovar": "批准", "pay.rejeitar": "拒绝", "pay.rejeitarConf": "确定要拒绝此申请吗？", "pay.pagamento": "付款", "pay.estorno": "撤销", "nav.novo": "新建", "nav.conferir": "核验", "nav.registros": "记录", "nav.ajustes": "设置",
   "tema.paraClaro": "切换到浅色模式", "tema.paraEscuro": "切换到深色模式",
 
-  "hero.eyebrow": "借款记录 · 双方签名",
-  "hero.titulo": "借出去，记下来。",
-  "hero.lead": "算好利息，记下借款，再请对方确认。双方各用一把只存在自己手机里的密钥签名，以后谁也不能说自己没同意过。",
-  "hero.chip1": "单利与复利", "hero.chip2": "双方签名", "hero.chip3": "二维码",
-  "comum.novoRegistro": "新建记录", "hero.ler": "读取代码",
-  "art.recibo": "收据", "art.selo": "双方已签名", "art.valor": "0.0026",
-  "hp.eyebrow": "计算 · 记录 · 证明",
-  "hp.sub": "<span>双方签名，</span> <em>几秒即可核验</em>",
-  "hp.f1t": "数字签名", "hp.f1": "出借人和借款人用各自手机里的密钥签名。",
-  "hp.f2t": "二维码", "hp.f2": "出示二维码，对方几秒就能核验。",
-  "hp.f3t": "无服务器", "hp.f3": "数据不离开设备，离线也能用。",
-  "hp.s1": "每条记录<br>的签名数", "hp.s2": "经过的<br>服务器", "hp.s3": "用于核验<br>的二维码",
-
+  "comum.novoRegistro": "新建记录", "art.recibo": "收据", "art.selo": "双方已签名", "art.valor": "0.0026",
   "form.passo": "第 1 步，共 3 步",
   "form.papel": "在这笔借款中，我是…", "form.credor": "出借人", "form.devedor": "借款人",
   "form.outroDevedor": "借款人姓名", "form.outroCredor": "出借人姓名", "form.outroPh": "例如：Bruno Lima",
