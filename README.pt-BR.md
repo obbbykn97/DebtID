@@ -7,11 +7,11 @@
 <p align="center">Calculadora e registro de empréstimos em qualquer moeda. Os dois lados assinam, e um QR code deixa qualquer pessoa conferir o registro em segundos.<br>
 Funciona sem internet, sem conta e sem servidor, em 12 idiomas.</p>
 
-[Baixar APK](https://github.com/obbbykn97/DebtID-multi/releases/latest) · [Como funciona](#como-funciona) · [Segurança](#segurança) · [Código](#para-quem-quer-mexer-no-código)
+[Baixar APK](https://github.com/obbbykn97/DebtID/releases/latest) · [Como funciona](#como-funciona) · [Segurança](#segurança) · [Código](#para-quem-quer-mexer-no-código)
 
 ## Baixar
 
-Baixe o `DebtID.apk` na página de [versões](https://github.com/obbbykn97/DebtID-multi/releases/latest) e abra o arquivo no celular para instalar. Se o Android pedir, permita a instalação de apps baixados pelo navegador.
+Baixe o `DebtID.apk` na página de [versões](https://github.com/obbbykn97/DebtID/releases/latest) e abra o arquivo no celular para instalar. Se o Android pedir, permita a instalação de apps baixados pelo navegador.
 
 Também dá para usar no computador: baixe o arquivo `web/dist/index.html` e abra no navegador.
 

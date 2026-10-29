@@ -11,7 +11,7 @@ Funciona sin internet, sin cuenta y sin servidor, en 12 idiomas.</p>
 
 ## Descargar
 
-Descarga `DebtID.apk` en la página de [versiones](https://github.com/obbbykn97/DebtID-multi/releases/latest) y abre el archivo en el teléfono para instalarlo. Si Android lo pide, permite instalar apps descargadas con el navegador.
+Descarga `DebtID.apk` en la página de [versiones](https://github.com/obbbykn97/DebtID/releases/latest) y abre el archivo en el teléfono para instalarlo. Si Android lo pide, permite instalar apps descargadas con el navegador.
 
 También se puede usar en una computadora: descarga `web/dist/index.html` y ábrelo en el navegador.
 

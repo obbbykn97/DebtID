@@ -7,11 +7,11 @@
 <p align="center">A loan calculator and IOU in any currency. Both sides sign it, and a QR code lets anyone check the record in seconds.<br>
 It works offline, with no account and no server, in 12 languages.</p>
 
-[Download APK](https://github.com/obbbykn97/DebtID-multi/releases/latest) · [How it works](#how-it-works) · [Security](#security) · [Development](#for-developers)
+[Download APK](https://github.com/obbbykn97/DebtID/releases/latest) · [How it works](#how-it-works) · [Security](#security) · [Development](#for-developers)
 
 ## Download
 
-Download `DebtID.apk` from the [releases page](https://github.com/obbbykn97/DebtID-multi/releases/latest) and open the file on your phone to install it. If Android asks, allow installing apps downloaded by the browser.
+Download `DebtID.apk` from the [releases page](https://github.com/obbbykn97/DebtID/releases/latest) and open the file on your phone to install it. If Android asks, allow installing apps downloaded by the browser.
 
 You can also use it on a computer: download `web/dist/index.html` and open it in a browser.
 
